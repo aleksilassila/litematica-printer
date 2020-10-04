@@ -12,7 +12,7 @@ public class Hotkeys
     public static final ConfigHotkey DELETE_SELECTION_BOX               = new ConfigHotkey("deleteSelectionBox",                "",     "Delete the currently selected box");
     public static final ConfigHotkey EASY_PLACE_ACTIVATION              = new ConfigHotkey("easyPlaceActivation",               "",     KeybindSettings.MODIFIER_INGAME_EMPTY, "When the easyPlaceMode is enabled, this key must\nbe held to enable placing the blocks when\nusing the vanilla Use key");
     public static final ConfigHotkey EASY_PLACE_TOGGLE                  = new ConfigHotkey("easyPlaceToggle",                   "",     "Allows quickly toggling on/off the Easy Place mode");
-    public static final ConfigHotkey PRINT_MODE                         = new ConfigHotkey("printMode",                         "M,O",     "Allows quickly toggling on/off the Print mode");
+    public static final ConfigHotkey TOGGLE_PRINTING_MODE               = new ConfigHotkey("togglePrintingMode",                "M,O",  "Allows quickly toggling on/off Printing mode");
     public static final ConfigHotkey EXECUTE_OPERATION                  = new ConfigHotkey("executeOperation",                  "",     "Execute the currently selected tool operation with the\ncurrent selection or placement in the Fill, Replace,\nPaste Schematic etc. modes");
     public static final ConfigHotkey INVERT_GHOST_BLOCK_RENDER_STATE    = new ConfigHotkey("invertGhostBlockRenderState",       "",     "Inverts the schematic/ghost block rendering status\nwhile this keybind is held down");
     public static final ConfigHotkey INVERT_OVERLAY_RENDER_STATE        = new ConfigHotkey("invertOverlayRenderState",          "",     "Inverts the Overlay rendering status while this keybind is held down");
@@ -86,8 +86,6 @@ public class Hotkeys
             DELETE_SELECTION_BOX,
             EASY_PLACE_ACTIVATION,
             EASY_PLACE_TOGGLE,
-            PRINT_MODE,
-
             EXECUTE_OPERATION,
             INVERT_GHOST_BLOCK_RENDER_STATE,
             INVERT_OVERLAY_RENDER_STATE,
@@ -143,6 +141,7 @@ public class Hotkeys
             TOGGLE_OVERLAY_SIDE_RENDERING,
             TOGGLE_PLACEMENT_BOXES_RENDERING,
             TOGGLE_PLACEMENT_RESTRICTION,
+            TOGGLE_PRINTING_MODE,
             TOGGLE_SCHEMATIC_BLOCK_RENDERING,
             TOGGLE_SCHEMATIC_RENDERING,
             TOGGLE_TRANSLUCENT_RENDERING,

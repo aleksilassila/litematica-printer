@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ClientPlayerInteractionManager.class)
-public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
+public abstract class MixinClientPlayerInteractionManager implements IClientPlayerInteractionManager {
 	@Shadow
 	private MinecraftClient client;
 
