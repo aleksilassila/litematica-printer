@@ -4,6 +4,8 @@
     "compatibilityLevel": "JAVA_8",
     "minVersion": "0.7",
     "client": [
+        "ClientPlayerEntityMixin",
+        "ClientPlayerInteractionManagerMixin",
         "IMixinChunkDeltaUpdateS2CPacket",
         "IMixinFenceGateBlock",
         "IMixinRedstoneWireBlock",
