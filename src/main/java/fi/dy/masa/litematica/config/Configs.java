@@ -39,7 +39,7 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean       FIX_RAIL_ROTATION       = new ConfigBoolean(    "fixRailRotation", true, "If true, then a fix is applied for the vanilla bug in rails,\nwhere the 180 degree rotations of straight north-south and\neast-west rails rotate 90 degrees counterclockwise instead >_>");
         public static final ConfigBoolean       LOAD_ENTIRE_SCHEMATICS  = new ConfigBoolean(    "loadEntireSchematics", false, "If true, then the entire schematic is always loaded at once.\nIf false, then only the part that is within the client's view distance is loaded.");
         public static final ConfigInteger       PASTE_COMMAND_INTERVAL  = new ConfigInteger(    "pasteCommandInterval", 1, 1, 1000, "The interval in game ticks the Paste schematic task runs at,\nin the command-based mode");
-        public static final ConfigInteger       PRINTING_DELAY          = new ConfigInteger(    "printingDelay", 1, 0, 3, "Delay between printing blocks");
+        public static final ConfigDouble        PRINTING_DELAY          = new ConfigDouble(    "printingDelay", 0.2, 0.0, 1.0, "Delay between printing blocks");
         public static final ConfigInteger       PRINTING_RANGE          = new ConfigInteger(    "printingRange", 2, 1, 6, "Printing block place range");
         public static final ConfigInteger       PASTE_COMMAND_LIMIT     = new ConfigInteger(    "pasteCommandLimit", 64, 1, 1000000, "Max number of commands sent per game tick,\nwhen using the Paste schematic feature in the\ncommand mode on a server");
         public static final ConfigString        PASTE_COMMAND_SETBLOCK  = new ConfigString(     "pasteCommandNameSetblock", "setblock", "The setblock command name to use for the\nPaste schematic feature on servers, when\nusing the command-based paste mode");
@@ -75,6 +75,8 @@ public class Configs implements IConfigHandler
                 SELECTION_CORNERS_MODE,
 
                 PASTE_COMMAND_INTERVAL,
+                PRINTING_RANGE,
+                PRINTING_DELAY,
                 PASTE_COMMAND_LIMIT,
                 PASTE_COMMAND_SETBLOCK,
                 PICK_BLOCKABLE_SLOTS,

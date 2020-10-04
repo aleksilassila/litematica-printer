@@ -26,6 +26,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Date;
+
 @Mixin(ClientPlayerEntity.class)
 public class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
 
@@ -37,19 +39,28 @@ public class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
     @Shadow
 	protected final MinecraftClient client;
 
+	protected long lastPlaced = new Date().getTime();
+
     @Inject(at = @At("HEAD"),
     method = "move")
     private void onPlayerMoveInput(MovementType type, Vec3d movement, CallbackInfo ci) {
 		if (!Configs.Generic.PRINT_MODE.getBooleanValue()) return;
     	if (SchematicWorldHandler.getSchematicWorld() == null) return;
+    	if (new Date().getTime() < lastPlaced + 1000.0 * Configs.Generic.PRINTING_DELAY.getDoubleValue()) {
+			System.out.println("DELAYED " + lastPlaced);
+			return;
+		};
 
 		WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
-		int range = 2;
+		int range = Configs.Generic.PRINTING_RANGE.getIntegerValue();
 
+		loop:
 		for (int x = -range; x < range + 1; x++) {
 			for (int y = -range; y < range + 1; y++) {
 				for (int z = -range; z < range + 1; z++) {
 					BlockPos pos = this.getBlockPos().north(x).west(z).up(y);
+					if (!this.clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR)) continue;
+
     				Block targetBlock = worldSchematic.getBlockState(pos).getBlock();
     				Material targetMaterial = worldSchematic.getBlockState(pos).getMaterial();
 					if (targetMaterial.equals(Material.AIR)) continue;
@@ -67,6 +78,9 @@ public class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
 
 						((IClientPlayerInteractionManager) this.client.interactionManager).rightClickBlock(neighbor,
 								side.getOpposite(), hitVec);
+
+						lastPlaced = new Date().getTime();
+						break loop;
 					}
 				}
 			}
