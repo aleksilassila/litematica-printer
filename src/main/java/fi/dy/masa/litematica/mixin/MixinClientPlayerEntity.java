@@ -16,6 +16,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.MovementType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
@@ -109,7 +110,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 		Vec3d posVec = Vec3d.ofCenter(pos);
 
-		Direction schDir = getBlockDirection(state);
+		Direction facing = getBlockDirection(state);
 		int half = getBlockHalf(state);
 
 		for(Direction side : Direction.values()) {
@@ -127,6 +128,14 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 				hitVec = hitVec.add(0, 0.25, 0);
 			} else if (half == 0 && !side.equals(Direction.DOWN)) {
 				hitVec = hitVec.add(0, -0.25, 0);
+			}
+
+			if (facing != null) {
+				float yaw = dir.asRotation();
+				float pitch = client.player.pitch;
+
+				client.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(
+					yaw, pitch, client.player.isOnGround()));
 			}
 
 			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(neighbor,
