@@ -9,3 +9,4 @@ logs/
 build.number
 run/
 .idea/
+.DS_Store

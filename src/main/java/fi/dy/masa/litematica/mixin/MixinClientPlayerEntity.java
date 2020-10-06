@@ -3,23 +3,31 @@ package fi.dy.masa.litematica.mixin;
 import com.mojang.authlib.GameProfile;
 import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.interfaces.IClientPlayerInteractionManager;
+import fi.dy.masa.litematica.util.InventoryUtils;
+import fi.dy.masa.litematica.util.ItemUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
+import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.util.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -32,8 +40,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
@@ -73,7 +79,33 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     				// Check if something should be placed in target block
     				if (targetSchematicMaterial.equals(Material.AIR)) continue;
     				// Check if player is holding right block
-    				if (!isBlockInHand(targetSchematicBlock)) continue;
+    				if (!isBlockInHand(targetSchematicBlock)) {
+    					if (client.player.abilities.creativeMode) {
+    						ItemStack stack = new ItemStack(targetSchematicBlock);
+							BlockEntity te = world.getBlockEntity(pos);
+
+							// The creative mode pick block with NBT only works correctly
+							// if the server world doesn't have a TileEntity in that position.
+							// Otherwise it would try to write whatever that TE is into the picked ItemStack.
+							if (GuiBase.isCtrlDown() && te != null && client.world.isAir(pos))
+							{
+								ItemUtils.storeTEInStack(stack, te);
+							}
+
+							InventoryUtils.setPickedItemToHand(stack, client);
+							client.interactionManager.clickCreativeStack(client.player.getStackInHand(Hand.MAIN_HAND),
+									36 + client.player.inventory.selectedSlot);
+
+						} else {
+							int slot = getBlockInventorySlot(targetSchematicBlock);
+
+							if (slot == -1) {
+								continue;
+							}
+
+							swapHandWithSlot(slot);
+						}
+					};
 
 					if (tryToPlaceBlock(pos)) {
 						lastPlaced = new Date().getTime();
@@ -84,7 +116,24 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		}
     }
 
-    int getBlockHalf(BlockState state) {
+	private void swapHandWithSlot(int slot) {
+		ItemStack stack = client.player.inventory.getStack(slot);
+		InventoryUtils.setPickedItemToHand(stack, client);
+	}
+
+	private int getBlockInventorySlot(Block block) {
+    	Inventory inv = client.player.inventory;
+
+    	for (int slot = 0; slot < inv.size(); slot++) {
+    		if (inv.getStack(slot).getItem().equals(block.asItem())) return slot;
+		}
+
+    	return -1;
+	}
+
+
+
+	int getBlockHalf(BlockState state) {
     	for (Property<?> prop : state.getProperties()) {
 			if (prop.getName().equals("type") || prop.getName().equals("half")) {
 				return state.get(prop).toString().equals("top") ? 1 : 0;
