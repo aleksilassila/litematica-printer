@@ -69,19 +69,22 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
 					BlockPos pos = this.getBlockPos().north(x).west(z).up(y);
+    				BlockState requiredBlockState = worldSchematic.getBlockState(pos);
+    				Material requiredMaterial = worldSchematic.getBlockState(pos).getMaterial();
+
+    				// Check if something should be placed in target block
+    				if (requiredMaterial.equals(Material.AIR)) continue;
 
 					// Check if target block is empty
 					if (!this.clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR)) continue;
 
-    				Block targetSchematicBlock = worldSchematic.getBlockState(pos).getBlock();
-    				Material targetSchematicMaterial = worldSchematic.getBlockState(pos).getMaterial();
+    				// Check if can be placed in world
+    				if (!requiredBlockState.canPlaceAt(clientWorld, pos)) continue;
 
-    				// Check if something should be placed in target block
-    				if (targetSchematicMaterial.equals(Material.AIR)) continue;
     				// Check if player is holding right block
-    				if (!isBlockInHand(targetSchematicBlock)) {
+    				if (!isBlockInHand(requiredBlockState.getBlock())) {
     					if (client.player.abilities.creativeMode) {
-    						ItemStack stack = new ItemStack(targetSchematicBlock);
+    						ItemStack stack = new ItemStack(requiredBlockState.getBlock());
 							BlockEntity te = world.getBlockEntity(pos);
 
 							// The creative mode pick block with NBT only works correctly
@@ -97,7 +100,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 									36 + client.player.inventory.selectedSlot);
 
 						} else {
-							int slot = getBlockInventorySlot(targetSchematicBlock);
+							int slot = getBlockInventorySlot(requiredBlockState.getBlock());
 
 							if (slot == -1) {
 								continue;
