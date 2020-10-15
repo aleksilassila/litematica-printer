@@ -20,6 +20,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -34,7 +35,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
@@ -96,11 +100,12 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     				BlockState requiredBlockState = worldSchematic.getBlockState(pos);
     				Material requiredMaterial = worldSchematic.getBlockState(pos).getMaterial();
 
+    				// FIXME water and lava
     				// Check if something should be placed in target block
-    				if (requiredMaterial.equals(Material.AIR)) continue;
+    				if (requiredMaterial.equals(Material.AIR) || requiredMaterial.equals(Material.WATER) || requiredMaterial.equals(Material.LAVA)) continue;
 
 					// Check if target block is empty
-					if (!this.clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR)) continue;
+					if (!this.clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR) && !isFlowingBlock(pos) ) continue;
 
     				// Check if can be placed in world
     				if (!requiredBlockState.canPlaceAt(clientWorld, pos)) continue;
@@ -185,6 +190,10 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 		if (state.getBlock() instanceof PillarBlock) {
 			return null;
+		}
+
+		if (state.getBlock() instanceof AnvilBlock) {
+			dir = dir.rotateYCounterclockwise();
 		}
 
     	return dir;
@@ -278,6 +287,20 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		}
 
     	return false;
+	}
+
+	private boolean isFlowingBlock(BlockPos pos) {
+		BlockState state = clientWorld.getBlockState(pos);
+
+		if (state.getMaterial().equals(Material.WATER) || state.getMaterial().equals(Material.LAVA)) {
+			for (Property<?> prop : state.getProperties()) {
+				if (prop instanceof IntProperty) {
+					if ((Integer) state.get(prop) > 0) return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private boolean canBeClicked(BlockPos pos)
