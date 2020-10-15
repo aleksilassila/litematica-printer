@@ -8,23 +8,17 @@ import fi.dy.masa.litematica.util.ItemUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import fi.dy.masa.malilib.gui.GuiBase;
-import fi.dy.masa.malilib.util.BlockUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Material;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.MovementType;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Hand;
@@ -38,8 +32,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Date;
+import java.util.*;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
@@ -52,6 +47,35 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 	protected MinecraftClient client;
 
 	protected long lastPlaced = new Date().getTime();
+
+	protected boolean isPlacementComing = false;
+	protected boolean sendPlacement = false;
+
+	protected BlockPos pNeighbor;
+	protected Direction pSide;
+	protected Vec3d pHitVec;
+
+	@Inject(at = @At("RETURN"), method = "isCamera", cancellable = true)
+	protected void isCamera(CallbackInfoReturnable<Boolean> cir) {
+		if (isPlacementComing) {
+			cir.setReturnValue(false);
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "tick")
+	public void tick(CallbackInfo ci) {
+		if (sendPlacement) {
+			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(pNeighbor,
+					pSide, pHitVec);
+
+			sendPlacement = false;
+			isPlacementComing = false;
+		}
+
+		if (isPlacementComing) {
+			sendPlacement = true;
+		}
+	}
 
     @Inject(at = @At("HEAD"), method = "move")
     private void onPlayerMoveInput(MovementType type, Vec3d movement, CallbackInfo ci) {
@@ -146,10 +170,32 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     	return -1;
 	}
 
-	Direction getBlockDirection(BlockState state) {
+	Direction getFacingDirection(BlockState state) {
+    	Direction dir = null;
+
     	for (Property<?> prop : state.getProperties()) {
 			if (prop instanceof DirectionProperty) {
-				return (Direction)state.get(prop);
+				dir = (Direction)state.get(prop);
+			}
+		}
+
+		if (state.getBlock() instanceof AbstractFurnaceBlock || state.getBlock() instanceof PistonBlock) {
+			dir = dir.getOpposite();
+		}
+
+		if (state.getBlock() instanceof PillarBlock) {
+			return null;
+		}
+
+    	return dir;
+	}
+
+	Direction.Axis availableAxis(BlockState state) {
+    	if (state.getBlock() instanceof PillarBlock) {
+    		for (Property<?> prop : state.getProperties()) {
+    			if (state.get(prop) instanceof Direction.Axis) {
+    				return (Direction.Axis) state.get(prop);
+				}
 			}
 		}
 
@@ -158,16 +204,21 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
     private boolean tryToPlaceBlock(BlockPos pos) {
     	BlockState state = SchematicWorldHandler.getSchematicWorld().getBlockState(pos);
-    	Direction dir = BlockUtils.getFirstPropertyFacingValue(state);
 
 		Vec3d posVec = Vec3d.ofCenter(pos);
 
-		Direction facing = getBlockDirection(state);
+		Direction playerShouldBeFacing = getFacingDirection(state);
+		Direction.Axis axis = availableAxis(state);
 		int half = getBlockHalf(state);
+
+//    	for (Property<?> prop : state.getProperties()) {
+//			System.out.println("Block " + state.getBlock().getName() + " has property " + prop.getName() + " with value " + state.get(prop).toString() + " class name " + state.get(prop).getClass().getName());
+//		}
 
 		for(Direction side : Direction.values()) {
 			if (half == 1 && side.equals(Direction.DOWN)) continue;
 			if (half == 0 && side.equals(Direction.UP)) continue;
+			if (axis != null && side.getAxis() != axis) continue;
 
 			BlockPos neighbor = pos.offset(side);
 
@@ -182,21 +233,40 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 				hitVec = hitVec.add(0, -0.25, 0);
 			}
 
-			if (facing != null) {
-				float yaw = dir.asRotation();
-				float pitch = client.player.pitch;
-
-				client.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(
-					yaw, pitch, client.player.isOnGround()));
-			}
-
-			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(neighbor,
-					side.getOpposite(), hitVec);
+			sendPlacement(neighbor, side, hitVec, playerShouldBeFacing);
 
 			return true;
 		}
 
 		return false;
+	}
+
+	private void sendPlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing) {
+		if (!isPlacementComing) {
+			sendLookPacket(playerShouldBeFacing);
+
+			pNeighbor = neighbor;
+			pSide = side.getOpposite();
+			pHitVec = hitVec;
+
+			isPlacementComing = true;
+		}
+	}
+
+	private void sendLookPacket(Direction playerShouldBeFacing) {
+    	if (playerShouldBeFacing != null) {
+			float yaw = client.player.yaw;
+			float pitch = client.player.pitch;
+
+			if (playerShouldBeFacing.getAxis().isHorizontal()) {
+				yaw = playerShouldBeFacing.asRotation();
+			} else {
+				pitch = playerShouldBeFacing.asRotation();
+			}
+
+			client.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(
+				yaw, pitch, client.player.isOnGround()));
+		}
 	}
 
     private boolean isBlockInHand(Block targetBlock) {
