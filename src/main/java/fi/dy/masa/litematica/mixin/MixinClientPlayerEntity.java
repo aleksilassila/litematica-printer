@@ -24,6 +24,7 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -36,7 +37,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.lang.reflect.Method;
 import java.util.Date;
 
 @Mixin(ClientPlayerEntity.class)
@@ -198,7 +198,6 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 		if (shouldGetOpposite(state)) {
 			dir = dir.getOpposite();
-			System.out.println("Did get opposite, dir: " + dir.name());
 		}
 
 		if (shouldRotate(state)) {
@@ -215,6 +214,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 				|| state.getBlock() instanceof TrapdoorBlock
 				|| state.getBlock() instanceof StonecutterBlock
 				|| state.getBlock() instanceof WallTorchBlock
+				|| state.getBlock() instanceof LecternBlock
 				|| state.getBlock() instanceof ChestBlock;
 	}
 
@@ -266,7 +266,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 				hitVec = hitVec.add(0, -0.25, 0);
 			}
 
-			sendPlacement(neighbor, side, hitVec, playerShouldBeFacing, needsShift(state));
+			sendPlacement(neighbor, side, hitVec, playerShouldBeFacing, needsShift(state, new BlockHitResult(hitVec, side, neighbor, false)));
 
 			return true;
 		}
@@ -295,7 +295,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			if (playerShouldBeFacing.getAxis().isHorizontal()) {
 				yaw = playerShouldBeFacing.asRotation();
 			} else {
-				pitch = playerShouldBeFacing.asRotation();
+				pitch = playerShouldBeFacing == Direction.DOWN ? 90 : -90;
 			}
 
 			client.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(
@@ -333,13 +333,35 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		return getOutlineShape(pos) != VoxelShapes.empty();
 	}
 
-	private boolean needsShift(BlockState state) {
+	private boolean needsShift(BlockState state, BlockHitResult blockHitResult) {
+		// FIXME needShift
+//		Block block = state.getBlock();
+//
+//		ActionResult actionResult = state.onUse(client.world, client.player, Hand.MAIN_HAND, blockHitResult);
+//		System.out.println("Result: " + actionResult.name());
+//		if (actionResult.isAccepted()) {
+//			System.out.println("ACCEPTED OR SOMETHING");
+//			return true;
+//		}
 
-		for (Method method : state.getBlock().getClass().getMethods()) {
-			if (method.getName().equalsIgnoreCase("onuse")) return true;
-		}
 
-		return false;
+
+//		return block instanceof DoorBlock
+//				|| block instanceof ChestBlock
+//				|| block instanceof CraftingTableBlock
+//				|| block instanceof AnvilBlock
+//				|| block instanceof AbstractFurnaceBlock
+//				|| block instanceof BarrelBlock
+//				|| block instanceof ChestBlock
+//				|| block instanceof BedBlock
+//				|| block instanceof BellBlock
+//				|| block instanceof BrewingStandBlock
+//				|| block instanceof ChestBlock
+//				|| block instanceof ChestBlock
+//				|| block instanceof ChestBlock
+//				|| block instanceof TrapdoorBlock;
+
+		return true;
 	}
 
 	private VoxelShape getOutlineShape(BlockPos pos)
