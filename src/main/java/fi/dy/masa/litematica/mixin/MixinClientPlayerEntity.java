@@ -176,7 +176,11 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 	}
 
 	Direction getFacingDirection(BlockState state) {
-    	Direction dir = null;
+		Direction dir = null;
+
+		if (state.getBlock() instanceof PillarBlock) {
+			return null;
+		}
 
     	for (Property<?> prop : state.getProperties()) {
 			if (prop instanceof DirectionProperty) {
@@ -184,19 +188,32 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			}
 		}
 
-		if (state.getBlock() instanceof AbstractFurnaceBlock || state.getBlock() instanceof PistonBlock) {
+    	if (dir == null) return null;
+
+		if (shouldGetOpposite(state)) {
 			dir = dir.getOpposite();
+			System.out.println("Did get opposite, dir: " + dir.name());
 		}
 
-		if (state.getBlock() instanceof PillarBlock) {
-			return null;
-		}
-
-		if (state.getBlock() instanceof AnvilBlock) {
+		if (shouldRotate(state)) {
 			dir = dir.rotateYCounterclockwise();
 		}
 
     	return dir;
+	}
+
+	private boolean shouldGetOpposite(BlockState state) {
+		return state.getBlock() instanceof AbstractFurnaceBlock
+				|| state.getBlock() instanceof PistonBlock
+				|| state.getBlock() instanceof BarrelBlock
+				|| state.getBlock() instanceof TrapdoorBlock
+				|| state.getBlock() instanceof StonecutterBlock
+				|| state.getBlock() instanceof WallTorchBlock
+				|| state.getBlock() instanceof ChestBlock;
+	}
+
+	private boolean shouldRotate(BlockState state) {
+		return state.getBlock() instanceof AnvilBlock ;
 	}
 
 	Direction.Axis availableAxis(BlockState state) {
@@ -228,6 +245,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			if (half == 1 && side.equals(Direction.DOWN)) continue;
 			if (half == 0 && side.equals(Direction.UP)) continue;
 			if (axis != null && side.getAxis() != axis) continue;
+			if (state.getBlock() instanceof WallTorchBlock && playerShouldBeFacing != side) continue;
 
 			BlockPos neighbor = pos.offset(side);
 
