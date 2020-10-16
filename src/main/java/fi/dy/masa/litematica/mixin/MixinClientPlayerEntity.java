@@ -18,6 +18,7 @@ import net.minecraft.entity.MovementType;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.IntProperty;
@@ -35,10 +36,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.List;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
@@ -58,6 +57,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 	protected BlockPos pNeighbor;
 	protected Direction pSide;
 	protected Vec3d pHitVec;
+	protected boolean pNeedsShift;
 
 	@Inject(at = @At("RETURN"), method = "isCamera", cancellable = true)
 	protected void isCamera(CallbackInfoReturnable<Boolean> cir) {
@@ -69,8 +69,14 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 	@Inject(at = @At("HEAD"), method = "tick")
 	public void tick(CallbackInfo ci) {
 		if (sendPlacement) {
+			if (pNeedsShift && !this.isSneaking())
+				client.player.networkHandler.sendPacket(new ClientCommandC2SPacket(this, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+
 			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(pNeighbor,
 					pSide, pHitVec);
+
+			if (pNeedsShift && !this.isSneaking())
+				client.player.networkHandler.sendPacket(new ClientCommandC2SPacket(this, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
 			sendPlacement = false;
 			isPlacementComing = false;
@@ -260,7 +266,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 				hitVec = hitVec.add(0, -0.25, 0);
 			}
 
-			sendPlacement(neighbor, side, hitVec, playerShouldBeFacing);
+			sendPlacement(neighbor, side, hitVec, playerShouldBeFacing, needsShift(state));
 
 			return true;
 		}
@@ -268,13 +274,14 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		return false;
 	}
 
-	private void sendPlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing) {
+	private void sendPlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean needsShift) {
 		if (!isPlacementComing) {
 			sendLookPacket(playerShouldBeFacing);
 
 			pNeighbor = neighbor;
 			pSide = side.getOpposite();
 			pHitVec = hitVec;
+			pNeedsShift = needsShift;
 
 			isPlacementComing = true;
 		}
@@ -324,6 +331,15 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 	private boolean canBeClicked(BlockPos pos)
 	{
 		return getOutlineShape(pos) != VoxelShapes.empty();
+	}
+
+	private boolean needsShift(BlockState state) {
+
+		for (Method method : state.getBlock().getClass().getMethods()) {
+			if (method.getName().equalsIgnoreCase("onuse")) return true;
+		}
+
+		return false;
 	}
 
 	private VoxelShape getOutlineShape(BlockPos pos)
