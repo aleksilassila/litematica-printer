@@ -1,5 +1,6 @@
 package fi.dy.masa.litematica.printer;
 
+import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.interfaces.IClientPlayerInteractionManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
 import fi.dy.masa.litematica.util.ItemUtils;
@@ -35,14 +36,15 @@ public class Printer extends PrinterUtils {
     private final ClientWorld clientWorld;
 
 	public long lastPlaced = new Date().getTime();
-	public boolean isPlacementComing = false;
 
-	protected boolean sendPlacement = false;
+	public boolean lockCamera = false;
 
-	protected BlockPos pNeighbor;
-	protected Direction pSide;
-	protected Vec3d pHitVec;
-	protected boolean pNeedsShift;
+	public static class Queue {
+		public static BlockPos neighbor;
+		public static Direction side;
+		public static Vec3d hitVec;
+		public static boolean useShift;
+	}
 
 	public Printer(MinecraftClient client, ClientPlayerEntity playerEntity, ClientWorld clientWorld) {
         this.client = client;
@@ -50,55 +52,48 @@ public class Printer extends PrinterUtils {
         this.clientWorld = clientWorld;
     }
 
-    public void onTick() {
-	    if (sendPlacement) {
-			if (pNeedsShift && !playerEntity.isSneaking())
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+    public void print() {
+		lockCamera = false;
+		sendQueuedPackets();
 
-			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(pNeighbor,
-					pSide, pHitVec);
+		if (new Date().getTime() < lastPlaced + 1000.0 * Configs.Generic.PRINTING_DELAY.getDoubleValue()) return;
 
-			if (pNeedsShift && !playerEntity.isSneaking())
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+		int range = Configs.Generic.PRINTING_RANGE.getIntegerValue();
+		WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-			sendPlacement = false;
-			isPlacementComing = false;
-		}
-
-		if (isPlacementComing) {
-			sendPlacement = true;
-		}
-    }
-
-    public void doBlockPlacement(WorldSchematic worldSchematic, int range) {
+		loop:
 		for (int y = -range; y < range + 1; y++) {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
 					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
-    				BlockState requiredBlockState = worldSchematic.getBlockState(pos);
-    				Material requiredMaterial = worldSchematic.getBlockState(pos).getMaterial();
 
-					if (shouldClickBlock(clientWorld.getBlockState(pos), requiredBlockState)) {
-						if (tryToPlaceBlock(pos, true)) {
-							lastPlaced = new Date().getTime();
-							return;
-						}
+    				BlockState targetState = clientWorld.getBlockState(pos);
+    				BlockState requiredState = worldSchematic.getBlockState(pos);
+
+    				// Check if block should be just clicked (repeaters etc.)
+					if (shouldClickBlock(targetState, requiredState)) {
+						addQueuedPacket(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
+
+						lastPlaced = new Date().getTime();
+						break loop;
 					}
 
     				// FIXME water and lava
     				// Check if something should be placed in target block
-    				if (requiredMaterial.equals(Material.AIR) || requiredMaterial.equals(Material.WATER) || requiredMaterial.equals(Material.LAVA)) continue;
+    				if (requiredState.isAir()
+							|| requiredState.getMaterial().equals(Material.WATER)
+							|| requiredState.getMaterial().equals(Material.LAVA)) continue;
 
 					// Check if target block is empty
-					if (!clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR) && !isFlowingBlock(requiredBlockState)) continue;
+					if (!targetState.isAir() && !isFlowingBlock(requiredState)) continue;
 
     				// Check if can be placed in world
-    				if (!requiredBlockState.canPlaceAt(clientWorld, pos)) continue;
+    				if (!requiredState.canPlaceAt(clientWorld, pos)) continue;
 
     				// Check if player is holding right block
-    				if (!isBlockInHand(requiredBlockState.getBlock())) {
+    				if (!isBlockInHand(requiredState.getBlock())) {
     					if (playerEntity.abilities.creativeMode) {
-    						ItemStack stack = new ItemStack(requiredBlockState.getBlock());
+    						ItemStack stack = new ItemStack(requiredState.getBlock());
 							BlockEntity te = clientWorld.getBlockEntity(pos);
 
 							// The creative mode pick block with NBT only works correctly
@@ -114,7 +109,7 @@ public class Printer extends PrinterUtils {
 									36 + playerEntity.inventory.selectedSlot);
 
 						} else {
-							int slot = getBlockInventorySlot(requiredBlockState.getBlock());
+							int slot = getBlockInventorySlot(requiredState.getBlock());
 
 							if (slot == -1) {
 								continue;
@@ -124,14 +119,47 @@ public class Printer extends PrinterUtils {
 						}
 					}
 
-					if (tryToPlaceBlock(pos, false)) {
-						lastPlaced = new Date().getTime();
-						return;
-					}
+					if (placeBlock(pos)) break loop;
 				}
 			}
 		}
     }
+
+    public void addQueuedPacket(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
+		if (Queue.neighbor != null) return;
+
+		lockCamera = true;
+
+		sendLookPacket(playerShouldBeFacing);
+
+		Queue.neighbor = neighbor;
+		Queue.side = side;
+		Queue.hitVec = hitVec;
+		Queue.useShift = useShift;
+	}
+
+	public void sendQueuedPackets() {
+		if (Queue.neighbor != null) {
+			boolean wasSneaking = playerEntity.isSneaking();
+
+			if (Queue.useShift && !wasSneaking)
+				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+			else if (!Queue.useShift && wasSneaking)
+				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+
+			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(Queue.neighbor,
+					Queue.side.getOpposite(), Queue.hitVec);
+
+			if (Queue.useShift && !wasSneaking)
+				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+			else if (!Queue.useShift && wasSneaking)
+				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+
+			Queue.neighbor = null;
+			Queue.hitVec = null;
+			Queue.side = null;
+		}
+	}
 
 	private void swapHandWithSlot(int slot) {
 		ItemStack stack = playerEntity.inventory.getStack(slot);
@@ -148,15 +176,10 @@ public class Printer extends PrinterUtils {
     	return -1;
 	}
 
-    private boolean tryToPlaceBlock(BlockPos pos, boolean doClick) {
+    private boolean placeBlock(BlockPos pos) {
     	BlockState state = SchematicWorldHandler.getSchematicWorld().getBlockState(pos);
 
 		Vec3d posVec = Vec3d.ofCenter(pos);
-
-		if (doClick) {
-			sendChangeStateClick(pos, Direction.UP, posVec);
-			return true;
-		}
 
 		Direction playerShouldBeFacing = getFacingDirection(state);
 		Direction.Axis axis = availableAxis(state);
@@ -185,36 +208,13 @@ public class Printer extends PrinterUtils {
 				hitVec = hitVec.add(0, -0.25, 0);
 			}
 
-			sendPlacement(neighbor, side, hitVec, playerShouldBeFacing, needsShift(state, new BlockHitResult(hitVec, side, neighbor, false)));
+			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, true);
 
+			lastPlaced = new Date().getTime();
 			return true;
 		}
 
 		return false;
-	}
-
-	private void sendPlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean needsShift) {
-		if (!isPlacementComing) {
-			sendLookPacket(playerShouldBeFacing);
-
-			pNeighbor = neighbor;
-			pSide = side.getOpposite();
-			pHitVec = hitVec;
-			pNeedsShift = needsShift;
-
-			isPlacementComing = true;
-		}
-	}
-
-	private void sendChangeStateClick(BlockPos neighbor, Direction side, Vec3d hitVec) {
-		if (!isPlacementComing) {
-			pNeighbor = neighbor;
-			pSide = side.getOpposite();
-			pHitVec = hitVec;
-			pNeedsShift = false;
-
-			isPlacementComing = true;
-		}
 	}
 
 	private void sendLookPacket(Direction playerShouldBeFacing) {

@@ -60,7 +60,6 @@ public class PrinterUtils {
 	protected static boolean shouldClickBlock(BlockState state, BlockState targetState) {
     	Block block = state.getBlock();
 
-
     	if (!(block instanceof RepeaterBlock) && !(block instanceof ComparatorBlock)) return false;
     	if (state.getClass() != targetState.getClass()) return false;
 
