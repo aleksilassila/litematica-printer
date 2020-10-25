@@ -186,14 +186,14 @@ public class Printer extends PrinterUtils {
 //			System.out.println("Block " + state.getBlock().getName() + " has property " + prop.getName() + " with value " + state.get(prop).toString() + " class name " + state.get(prop).getClass().getName());
 //		}
 
-		for(Direction side : Direction.values()) {
+		for (Direction side : Direction.values()) {
 			if (half == 1 && side.equals(Direction.DOWN)) continue;
 			if (half == 0 && side.equals(Direction.UP)) continue;
 			if (axis != null && side.getAxis() != axis) continue;
-			if (state.getBlock() instanceof TorchBlock && playerShouldBeFacing != side) continue;
+			if (isTorchOnWall(state) && playerShouldBeFacing != side) continue;
 			if (state.getBlock() instanceof HopperBlock && playerShouldBeFacing != side.getOpposite()) continue;
 			if ((state.getBlock() instanceof AbstractButtonBlock || state.getBlock() instanceof LeverBlock)
-					&& isLeverHorizontal(state)
+					&& isLeverOnWall(state)
 					&& playerShouldBeFacing != side.getOpposite()) continue;
 
 			BlockPos neighbor = pos.offset(side);

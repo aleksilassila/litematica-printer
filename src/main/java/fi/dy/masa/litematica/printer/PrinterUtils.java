@@ -42,7 +42,20 @@ public class PrinterUtils {
     	return dir;
 	}
 
-	protected static boolean isLeverHorizontal(BlockState state) {
+	protected static boolean isTorchOnWall(BlockState state) {
+    	if (state.getBlock() instanceof WallTorchBlock) return true;
+    	if (!(state.getBlock() instanceof TorchBlock)) return false;
+
+		for (Property<?> prop : state.getProperties()) {
+			if (prop.getName().equalsIgnoreCase("facing")) {
+				return true;
+			}
+		}
+
+    	return false;
+	}
+
+	protected static boolean isLeverOnWall(BlockState state) {
     	if (!(state.getBlock() instanceof LeverBlock) && !(state.getBlock() instanceof AbstractButtonBlock)) {
     		return false;
 		}
@@ -56,7 +69,6 @@ public class PrinterUtils {
 				break;
 			}
 		}
-
 
     	return false;
 	}
