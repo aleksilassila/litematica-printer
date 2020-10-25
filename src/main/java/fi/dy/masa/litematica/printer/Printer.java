@@ -1,4 +1,4 @@
-package fi.dy.masa.litematica;
+package fi.dy.masa.litematica.printer;
 
 import fi.dy.masa.litematica.interfaces.IClientPlayerInteractionManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
@@ -6,10 +6,12 @@ import fi.dy.masa.litematica.util.ItemUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import fi.dy.masa.malilib.gui.GuiBase;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
+import net.minecraft.block.WallTorchBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.inventory.Inventory;
@@ -17,9 +19,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -30,7 +29,7 @@ import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.Date;
 
-public class Printer {
+public class Printer extends PrinterUtils {
     private final MinecraftClient client;
     private final ClientPlayerEntity playerEntity;
     private final ClientWorld clientWorld;
@@ -51,8 +50,27 @@ public class Printer {
         this.clientWorld = clientWorld;
     }
 
+    public void onTick() {
+	    if (sendPlacement) {
+			if (pNeedsShift && !playerEntity.isSneaking())
+				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+
+			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(pNeighbor,
+					pSide, pHitVec);
+
+			if (pNeedsShift && !playerEntity.isSneaking())
+				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+
+			sendPlacement = false;
+			isPlacementComing = false;
+		}
+
+		if (isPlacementComing) {
+			sendPlacement = true;
+		}
+    }
+
     public void doBlockPlacement(WorldSchematic worldSchematic, int range) {
-        loop:
 		for (int y = -range; y < range + 1; y++) {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
@@ -60,12 +78,19 @@ public class Printer {
     				BlockState requiredBlockState = worldSchematic.getBlockState(pos);
     				Material requiredMaterial = worldSchematic.getBlockState(pos).getMaterial();
 
+					if (shouldClickBlock(clientWorld.getBlockState(pos), requiredBlockState)) {
+						if (tryToPlaceBlock(pos, true)) {
+							lastPlaced = new Date().getTime();
+							return;
+						}
+					}
+
     				// FIXME water and lava
     				// Check if something should be placed in target block
     				if (requiredMaterial.equals(Material.AIR) || requiredMaterial.equals(Material.WATER) || requiredMaterial.equals(Material.LAVA)) continue;
 
 					// Check if target block is empty
-					if (!clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR) && !isFlowingBlock(pos)) continue;
+					if (!clientWorld.getBlockState(pos).getMaterial().equals(Material.AIR) && !isFlowingBlock(requiredBlockState)) continue;
 
     				// Check if can be placed in world
     				if (!requiredBlockState.canPlaceAt(clientWorld, pos)) continue;
@@ -97,34 +122,14 @@ public class Printer {
 
 							swapHandWithSlot(slot);
 						}
-					};
+					}
 
-					if (tryToPlaceBlock(pos)) {
+					if (tryToPlaceBlock(pos, false)) {
 						lastPlaced = new Date().getTime();
-						break loop;
-					};
+						return;
+					}
 				}
 			}
-		}
-    }
-
-    public void onTick() {
-	    if (sendPlacement && playerEntity != null) {
-			if (pNeedsShift && !playerEntity.isSneaking())
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-
-			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(pNeighbor,
-					pSide, pHitVec);
-
-			if (pNeedsShift && !playerEntity.isSneaking())
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-
-			sendPlacement = false;
-			isPlacementComing = false;
-		}
-
-		if (isPlacementComing) {
-			sendPlacement = true;
 		}
     }
 
@@ -143,75 +148,15 @@ public class Printer {
     	return -1;
 	}
 
-
-
-	int getBlockHalf(BlockState state) {
-    	for (Property<?> prop : state.getProperties()) {
-			if (prop.getName().equals("type") || prop.getName().equals("half")) {
-				return state.get(prop).toString().equals("top") ? 1 : 0;
-			}
-		}
-
-    	return -1;
-	}
-
-	Direction getFacingDirection(BlockState state) {
-		Direction dir = null;
-
-		if (state.getBlock() instanceof PillarBlock) {
-			return null;
-		}
-
-    	for (Property<?> prop : state.getProperties()) {
-			if (prop instanceof DirectionProperty) {
-				dir = (Direction)state.get(prop);
-			}
-		}
-
-    	if (dir == null) return null;
-
-		if (shouldGetOpposite(state)) {
-			dir = dir.getOpposite();
-		}
-
-		if (shouldRotate(state)) {
-			dir = dir.rotateYCounterclockwise();
-		}
-
-    	return dir;
-	}
-
-	private boolean shouldGetOpposite(BlockState state) {
-		return state.getBlock() instanceof AbstractFurnaceBlock
-				|| state.getBlock() instanceof PistonBlock
-				|| state.getBlock() instanceof BarrelBlock
-				|| state.getBlock() instanceof TrapdoorBlock
-				|| state.getBlock() instanceof StonecutterBlock
-				|| state.getBlock() instanceof WallTorchBlock
-				|| state.getBlock() instanceof LecternBlock
-				|| state.getBlock() instanceof ChestBlock;
-	}
-
-	private boolean shouldRotate(BlockState state) {
-		return state.getBlock() instanceof AnvilBlock ;
-	}
-
-	Direction.Axis availableAxis(BlockState state) {
-    	if (state.getBlock() instanceof PillarBlock) {
-    		for (Property<?> prop : state.getProperties()) {
-    			if (state.get(prop) instanceof Direction.Axis) {
-    				return (Direction.Axis) state.get(prop);
-				}
-			}
-		}
-
-    	return null;
-	}
-
-    private boolean tryToPlaceBlock(BlockPos pos) {
+    private boolean tryToPlaceBlock(BlockPos pos, boolean doClick) {
     	BlockState state = SchematicWorldHandler.getSchematicWorld().getBlockState(pos);
 
 		Vec3d posVec = Vec3d.ofCenter(pos);
+
+		if (doClick) {
+			sendChangeStateClick(pos, Direction.UP, posVec);
+			return true;
+		}
 
 		Direction playerShouldBeFacing = getFacingDirection(state);
 		Direction.Axis axis = availableAxis(state);
@@ -261,6 +206,17 @@ public class Printer {
 		}
 	}
 
+	private void sendChangeStateClick(BlockPos neighbor, Direction side, Vec3d hitVec) {
+		if (!isPlacementComing) {
+			pNeighbor = neighbor;
+			pSide = side.getOpposite();
+			pHitVec = hitVec;
+			pNeedsShift = false;
+
+			isPlacementComing = true;
+		}
+	}
+
 	private void sendLookPacket(Direction playerShouldBeFacing) {
     	if (playerShouldBeFacing != null) {
 			float yaw = playerEntity.yaw;
@@ -284,20 +240,6 @@ public class Printer {
 		}
 
     	return false;
-	}
-
-	private boolean isFlowingBlock(BlockPos pos) {
-		BlockState state = clientWorld.getBlockState(pos);
-
-		if (state.getMaterial().equals(Material.WATER) || state.getMaterial().equals(Material.LAVA)) {
-			for (Property<?> prop : state.getProperties()) {
-				if (prop instanceof IntProperty) {
-					if ((Integer) state.get(prop) > 0) return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	private boolean canBeClicked(BlockPos pos)
@@ -338,11 +280,11 @@ public class Printer {
 
 	private VoxelShape getOutlineShape(BlockPos pos)
 	{
-		return getState(pos).getOutlineShape(client.world, pos);
+		return getState(pos).getOutlineShape(clientWorld, pos);
 	}
 
 	private BlockState getState(BlockPos pos)
 	{
-		return client.world.getBlockState(pos);
+		return clientWorld.getBlockState(pos);
 	}
 }

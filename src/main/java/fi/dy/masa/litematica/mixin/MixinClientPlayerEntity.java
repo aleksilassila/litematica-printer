@@ -1,18 +1,15 @@
 package fi.dy.masa.litematica.mixin;
 
 import com.mojang.authlib.GameProfile;
-import fi.dy.masa.litematica.Printer;
 import fi.dy.masa.litematica.config.Configs;
+import fi.dy.masa.litematica.printer.Printer;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.MovementType;
-import net.minecraft.stat.StatHandler;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
