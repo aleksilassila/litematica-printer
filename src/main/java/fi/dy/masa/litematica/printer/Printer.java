@@ -7,10 +7,7 @@ import fi.dy.masa.litematica.util.ItemUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import fi.dy.masa.malilib.gui.GuiBase;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Material;
-import net.minecraft.block.WallTorchBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -193,7 +190,11 @@ public class Printer extends PrinterUtils {
 			if (half == 1 && side.equals(Direction.DOWN)) continue;
 			if (half == 0 && side.equals(Direction.UP)) continue;
 			if (axis != null && side.getAxis() != axis) continue;
-			if (state.getBlock() instanceof WallTorchBlock && playerShouldBeFacing != side) continue;
+			if (state.getBlock() instanceof TorchBlock && playerShouldBeFacing != side) continue;
+			if (state.getBlock() instanceof HopperBlock && playerShouldBeFacing != side.getOpposite()) continue;
+			if ((state.getBlock() instanceof AbstractButtonBlock || state.getBlock() instanceof LeverBlock)
+					&& isLeverHorizontal(state)
+					&& playerShouldBeFacing != side.getOpposite()) continue;
 
 			BlockPos neighbor = pos.offset(side);
 

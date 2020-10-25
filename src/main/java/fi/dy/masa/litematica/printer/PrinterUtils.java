@@ -1,7 +1,6 @@
 package fi.dy.masa.litematica.printer;
 
 import net.minecraft.block.*;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
@@ -24,15 +23,15 @@ public class PrinterUtils {
 			return null;
 		}
 
+		if (!containsProperty(state, "facing")) return null;
+
     	for (Property<?> prop : state.getProperties()) {
-			if (prop instanceof DirectionProperty) {
+			if (prop.getName().equalsIgnoreCase("facing")) {
 				dir = (Direction)state.get(prop);
 			}
 		}
 
-    	if (dir == null) return null;
-
-		if (shouldGetOpposite(state)) {
+		if (!shouldntGetOpposite(state)) {
 			dir = dir.getOpposite();
 		}
 
@@ -43,25 +42,48 @@ public class PrinterUtils {
     	return dir;
 	}
 
-	protected static boolean shouldGetOpposite(BlockState state) {
-		return state.getBlock() instanceof AbstractFurnaceBlock
-				|| state.getBlock() instanceof PistonBlock
-				|| state.getBlock() instanceof BarrelBlock
-				|| state.getBlock() instanceof TrapdoorBlock
-				|| state.getBlock() instanceof StonecutterBlock
-				|| state.getBlock() instanceof WallTorchBlock
-				|| state.getBlock() instanceof LecternBlock
-				|| state.getBlock() instanceof RepeaterBlock
-				|| state.getBlock() instanceof ComparatorBlock
-				|| state.getBlock() instanceof DispenserBlock
-				|| state.getBlock() instanceof ChestBlock;
+	protected static boolean isLeverHorizontal(BlockState state) {
+    	if (!(state.getBlock() instanceof LeverBlock) && !(state.getBlock() instanceof AbstractButtonBlock)) {
+    		return false;
+		}
+
+    	for (Property<?> prop : state.getProperties()) {
+			if (prop.getName().equalsIgnoreCase("face")) {
+				if (state.get(prop).toString().equalsIgnoreCase("wall")) {
+					return true;
+				}
+
+				break;
+			}
+		}
+
+
+    	return false;
+	}
+
+	private static boolean containsProperty(BlockState state, String name) {
+    	for (Property<?> prop : state.getProperties()) {
+			if (prop.getName().equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+
+    	return false;
+	}
+
+	protected static boolean shouldntGetOpposite(BlockState state) {
+		return state.getBlock() instanceof StairsBlock
+				|| state.getBlock() instanceof GrindstoneBlock
+				|| state.getBlock() instanceof LeverBlock
+				|| state.getBlock() instanceof AbstractButtonBlock
+				|| state.getBlock() instanceof ObserverBlock;
 	}
 
 	protected static boolean shouldClickBlock(BlockState state, BlockState targetState) {
     	Block block = state.getBlock();
 
     	if (!(block instanceof RepeaterBlock) && !(block instanceof ComparatorBlock)) return false;
-    	if (state.getClass() != targetState.getClass()) return false;
+    	if (block.getClass() != targetState.getBlock().getClass()) return false;
 
     	for (Property<?> prop : state.getProperties()) {
 			if (prop.getName().equals("delay") || prop.getName().equals("mode")) {
