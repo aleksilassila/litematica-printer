@@ -12,6 +12,8 @@
         "MixinMinecraftClient",
         "MixinRailBlocks",
         "MixinWorldChunk",
+        "MixinClientPlayerInteractionManager",
+        "MixinClientPlayerEntity",
         "MixinWorldRenderer"
     ],
     "injectors": {

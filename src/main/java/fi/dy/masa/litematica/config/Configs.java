@@ -49,6 +49,9 @@ public class Configs implements IConfigHandler
         public static final ConfigOptionList    SELECTION_CORNERS_MODE  = new ConfigOptionList( "selectionCornersMode", CornerSelectionMode.CORNERS, "The Area Selection corners mode to use (Corners, or Expand)");
         public static final ConfigString        TOOL_ITEM               = new ConfigString(     "toolItem", "minecraft:stick", "The item to use as the \"tool\" for selections etc.");
         public static final ConfigBoolean       TOOL_ITEM_ENABLED       = new ConfigBoolean(    "toolItemEnabled", true, "If true, then the \"tool\" item can be used to control selections etc.", "Tool Item Enabled");
+        public static final ConfigDouble        PRINTING_DELAY          = new ConfigDouble(     "printingDelay", 0.2, 0.0, 1.0, "Delay between printing blocks.\nDo not set to 0 if you are playing on a server.");
+        public static final ConfigInteger       PRINTING_RANGE          = new ConfigInteger(    "printingRange", 2, 1, 6, "Printing block place range\nLower values are recommended for servers.");
+        public static final ConfigBoolean       PRINT_MODE              = new ConfigBoolean(    "printingMode", false, "Autobuild / print loaded selection.\nBe aware that some servers and anticheat plugins do not allow printing.");
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 AREAS_PER_WORLD,
@@ -72,7 +75,10 @@ public class Configs implements IConfigHandler
                 PASTE_COMMAND_LIMIT,
                 PASTE_COMMAND_SETBLOCK,
                 PICK_BLOCKABLE_SLOTS,
-                TOOL_ITEM
+                TOOL_ITEM,
+                PRINTING_DELAY,
+                PRINTING_RANGE,
+                PRINT_MODE
         );
     }
 
