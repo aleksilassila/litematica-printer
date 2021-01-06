@@ -66,8 +66,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
             if (!version.equals(newVersion)) {
                 client.inGameHud.addChatMessage(MessageType.SYSTEM,
-                        new LiteralText("New version of Litematica Printer available in https://github.com/aleksilassila/litematica-printer/releases"),
-                        null);
+                        new LiteralText("New version of Litematica Printer available in https://github.com/aleksilassila/litematica-printer/releases"));
             }
         }).start();
 	}
