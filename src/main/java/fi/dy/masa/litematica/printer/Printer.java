@@ -1,6 +1,7 @@
 package fi.dy.masa.litematica.printer;
 
 import fi.dy.masa.litematica.config.Configs;
+import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.interfaces.IClientPlayerInteractionManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
 import fi.dy.masa.litematica.util.ItemUtils;
@@ -63,6 +64,7 @@ public class Printer extends PrinterUtils {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
 					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
+					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
 
     				BlockState targetState = clientWorld.getBlockState(pos);
     				BlockState requiredState = worldSchematic.getBlockState(pos);
