@@ -7,6 +7,7 @@ Printer allows players to build big structures more quickly by automatically pla
 
 Because the main branch is dedicated for 1.12 LiteLoader, my code can be found in [printer](https://github.com/aleksilassila/litematica-printing/tree/printing) branch. If you have issues with the printer, 
 **do not** bother the original creator of Litematica (maruohon) with them. Contact me instead.
+Feature requests or bugs can be reported via github issues.
 
 For downloads check out [releases](https://github.com/aleksilassila/litematica-printing/releases/latest).
 
