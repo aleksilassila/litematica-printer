@@ -42,6 +42,19 @@ public class PrinterUtils {
     	return dir;
 	}
 
+	protected static boolean isWaterLogged(BlockState state) {
+    	if (!(state.getBlock() instanceof Waterloggable)) return false;
+    	if (!containsProperty(state, "waterlogged")) return false;
+
+		for (Property<?> prop : state.getProperties()) {
+			if (prop.getName().equalsIgnoreCase("waterlogged")) {
+				return (Boolean) state.get(prop);
+			}
+		}
+
+		return false;
+	}
+
 	protected static boolean isTorchOnWall(BlockState state) {
     	if (state.getBlock() instanceof WallTorchBlock) return true;
     	if (!(state.getBlock() instanceof TorchBlock)) return false;

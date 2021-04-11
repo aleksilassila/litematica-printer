@@ -14,8 +14,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -32,10 +31,13 @@ public class Printer extends PrinterUtils {
     private final MinecraftClient client;
     private final ClientPlayerEntity playerEntity;
     private final ClientWorld clientWorld;
+    private WorldSchematic worldSchematic;
 
 	public long lastPlaced = new Date().getTime();
 
 	public boolean lockCamera = false;
+
+	private boolean shouldPlaceWater;
 
 	public static class Queue {
 		public static BlockPos neighbor;
@@ -50,6 +52,75 @@ public class Printer extends PrinterUtils {
         this.clientWorld = clientWorld;
     }
 
+	/**
+	 * @return true if block was placed.
+	 */
+	public boolean processBlock(BlockPos pos) {
+		if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) return false;
+
+		BlockState currentState = clientWorld.getBlockState(pos);
+		BlockState requiredState = worldSchematic.getBlockState(pos);
+
+		// Check if block should be just clicked (repeaters etc.)
+		if (shouldClickBlock(currentState, requiredState)) {
+			addQueuedPacket(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
+
+			lastPlaced = new Date().getTime();
+			return true;
+		}
+
+		// FIXME water and lava
+		// Check if something should be placed in target block
+		if (requiredState.isAir()
+				|| requiredState.getMaterial().equals(Material.WATER)
+				|| requiredState.getMaterial().equals(Material.LAVA)) return false;
+
+		// Check if target block is empty
+		if (!shouldPlaceWater)
+			if (!currentState.isAir()) return false;
+		else {
+			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return false;
+			if (!isWaterLogged(requiredState) && !currentState.isAir()) return false;
+		}
+
+		System.out.println(currentState.getBlock().getName() + ": " + requiredState.getBlock().getName() + ", " + isWaterLogged(currentState) + ", " + isWaterLogged(requiredState));
+
+		// Check if can be placed in world
+		if (!requiredState.canPlaceAt(clientWorld, pos)) return false;
+
+		// Check if player is holding right block
+		Item itemInHand = playerEntity.inventory.getMainHandStack().getItem();
+		if (!itemInHand.equals(requiredItemInHand(requiredState, currentState))) {
+			if (playerEntity.abilities.creativeMode) {
+				ItemStack required = new ItemStack(requiredItemInHand(requiredState, currentState));
+				BlockEntity te = clientWorld.getBlockEntity(pos);
+
+				// The creative mode pick block with NBT only works correctly
+				// if the server world doesn't have a TileEntity in that position.
+				// Otherwise it would try to write whatever that TE is into the picked ItemStack.
+				if (GuiBase.isCtrlDown() && te != null && clientWorld.isAir(pos))
+				{
+					ItemUtils.storeTEInStack(required, te);
+				}
+
+				InventoryUtils.setPickedItemToHand(required, client);
+				client.interactionManager.clickCreativeStack(playerEntity.getStackInHand(Hand.MAIN_HAND),
+						36 + playerEntity.inventory.selectedSlot);
+
+			} else {
+				int slot = getBlockInventorySlot(requiredItemInHand(requiredState, currentState));
+
+				if (slot == -1) {
+					return false;
+				}
+
+				swapHandWithSlot(slot);
+			}
+		}
+
+		return placeBlock(pos);
+	}
+
     public void print() {
 		lockCamera = false;
 		sendQueuedPackets();
@@ -57,68 +128,14 @@ public class Printer extends PrinterUtils {
 		if (new Date().getTime() < lastPlaced + 1000.0 * Configs.Generic.PRINTING_DELAY.getDoubleValue()) return;
 
 		int range = Configs.Generic.PRINTING_RANGE.getIntegerValue();
-		WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
+		shouldPlaceWater = Configs.Generic.PRINT_WATER.getBooleanValue();
+		worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-		loop:
+		forEachBlockInRadius:
 		for (int y = -range; y < range + 1; y++) {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
-					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
-					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
-
-    				BlockState targetState = clientWorld.getBlockState(pos);
-    				BlockState requiredState = worldSchematic.getBlockState(pos);
-
-    				// Check if block should be just clicked (repeaters etc.)
-					if (shouldClickBlock(targetState, requiredState)) {
-						addQueuedPacket(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
-
-						lastPlaced = new Date().getTime();
-						break loop;
-					}
-
-    				// FIXME water and lava
-    				// Check if something should be placed in target block
-    				if (requiredState.isAir()
-							|| requiredState.getMaterial().equals(Material.WATER)
-							|| requiredState.getMaterial().equals(Material.LAVA)) continue;
-
-					// Check if target block is empty
-					if (!targetState.isAir() && !isFlowingBlock(requiredState)) continue;
-
-    				// Check if can be placed in world
-    				if (!requiredState.canPlaceAt(clientWorld, pos)) continue;
-
-    				// Check if player is holding right block
-    				if (!isBlockInHand(requiredState.getBlock())) {
-    					if (playerEntity.abilities.creativeMode) {
-    						ItemStack stack = new ItemStack(requiredState.getBlock());
-							BlockEntity te = clientWorld.getBlockEntity(pos);
-
-							// The creative mode pick block with NBT only works correctly
-							// if the server world doesn't have a TileEntity in that position.
-							// Otherwise it would try to write whatever that TE is into the picked ItemStack.
-							if (GuiBase.isCtrlDown() && te != null && clientWorld.isAir(pos))
-							{
-								ItemUtils.storeTEInStack(stack, te);
-							}
-
-							InventoryUtils.setPickedItemToHand(stack, client);
-							client.interactionManager.clickCreativeStack(playerEntity.getStackInHand(Hand.MAIN_HAND),
-									36 + playerEntity.inventory.selectedSlot);
-
-						} else {
-							int slot = getBlockInventorySlot(requiredState.getBlock());
-
-							if (slot == -1) {
-								continue;
-							}
-
-							swapHandWithSlot(slot);
-						}
-					}
-
-					if (placeBlock(pos)) break loop;
+					if (processBlock(playerEntity.getBlockPos().north(x).west(z).up(y))) return;
 				}
 			}
 		}
@@ -165,11 +182,11 @@ public class Printer extends PrinterUtils {
 		InventoryUtils.setPickedItemToHand(stack, client);
 	}
 
-	private int getBlockInventorySlot(Block block) {
+	private int getBlockInventorySlot(Item item) {
     	Inventory inv = playerEntity.inventory;
 
     	for (int slot = 0; slot < inv.size(); slot++) {
-    		if (inv.getStack(slot).getItem().equals(block.asItem())) return slot;
+    		if (inv.getStack(slot).getItem().equals(item)) return slot;
 		}
 
     	return -1;
@@ -236,13 +253,14 @@ public class Printer extends PrinterUtils {
 		}
 	}
 
-    private boolean isBlockInHand(Block targetBlock) {
-    	if (playerEntity.inventory.getMainHandStack().equals(ItemStack.EMPTY)) return false;
-    	if (playerEntity.inventory.getMainHandStack().getItem() instanceof BlockItem) {
-            return ((BlockItem) playerEntity.inventory.getMainHandStack().getItem()).getBlock().equals(targetBlock);
-		}
-
-    	return false;
+    private Item requiredItemInHand(BlockState requiredState, BlockState currentState) {
+		// If block should be waterlogged
+		if (!currentState.isAir() && isWaterLogged(requiredState))
+			return Items.WATER_BUCKET;
+		else if (requiredState.getBlock().equals(Blocks.WATER))
+			return Items.WATER_BUCKET;
+		else
+			return new ItemStack(requiredState.getBlock()).getItem();
 	}
 
 	private boolean canBeClicked(BlockPos pos)

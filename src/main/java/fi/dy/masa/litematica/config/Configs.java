@@ -41,6 +41,7 @@ public class Configs implements IConfigHandler
         public static final ConfigInteger       PASTE_COMMAND_INTERVAL  = new ConfigInteger(    "pasteCommandInterval", 1, 1, 1000, "The interval in game ticks the Paste schematic task runs at,\nin the command-based mode");
         public static final ConfigDouble        PRINTING_DELAY          = new ConfigDouble(     "printingDelay", 0.2, 0.0, 1.0, "Delay between printing blocks.\nDo not set to 0 if you are playing on a server.");
         public static final ConfigInteger       PRINTING_RANGE          = new ConfigInteger(    "printingRange", 2, 1, 6, "Printing block place range\nLower values are recommended for servers.");
+        public static final ConfigBoolean       PRINT_WATER             = new ConfigBoolean(    "printWater", false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
         public static final ConfigInteger       PASTE_COMMAND_LIMIT     = new ConfigInteger(    "pasteCommandLimit", 64, 1, 1000000, "Max number of commands sent per game tick,\nwhen using the Paste schematic feature in the\ncommand mode on a server");
         public static final ConfigString        PASTE_COMMAND_SETBLOCK  = new ConfigString(     "pasteCommandNameSetblock", "setblock", "The setblock command name to use for the\nPaste schematic feature on servers, when\nusing the command-based paste mode");
         public static final ConfigBoolean       PASTE_IGNORE_INVENTORY  = new ConfigBoolean(    "pasteIgnoreInventories", false, "Don't paste inventory contents when pasting a schematic");
@@ -80,6 +81,7 @@ public class Configs implements IConfigHandler
                 PICK_BLOCKABLE_SLOTS,
                 PRINTING_DELAY,
                 PRINTING_RANGE,
+                PRINT_WATER,
                 TOOL_ITEM
         );
     }
