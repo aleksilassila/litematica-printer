@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import org.lwjgl.opengl.GL11;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
@@ -14,6 +13,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -122,7 +122,7 @@ public class OverlayRenderer
         }
     }
 
-    public void renderBoxes(MatrixStack matrices, float partialTicks)
+    public void renderBoxes(MatrixStack matrices)
     {
         SelectionManager sm = DataManager.getSelectionManager();
         AreaSelection currentSelection = sm.getCurrentSelection();
@@ -135,15 +135,11 @@ public class OverlayRenderer
 
         if (renderAreas || renderPlacements || isProjectMode)
         {
-            RenderSystem.pushMatrix();
-
             fi.dy.masa.malilib.render.RenderUtils.color(1f, 1f, 1f, 1f);
             fi.dy.masa.malilib.render.RenderUtils.setupBlend();
             RenderSystem.enableDepthTest();
-            RenderSystem.disableLighting();
             RenderSystem.depthMask(false);
             RenderSystem.disableTexture();
-            RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
 
             if (renderAreas)
             {
@@ -227,7 +223,6 @@ public class OverlayRenderer
                 }
             }
 
-            RenderSystem.popMatrix();
             RenderSystem.enableTexture();
             RenderSystem.depthMask(true);
         }
@@ -348,7 +343,7 @@ public class OverlayRenderer
         }
     }
 
-    public void renderSchematicVerifierMismatches(MatrixStack matrices, float partialTicks)
+    public void renderSchematicVerifierMismatches(MatrixStack matrices)
     {
         SchematicPlacement placement = DataManager.getSchematicPlacementManager().getSelectedSchematicPlacement();
 
@@ -363,24 +358,21 @@ public class OverlayRenderer
                 List<BlockPos> posList = verifier.getSelectedMismatchBlockPositionsForRender();
                 HitResult trace = RayTraceUtils.traceToPositions(posList, this.mc.player, 128);
                 BlockPos posLook = trace != null && trace.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) trace).getBlockPos() : null;
-                this.renderSchematicMismatches(list, posLook, matrices, partialTicks);
+                this.renderSchematicMismatches(list, posLook, matrices);
             }
         }
     }
 
-    private void renderSchematicMismatches(List<MismatchRenderPos> posList, @Nullable BlockPos lookPos, MatrixStack matrices, float partialTicks)
+    private void renderSchematicMismatches(List<MismatchRenderPos> posList, @Nullable BlockPos lookPos, MatrixStack matrices)
     {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        RenderSystem.disableLighting();
-        RenderSystem.disableTexture();
-        RenderSystem.pushMatrix();
 
         RenderSystem.lineWidth(2f);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+        RenderUtils.startDrawingLines(buffer);
         MismatchRenderPos lookedEntry = null;
         MismatchRenderPos prevEntry = null;
         boolean connections = Configs.Visuals.RENDER_ERROR_MARKER_CONNECTIONS.getBooleanValue();
@@ -414,7 +406,7 @@ public class OverlayRenderer
             }
 
             tessellator.draw();
-            buffer.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+            RenderUtils.startDrawingLines(buffer);
 
             RenderSystem.lineWidth(6f);
             RenderUtils.drawBlockBoundingBoxOutlinesBatchedLines(lookPos, lookedEntry.type.getColor(), 0.002, buffer, this.mc);
@@ -427,7 +419,7 @@ public class OverlayRenderer
             RenderSystem.enableBlend();
             RenderSystem.disableCull();
 
-            buffer.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
             float alpha = (float) Configs.InfoOverlays.VERIFIER_ERROR_HILIGHT_ALPHA.getDoubleValue();
 
             for (MismatchRenderPos entry : posList)
@@ -442,10 +434,7 @@ public class OverlayRenderer
             RenderSystem.disableBlend();
         }
 
-        RenderSystem.popMatrix();
-        RenderSystem.enableTexture();
         RenderSystem.enableCull();
-        RenderSystem.enableLighting();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
     }
@@ -470,7 +459,8 @@ public class OverlayRenderer
 
             if (renderBlockInfoLines || renderInfoOverlay)
             {
-                traceWrapper = RayTraceUtils.getGenericTrace(mc.world, mc.player, 10, true);
+                boolean targetFluids = Configs.InfoOverlays.INFO_OVERLAYS_TARGET_FLUIDS.getBooleanValue();
+                traceWrapper = RayTraceUtils.getGenericTrace(mc.world, mc.player, 10, true, targetFluids);
             }
 
             if (traceWrapper != null &&
@@ -649,7 +639,7 @@ public class OverlayRenderer
         }
     }
 
-    public void renderSchematicRebuildTargetingOverlay(MatrixStack matrixStack, float partialTicks)
+    public void renderSchematicRebuildTargetingOverlay(MatrixStack matrixStack)
     {
         RayTraceWrapper traceWrapper = null;
         Color4f color = null;
@@ -690,7 +680,6 @@ public class OverlayRenderer
             BlockPos pos = trace.getBlockPos();
 
             RenderSystem.depthMask(false);
-            RenderSystem.disableLighting();
             RenderSystem.disableCull();
             RenderSystem.disableTexture();
             fi.dy.masa.malilib.render.RenderUtils.setupBlend();
@@ -710,7 +699,6 @@ public class OverlayRenderer
 
             RenderSystem.disablePolygonOffset();
             RenderSystem.enableTexture();
-            //RenderSystem.enableDepth();
             RenderSystem.disableBlend();
             RenderSystem.enableCull();
             RenderSystem.depthMask(true);

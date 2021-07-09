@@ -778,7 +778,7 @@ public class SchematicUtils
 
     public static void moveCurrentlySelectedWorldRegionTo(BlockPos pos, MinecraftClient mc)
     {
-        if (mc.player == null || mc.player.abilities.creativeMode == false)
+        if (mc.player == null || EntityUtils.isCreativeMode(mc.player) == false)
         {
             InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "litematica.error.generic.creative_mode_only");
             return;
@@ -807,7 +807,8 @@ public class SchematicUtils
         if (area != null && area.getAllSubRegionBoxes().size() > 0)
         {
             LitematicaSchematic schematic = LitematicaSchematic.createEmptySchematic(area, "");
-            TaskSaveSchematic taskSave = new TaskSaveSchematic(schematic, area, true);
+            LitematicaSchematic.SchematicSaveInfo info = new LitematicaSchematic.SchematicSaveInfo(false, false);
+            TaskSaveSchematic taskSave = new TaskSaveSchematic(schematic, area, info);
             taskSave.disableCompletionMessage();
             areaMovedTime = System.currentTimeMillis();
 
@@ -865,7 +866,8 @@ public class SchematicUtils
         if (area != null && area.getAllSubRegionBoxes().size() > 0)
         {
             LitematicaSchematic schematic = LitematicaSchematic.createEmptySchematic(area, mc.player.getName().getString());
-            TaskSaveSchematic taskSave = new TaskSaveSchematic(schematic, area, true);
+            LitematicaSchematic.SchematicSaveInfo info = new LitematicaSchematic.SchematicSaveInfo(false, false);
+            TaskSaveSchematic taskSave = new TaskSaveSchematic(schematic, area, info);
             taskSave.disableCompletionMessage();
 
             taskSave.setCompletionListener(() ->
@@ -884,7 +886,7 @@ public class SchematicUtils
                 manager.addSchematicPlacement(placement, false);
                 manager.setSelectedSchematicPlacement(placement);
 
-                if (mc.player.abilities.creativeMode)
+                if (EntityUtils.isCreativeMode(mc.player))
                 {
                     DataManager.setToolMode(ToolMode.PASTE_SCHEMATIC);
                 }

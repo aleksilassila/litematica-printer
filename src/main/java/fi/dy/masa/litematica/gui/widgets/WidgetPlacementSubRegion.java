@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -101,9 +100,9 @@ public class WidgetPlacementSubRegion extends WidgetListEntryBase<SubRegionPlace
 
         if (placementSelected)
         {
-            RenderSystem.translatef(0, 0, 1);
+            //TODO: RenderSystem.translatef(0, 0, 1);
             RenderUtils.drawOutline(this.x, this.y, this.width, this.height, 0xFFE0E0E0);
-            RenderSystem.translatef(0, 0, -1);
+            //TODO: RenderSystem.translatef(0, 0, -1);
         }
 
         String name = this.placement.getName();

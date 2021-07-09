@@ -1,16 +1,14 @@
 package fi.dy.masa.litematica.world;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.DummyClientTickScheduler;
 import net.minecraft.entity.Entity;
@@ -23,7 +21,9 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.tag.TagManager;
+import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.profiler.Profiler;
@@ -38,17 +38,18 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.entity.EntityLookup;
+import net.minecraft.world.event.GameEvent;
 import fi.dy.masa.litematica.render.LitematicaRenderer;
 import fi.dy.masa.litematica.render.schematic.WorldRendererSchematic;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 public class WorldSchematic extends World
 {
     private final MinecraftClient mc;
     private final WorldRendererSchematic worldRenderer;
     private final ChunkManagerSchematic chunkManagerSchematic;
-    private final Int2ObjectOpenHashMap<Entity> regularEntities = new Int2ObjectOpenHashMap<>();
     private int nextEntityId;
+    private int entityCount;
 
     protected WorldSchematic(MutableWorldProperties mutableWorldProperties, DimensionType dimensionType, Supplier<Profiler> supplier)
     {
@@ -84,7 +85,7 @@ public class WorldSchematic extends World
 
     public int getRegularEntityCount()
     {
-        return this.regularEntities.size();
+        return this.entityCount;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class WorldSchematic extends World
     }
 
     @Override
-    public WorldChunk getChunk(int chunkX, int chunkZ)
+    public ChunkSchematic getChunk(int chunkX, int chunkZ)
     {
         return this.chunkManagerSchematic.getChunk(chunkX, chunkZ);
     }
@@ -114,7 +115,7 @@ public class WorldSchematic extends World
     @Override
     public boolean setBlockState(BlockPos pos, BlockState newState, int flags)
     {
-        if (pos.getY() < 0 || pos.getY() >= 256)
+        if (pos.getY() < this.getBottomY() || pos.getY() >= this.getTopY())
         {
             return false;
         }
@@ -124,69 +125,43 @@ public class WorldSchematic extends World
         }
     }
 
-    public boolean spawnEntity(Entity entityIn)
+    @Override
+    public boolean spawnEntity(Entity entity)
     {
-        return this.spawnEntityBase(entityIn);
-    }
+        int chunkX = MathHelper.floor(entity.getX() / 16.0D);
+        int chunkZ = MathHelper.floor(entity.getZ() / 16.0D);
 
-    private boolean spawnEntityBase(Entity entity)
-    {
-        int cx = MathHelper.floor(entity.getX() / 16.0D);
-        int cz = MathHelper.floor(entity.getZ() / 16.0D);
-
-        if (this.chunkManagerSchematic.isChunkLoaded(cx, cz) == false)
+        if (this.chunkManagerSchematic.isChunkLoaded(chunkX, chunkZ) == false)
         {
             return false;
         }
         else
         {
-            entity.setEntityId(this.nextEntityId++);
-
-            int id = entity.getEntityId();
-            this.removeEntity(id);
-
-            this.regularEntities.put(id, entity);
-            this.chunkManagerSchematic.getChunk(MathHelper.floor(entity.getX() / 16.0D), MathHelper.floor(entity.getZ() / 16.0D)).addEntity(entity);
+            entity.setId(this.nextEntityId++);
+            this.chunkManagerSchematic.getChunk(chunkX, chunkZ).addEntity(entity);
+            ++this.entityCount;
 
             return true;
         }
     }
 
-    public void removeEntity(int id)
+    public void unloadedEntities(int count)
     {
-        Entity entity = this.regularEntities.remove(id);
-
-        if (entity != null)
-        {
-            entity.remove();
-            entity.detach();
-
-            if (entity.updateNeeded)
-            {
-                this.getChunk(entity.chunkX, entity.chunkZ).remove(entity);
-            }
-        }
+        this.entityCount -= count;
     }
 
     @Nullable
     @Override
     public Entity getEntityById(int id)
     {
-        return this.regularEntities.get(id);
+        // This shouldn't be used for anything in the mod, so just return null here
+        return null;
     }
 
     @Override
     public List<? extends PlayerEntity> getPlayers()
     {
         return ImmutableList.of();
-    }
-
-    public void unloadBlockEntities(Collection<BlockEntity> blockEntities)
-    {
-        Set<BlockEntity> remove = Collections.newSetFromMap(new IdentityHashMap<>());
-        remove.addAll(blockEntities);
-        this.tickingBlockEntities.removeAll(remove);
-        this.blockEntities.removeAll(remove);
     }
 
     @Override
@@ -203,7 +178,7 @@ public class WorldSchematic extends World
     }
 
     @Override
-    public void putMapState(MapState mapState)
+    public void putMapState(String name, MapState mapState)
     {
         // NO-OP
     }
@@ -233,6 +208,68 @@ public class WorldSchematic extends World
     }
 
     @Override
+    protected EntityLookup<Entity> getEntityLookup()
+    {
+        // This is not used in the mod
+        return null;
+    }
+
+    @Override
+    public List<Entity> getOtherEntities(@Nullable final Entity except, final Box box, Predicate<? super Entity> predicate)
+    {
+        final int minY = MathHelper.floor(box.minY / 16.0);
+        final int maxY = MathHelper.floor(box.maxY / 16.0);
+        final List<Entity> entities = new ArrayList<>();
+        List<ChunkSchematic> chunks = this.getChunksWithinBox(box);
+
+        for (ChunkSchematic chunk : chunks)
+        {
+            for (int cy = minY; cy <= maxY; ++cy)
+            {
+                chunk.getEntityListForSectionIfExists(cy).forEach((e) -> {
+                    if (e != except && box.intersects(e.getBoundingBox()) && predicate.test(e)) {
+                        entities.add(e);
+                    }
+                });
+            }
+        }
+
+        return entities;
+    }
+
+    @Override
+    public <T extends Entity> List<T> getEntitiesByType(TypeFilter<Entity, T> arg, Box box, Predicate<? super T> predicate)
+    {
+        // This is not used in the mod, so just return an empty list...
+        return Collections.emptyList();
+    }
+
+    public List<ChunkSchematic> getChunksWithinBox(Box box)
+    {
+        final int minX = MathHelper.floor(box.minX / 16.0);
+        final int minZ = MathHelper.floor(box.minZ / 16.0);
+        final int maxX = MathHelper.floor(box.maxX / 16.0);
+        final int maxZ = MathHelper.floor(box.maxZ / 16.0);
+
+        List<ChunkSchematic> chunks = new ArrayList<>();
+
+        for (int cx = minX; cx <= maxX; ++cx)
+        {
+            for (int cz = minZ; cz <= maxZ; ++cz)
+            {
+                ChunkSchematic chunk = this.chunkManagerSchematic.getChunkIfExists(cx, cz);
+
+                if (chunk != null)
+                {
+                    chunks.add(chunk);
+                }
+            }
+        }
+
+        return chunks;
+    }
+
+    @Override
     public void scheduleBlockRerenderIfNeeded(BlockPos pos, BlockState stateOld, BlockState stateNew)
     {
         this.scheduleBlockRenders(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
@@ -240,15 +277,18 @@ public class WorldSchematic extends World
 
     public void scheduleBlockRenders(int chunkX, int chunkY, int chunkZ)
     {
-        if (chunkY >= 0 && chunkY < 16)
-        {
-            this.worldRenderer.scheduleChunkRenders(chunkX, chunkY, chunkZ);
-        }
+        this.worldRenderer.scheduleChunkRenders(chunkX, chunkY, chunkZ);
     }
 
     public void scheduleChunkRenders(int chunkX, int chunkZ)
     {
-        for (int chunkY = 0; chunkY < 16; ++chunkY)
+        MinecraftClient mc = MinecraftClient.getInstance();
+        int renderDistanceChunks = mc.options.viewDistance / 16 + 2;
+        int cameraChunkY = (mc.gameRenderer.getCamera().getBlockPos().getY()) / 16;
+        int startChunkY = Math.max(this.getBottomSectionCoord(), cameraChunkY - renderDistanceChunks);
+        int endChunkY = Math.min(this.getTopSectionCoord(), cameraChunkY + renderDistanceChunks);
+
+        for (int chunkY = startChunkY; chunkY < endChunkY; ++chunkY)
         {
             this.worldRenderer.scheduleChunkRenders(chunkX, chunkY, chunkZ);
         }
@@ -257,10 +297,10 @@ public class WorldSchematic extends World
     public void scheduleChunkRenders(int minBlockX, int minBlockY, int minBlockZ, int maxBlockX, int maxBlockY, int maxBlockZ)
     {
         final int minChunkX = Math.min(minBlockX, maxBlockX) >> 4;
-        final int minChunkY = MathHelper.clamp(Math.min(minBlockY, maxBlockY) >> 4, 0, 15);
+        final int minChunkY = Math.min(minBlockY, maxBlockY) >> 4;
         final int minChunkZ = Math.min(minBlockZ, maxBlockZ) >> 4;
         final int maxChunkX = Math.max(minBlockX, maxBlockX) >> 4;
-        final int maxChunkY = MathHelper.clamp(Math.max(minBlockY, maxBlockY) >> 4, 0, 15);
+        final int maxChunkY = Math.max(minBlockY, maxBlockY) >> 4;
         final int maxChunkZ = Math.max(minBlockZ, maxBlockZ) >> 4;
 
         for (int cz = minChunkZ; cz <= maxChunkZ; ++cz)
@@ -273,6 +313,18 @@ public class WorldSchematic extends World
                 }
             }
         }
+    }
+
+    @Override
+    public int getBottomY()
+    {
+        return this.mc.world != null ? this.mc.world.getBottomY() : -64;
+    }
+
+    @Override
+    public int getHeight()
+    {
+        return this.mc.world != null ? this.mc.world.getHeight() : 384;
     }
 
     @Override
@@ -314,6 +366,12 @@ public class WorldSchematic extends World
     @Override
     public void syncWorldEvent(@Nullable PlayerEntity entity, int id, BlockPos pos, int data)
     {
+    }
+
+    @Override
+    public void emitGameEvent(@org.jetbrains.annotations.Nullable Entity entity, GameEvent event, BlockPos pos)
+    {
+        // NO-OP
     }
 
     @Override
@@ -368,5 +426,11 @@ public class WorldSchematic extends World
     public DynamicRegistryManager getRegistryManager()
     {
         return this.mc.world.getRegistryManager();
+    }
+
+    @Override
+    public String asString()
+    {
+        return "Chunks[SCH] W: " + this.getChunkManager().getDebugString() + " E: " + this.getRegularEntityCount();
     }
 }

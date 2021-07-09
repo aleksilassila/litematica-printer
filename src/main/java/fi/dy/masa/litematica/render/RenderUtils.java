@@ -2,13 +2,10 @@ package fi.dy.masa.litematica.render;
 
 import java.util.List;
 import java.util.Random;
-import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.util.math.MatrixStack;
@@ -43,13 +40,21 @@ public class RenderUtils
         return length;
     }
 
+    static void startDrawingLines(BufferBuilder buffer)
+    {
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.applyModelViewMatrix();
+        buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+    }
+
     public static void renderBlockOutline(BlockPos pos, float expand, float lineWidth, Color4f color, MinecraftClient mc)
     {
         RenderSystem.lineWidth(lineWidth);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+        startDrawingLines(buffer);
 
         drawBlockBoundingBoxOutlinesBatchedLines(pos, color, expand, buffer, mc);
 
@@ -122,7 +127,7 @@ public class RenderUtils
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+        startDrawingLines(buffer);
 
         // Min corner
         buffer.vertex(minX, minY, minZ).color(color1.r, color1.g, color1.b, color1.a).next();
@@ -190,7 +195,7 @@ public class RenderUtils
     {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+        startDrawingLines(bufferbuilder);
 
         drawBoundingBoxLinesX(bufferbuilder, minX, minY, minZ, maxX, maxY, maxZ, colorX);
         drawBoundingBoxLinesY(bufferbuilder, minX, minY, minZ, maxX, maxY, maxZ, colorY);
@@ -249,9 +254,10 @@ public class RenderUtils
         RenderSystem.enableBlend();
         RenderSystem.disableCull();
 
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         renderAreaSidesBatched(pos1, pos2, color, 0.002, buffer, mc);
 
@@ -317,7 +323,7 @@ public class RenderUtils
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+        startDrawingLines(buffer);
 
         // Edges along the X-axis
         start = (pos1.getX() == xMin && pos1.getY() == yMin && pos1.getZ() == zMin) || (pos2.getX() == xMin && pos2.getY() == yMin && pos2.getZ() == zMin) ? xMin + 1 : xMin;
@@ -440,10 +446,19 @@ public class RenderUtils
     {
         for (final Direction side : fi.dy.masa.malilib.util.PositionUtils.ALL_DIRECTIONS)
         {
-            renderModelQuadOutlines(pos, buffer, color, model.getQuads(state, side, RAND));
+            renderModelQuadOutlines(model, state, pos, side, color, expand, buffer);
         }
 
-        renderModelQuadOutlines(pos, buffer, color, model.getQuads(state, null, RAND));
+        renderModelQuadOutlines(model, state, pos, null, color, expand, buffer);
+    }
+
+    private static void renderModelQuadOutlines(BakedModel model, BlockState state, BlockPos pos, Direction side, Color4f color, double expand, BufferBuilder buffer)
+    {
+        try
+        {
+            renderModelQuadOutlines(pos, buffer, color, model.getQuads(state, side, RAND));
+        }
+        catch (Exception ignore) {}
     }
 
     private static void renderModelQuadOutlines(BlockPos pos, BufferBuilder buffer, Color4f color, List<BakedQuad> quads)
@@ -490,15 +505,19 @@ public class RenderUtils
     {
         for (final Direction side : fi.dy.masa.malilib.util.PositionUtils.ALL_DIRECTIONS)
         {
-            renderModelQuadOverlayBatched(pos, buffer, color, model.getQuads(state, side, RAND));
+            drawBlockModelQuadOverlayBatched(model, state, pos, side, color, expand, buffer);
         }
 
-        renderModelQuadOverlayBatched(pos, buffer, color, model.getQuads(state, null, RAND));
+        drawBlockModelQuadOverlayBatched(model, state, pos, null, color, expand, buffer);
     }
 
     public static void drawBlockModelQuadOverlayBatched(BakedModel model, BlockState state, BlockPos pos, Direction side, Color4f color, double expand, BufferBuilder buffer)
     {
-        renderModelQuadOverlayBatched(pos, buffer, color, model.getQuads(state, side, RAND));
+        try
+        {
+            renderModelQuadOverlayBatched(pos, buffer, color, model.getQuads(state, side, RAND));
+        }
+        catch (Exception ignore) {}
     }
 
     private static void renderModelQuadOverlayBatched(BlockPos pos, BufferBuilder buffer, Color4f color, List<BakedQuad> quads)

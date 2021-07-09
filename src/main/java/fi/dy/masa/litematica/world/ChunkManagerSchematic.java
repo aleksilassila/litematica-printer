@@ -1,7 +1,7 @@
 package fi.dy.masa.litematica.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.collection.TypeFilterableList;
+import java.util.function.BooleanSupplier;
+import javax.annotation.Nullable;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -71,21 +71,19 @@ public class ChunkManagerSchematic extends ChunkManager
         return chunk == null ? this.blankChunk : chunk;
     }
 
+    @Nullable
+    public ChunkSchematic getChunkIfExists(int chunkX, int chunkZ)
+    {
+        return this.loadedChunks.get(ChunkPos.toLong(chunkX, chunkZ));
+    }
+
     public void unloadChunk(int chunkX, int chunkZ)
     {
         ChunkSchematic chunk = this.loadedChunks.remove(ChunkPos.toLong(chunkX, chunkZ));
 
         if (chunk != null)
         {
-            this.world.unloadBlockEntities(chunk.getBlockEntities().values());
-
-            for (TypeFilterableList<Entity> list : chunk.getEntitySectionArray())
-            {
-                for (Entity entity : list.getAllOfType(Entity.class))
-                {
-                    this.world.removeEntity(entity.getEntityId());
-                }
-            }
+            this.world.unloadedEntities(chunk.getEntityCount());
         }
     }
 
@@ -93,5 +91,11 @@ public class ChunkManagerSchematic extends ChunkManager
     public LightingProvider getLightingProvider()
     {
         return this.lightingProvider;
+    }
+
+    @Override
+    public void tick(BooleanSupplier booleanSupplier)
+    {
+        // NO-OP
     }
 }

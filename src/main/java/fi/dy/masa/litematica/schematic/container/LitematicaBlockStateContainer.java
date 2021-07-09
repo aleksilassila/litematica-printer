@@ -3,7 +3,7 @@ package fi.dy.masa.litematica.schematic.container;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
@@ -12,10 +12,12 @@ public class LitematicaBlockStateContainer implements ILitematicaBlockStatePalet
     public static final BlockState AIR_BLOCK_STATE = Blocks.AIR.getDefaultState();
     protected LitematicaBitArray storage;
     protected ILitematicaBlockStatePalette palette;
+    protected final Vec3i size;
     protected final int sizeX;
     protected final int sizeY;
     protected final int sizeZ;
     protected final int sizeLayer;
+    protected final long totalVolume;
     protected int bits;
 
     public LitematicaBlockStateContainer(int sizeX, int sizeY, int sizeZ)
@@ -29,13 +31,15 @@ public class LitematicaBlockStateContainer implements ILitematicaBlockStatePalet
         this.sizeY = sizeY;
         this.sizeZ = sizeZ;
         this.sizeLayer = sizeX * sizeZ;
+        this.totalVolume = (long) this.sizeX * (long) this.sizeY * (long) this.sizeZ;
+        this.size = new Vec3i(this.sizeX, this.sizeY, this.sizeZ);
 
         this.setBits(bits, backingLongArray);
     }
 
     public Vec3i getSize()
     {
-        return new Vec3i(this.sizeX, this.sizeY, this.sizeZ);
+        return this.size;
     }
 
     public LitematicaBitArray getArray()
@@ -86,11 +90,11 @@ public class LitematicaBlockStateContainer implements ILitematicaBlockStatePalet
 
             if (backingLongArray != null)
             {
-                this.storage = new LitematicaBitArray(this.bits, this.sizeX * this.sizeY * this.sizeZ, backingLongArray);
+                this.storage = new LitematicaBitArray(this.bits, this.totalVolume, backingLongArray);
             }
             else
             {
-                this.storage = new LitematicaBitArray(this.bits, this.sizeX * this.sizeY * this.sizeZ);
+                this.storage = new LitematicaBitArray(this.bits, this.totalVolume);
             }
         }
     }
@@ -98,19 +102,20 @@ public class LitematicaBlockStateContainer implements ILitematicaBlockStatePalet
     @Override
     public int onResize(int bits, BlockState state)
     {
-        LitematicaBitArray bitArray = this.storage;
-        ILitematicaBlockStatePalette statePaletteOld = this.palette;
+        LitematicaBitArray oldStorage = this.storage;
+        ILitematicaBlockStatePalette oldPalette = this.palette;
+        final long storageLength = oldStorage.size();
+
         this.setBits(bits, null);
 
-        for (int id = 0; id < bitArray.size(); ++id)
-        {
-            BlockState stateTmp = statePaletteOld.getBlockState(bitArray.getAt(id));
+        LitematicaBitArray newStorage = this.storage;
 
-            if (stateTmp != null)
-            {
-                this.set(id, stateTmp);
-            }
+        for (long index = 0; index < storageLength; ++index)
+        {
+            newStorage.setAt(index, oldStorage.getAt(index));
         }
+
+        this.palette.readFromNBT(oldPalette.writeToNBT());
 
         return this.palette.idFor(state);
     }
@@ -125,7 +130,7 @@ public class LitematicaBlockStateContainer implements ILitematicaBlockStatePalet
         return this.palette;
     }
 
-    public static LitematicaBlockStateContainer createFrom(ListTag palette, long[] blockStates, BlockPos size)
+    public static LitematicaBlockStateContainer createFrom(NbtList palette, long[] blockStates, BlockPos size)
     {
         int bits = Math.max(2, Integer.SIZE - Integer.numberOfLeadingZeros(palette.size() - 1));
         LitematicaBlockStateContainer container = new LitematicaBlockStateContainer(size.getX(), size.getY(), size.getZ(), bits, blockStates);

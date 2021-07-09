@@ -1,13 +1,12 @@
 {
     "required": true,
     "package": "fi.dy.masa.litematica.mixin",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_16",
     "minVersion": "0.7",
     "client": [
-        "MixinClientPlayerEntity",
-        "MixinClientPlayerInteractionManager",
         "IMixinChunkDeltaUpdateS2CPacket",
         "IMixinFenceGateBlock",
+        "IMixinHandledScreen",
         "IMixinRedstoneWireBlock",
         "IMixinStairsBlock",
         "IMixinVineBlock",
@@ -15,11 +14,14 @@
         "MixinClientPlayNetworkHandler",
         "MixinClientWorld",
         "MixinDebugHud",
+        "MixinHandledScreen",
         "MixinIntegratedServer",
         "MixinMinecraftClient",
-        "MixinModelOverride",
+        "MixinModelOverrideList",
         "MixinRailBlocks",
         "MixinWorldChunk",
+		"MixinClientPlayerInteractionManager",
+        "MixinClientPlayerEntity",
         "MixinWorldRenderer"
     ],
     "injectors": {

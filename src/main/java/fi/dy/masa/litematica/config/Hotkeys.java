@@ -12,7 +12,6 @@ public class Hotkeys
     public static final ConfigHotkey DELETE_SELECTION_BOX               = new ConfigHotkey("deleteSelectionBox",                "",     "Delete the currently selected box");
     public static final ConfigHotkey EASY_PLACE_ACTIVATION              = new ConfigHotkey("easyPlaceActivation",               "",     KeybindSettings.MODIFIER_INGAME_EMPTY, "When the easyPlaceMode is enabled, this key must\nbe held to enable placing the blocks when\nusing the vanilla Use key");
     public static final ConfigHotkey EASY_PLACE_TOGGLE                  = new ConfigHotkey("easyPlaceToggle",                   "",     "Allows quickly toggling on/off the Easy Place mode");
-    public static final ConfigHotkey TOGGLE_PRINTING_MODE               = new ConfigHotkey("togglePrintingMode",                "M,O",  "Allows quickly toggling on/off Printing mode");
     public static final ConfigHotkey EXECUTE_OPERATION                  = new ConfigHotkey("executeOperation",                  "",     "Execute the currently selected tool operation with the\ncurrent selection or placement in the Fill, Replace,\nPaste Schematic etc. modes");
     public static final ConfigHotkey INVERT_GHOST_BLOCK_RENDER_STATE    = new ConfigHotkey("invertGhostBlockRenderState",       "",     "Inverts the schematic/ghost block rendering status\nwhile this keybind is held down");
     public static final ConfigHotkey INVERT_OVERLAY_RENDER_STATE        = new ConfigHotkey("invertOverlayRenderState",          "",     "Inverts the Overlay rendering status while this keybind is held down");
@@ -79,7 +78,8 @@ public class Hotkeys
     public static final ConfigHotkey TOOL_SELECT_MODIFIER_BLOCK_1       = new ConfigHotkey("toolSelectModifierBlock1",          "LEFT_ALT", KeybindSettings.MODIFIER_INGAME, "The modifier key to hold while using the 'toolSelectElements'\nhotkey, to select the primary block type to use in some of the tool modes");
     public static final ConfigHotkey TOOL_SELECT_MODIFIER_BLOCK_2       = new ConfigHotkey("toolSelectModifierBlock2",          "LEFT_SHIFT", KeybindSettings.MODIFIER_INGAME, "The modifier key to hold while using the 'toolSelectElements'\nhotkey, to select the secondary block type to use in some of the tool modes");
     public static final ConfigHotkey UNLOAD_CURRENT_SCHEMATIC           = new ConfigHotkey("unloadCurrentSchematic",            "",     "Unloads the schematic of the currently selected placement,and thus also removes all placements created from it\n");
-
+    public static final ConfigHotkey TOGGLE_PRINTING_MODE 				= new ConfigHotkey("togglePrintingMode", "M,O", "Allows quickly toggling on/off Printing mode");
+    
     public static final List<ConfigHotkey> HOTKEY_LIST = ImmutableList.of(
             ADD_SELECTION_BOX,
             CLONE_SELECTION,
@@ -141,7 +141,6 @@ public class Hotkeys
             TOGGLE_OVERLAY_SIDE_RENDERING,
             TOGGLE_PLACEMENT_BOXES_RENDERING,
             TOGGLE_PLACEMENT_RESTRICTION,
-            TOGGLE_PRINTING_MODE,
             TOGGLE_SCHEMATIC_BLOCK_RENDERING,
             TOGGLE_SCHEMATIC_RENDERING,
             TOGGLE_TRANSLUCENT_RENDERING,
@@ -152,6 +151,7 @@ public class Hotkeys
             TOOL_SELECT_ELEMENTS,
             TOOL_SELECT_MODIFIER_BLOCK_1,
             TOOL_SELECT_MODIFIER_BLOCK_2,
-            UNLOAD_CURRENT_SCHEMATIC
+            UNLOAD_CURRENT_SCHEMATIC,
+            TOGGLE_PRINTING_MODE
     );
 }

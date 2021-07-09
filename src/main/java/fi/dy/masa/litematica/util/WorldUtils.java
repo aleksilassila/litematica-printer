@@ -28,7 +28,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.structure.Structure;
 import net.minecraft.structure.StructurePlacementData;
@@ -120,8 +120,9 @@ public class WorldUtils
         Box box = area.getSelectedSubRegionBox();
         area.setSubRegionCornerPos(box, Corner.CORNER_1, BlockPos.ORIGIN);
         area.setSubRegionCornerPos(box, Corner.CORNER_2, (new BlockPos(schematic.getSize())).add(-1, -1, -1));
+        LitematicaSchematic.SchematicSaveInfo info = new LitematicaSchematic.SchematicSaveInfo(false, false);
 
-        LitematicaSchematic litematicaSchematic = LitematicaSchematic.createFromWorld(world, area, false, "?", feedback);
+        LitematicaSchematic litematicaSchematic = LitematicaSchematic.createFromWorld(world, area, info, "?", feedback);
 
         if (litematicaSchematic != null && ignoreEntities == false)
         {
@@ -261,7 +262,7 @@ public class WorldUtils
                 return false;
             }
 
-            CompoundTag tag = template.toTag(new CompoundTag());
+            NbtCompound tag = template.writeNbt(new NbtCompound());
             os = new FileOutputStream(file);
             NbtIo.writeCompressed(tag, os);
             os.close();
@@ -278,10 +279,10 @@ public class WorldUtils
 
     private static Structure readTemplateFromStream(InputStream stream, DataFixer fixer) throws IOException
     {
-        CompoundTag nbt = NbtIo.readCompressed(stream);
+        NbtCompound nbt = NbtIo.readCompressed(stream);
         Structure template = new Structure();
         //template.read(fixer.process(FixTypes.STRUCTURE, nbt));
-        template.fromTag(nbt);
+        template.readNbt(nbt);
 
         return template;
     }
@@ -371,10 +372,10 @@ public class WorldUtils
 
             if (stack.isEmpty() == false)
             {
-                PlayerInventory inv = mc.player.inventory;
+                PlayerInventory inv = mc.player.getInventory();
                 stack = stack.copy();
 
-                if (mc.player.abilities.creativeMode)
+                if (EntityUtils.isCreativeMode(mc.player))
                 {
                     BlockEntity te = world.getBlockEntity(pos);
 
@@ -395,11 +396,20 @@ public class WorldUtils
                 {
                     int slot = inv.getSlotWithStack(stack);
                     boolean shouldPick = inv.selectedSlot != slot;
-                    boolean canPick = slot != -1;
 
-                    if (shouldPick && canPick)
+                    if (shouldPick && slot != -1)
                     {
                         InventoryUtils.setPickedItemToHand(stack, mc);
+                    }
+                    else if (slot == -1 && Configs.Generic.PICK_BLOCK_SHULKERS.getBooleanValue())
+                    {
+                        slot = InventoryUtils.findSlotWithBoxWithItem(mc.player.playerScreenHandler, stack, false);
+
+                        if (slot != -1)
+                        {
+                            ItemStack boxStack = mc.player.playerScreenHandler.slots.get(slot).getStack();
+                            InventoryUtils.setPickedItemToHand(boxStack, mc);
+                        }
                     }
 
                     //return shouldPick == false || canPick;

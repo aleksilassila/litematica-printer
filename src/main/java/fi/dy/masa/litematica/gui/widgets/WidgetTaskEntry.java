@@ -1,6 +1,6 @@
 package fi.dy.masa.litematica.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.util.math.MatrixStack;
 import fi.dy.masa.litematica.scheduler.ITask;
 import fi.dy.masa.litematica.scheduler.TaskScheduler;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
@@ -9,7 +9,6 @@ import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetListEntryBase;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.StringUtils;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class WidgetTaskEntry extends WidgetListEntryBase<ITask>
 {
@@ -55,7 +54,7 @@ public class WidgetTaskEntry extends WidgetListEntryBase<ITask>
         this.drawSubWidgets(mouseX, mouseY, matrixStack);
 
         RenderUtils.disableDiffuseLighting();
-        RenderSystem.disableLighting();
+        //TODO: RenderSystem.disableLighting();
     }
 
     private static class ButtonListener implements IButtonActionListener

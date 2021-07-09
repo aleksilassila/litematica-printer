@@ -37,6 +37,7 @@ import fi.dy.masa.litematica.scheduler.TaskScheduler;
 import fi.dy.masa.litematica.scheduler.tasks.TaskPasteSchematicSetblock;
 import fi.dy.masa.litematica.schematic.LitematicaSchematic;
 import fi.dy.masa.litematica.schematic.placement.SubRegionPlacement.RequiredEnabled;
+import fi.dy.masa.litematica.util.EntityUtils;
 import fi.dy.masa.litematica.util.PositionUtils;
 import fi.dy.masa.litematica.util.RayTraceUtils;
 import fi.dy.masa.litematica.util.RayTraceUtils.RayTraceWrapper;
@@ -436,7 +437,11 @@ public class SchematicPlacementManager
 
     private void updateTouchedBoxesInChunk(ChunkPos pos)
     {
-        for (int y = 0; y < 16; ++y)
+        WorldSchematic world = SchematicWorldHandler.getSchematicWorld();
+        int minChunkY = world != null ? world.getBottomSectionCoord() : -4;
+        int maxChunkY = world != null ? world.getTopSectionCoord() : 19;
+
+        for (int y = minChunkY; y < maxChunkY; ++y)
         {
             SubChunkPos subChunk = new SubChunkPos(pos.x, y, pos.z);
             this.touchedVolumesInSubChunk.removeAll(subChunk);
@@ -658,7 +663,7 @@ public class SchematicPlacementManager
 
     public void pastePlacementToWorld(final SchematicPlacement schematicPlacement, boolean changedBlocksOnly, boolean printMessage, MinecraftClient mc)
     {
-        if (mc.player != null && mc.player.abilities.creativeMode)
+        if (mc.player != null && EntityUtils.isCreativeMode(mc.player))
         {
             if (schematicPlacement != null)
             {

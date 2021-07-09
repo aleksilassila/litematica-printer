@@ -10,6 +10,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.BlockPos;
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.scheduler.TaskScheduler;
 import fi.dy.masa.litematica.scheduler.tasks.TaskSaveSchematic;
@@ -19,14 +21,13 @@ import fi.dy.masa.litematica.selection.AreaSelection;
 import fi.dy.masa.litematica.selection.AreaSelectionSimple;
 import fi.dy.masa.litematica.selection.SelectionManager;
 import fi.dy.masa.litematica.selection.SelectionMode;
+import fi.dy.masa.litematica.util.EntityUtils;
 import fi.dy.masa.litematica.util.ToolUtils;
 import fi.dy.masa.malilib.gui.Message.MessageType;
 import fi.dy.masa.malilib.interfaces.ICompletionListener;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.JsonUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.BlockPos;
 
 public class SchematicProject
 {
@@ -234,7 +235,7 @@ public class SchematicProject
         {
             MinecraftClient mc = MinecraftClient.getInstance();
 
-            if (mc.player == null || mc.player.abilities.creativeMode == false)
+            if (mc.player == null || EntityUtils.isCreativeMode(mc.player) == false)
             {
                 InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "litematica.error.generic.creative_mode_only");
                 return;
@@ -324,8 +325,9 @@ public class SchematicProject
             schematic.getMetadata().setName(name);
             BlockPos areaOffset = selection.getEffectiveOrigin().subtract(this.origin);
             SaveCompletionListener listener = new SaveCompletionListener(name, fileName, areaOffset);
+            LitematicaSchematic.SchematicSaveInfo info = new LitematicaSchematic.SchematicSaveInfo(false, false);
 
-            TaskSaveSchematic task = new TaskSaveSchematic(this.directory, fileName, schematic, selection.copy(), true, false);
+            TaskSaveSchematic task = new TaskSaveSchematic(this.directory, fileName, schematic, selection.copy(), info, false);
             task.setCompletionListener(listener);
             TaskScheduler.getServerInstanceIfExistsOrClient().scheduleTask(task, 2);
             this.saveInProgress = true;
