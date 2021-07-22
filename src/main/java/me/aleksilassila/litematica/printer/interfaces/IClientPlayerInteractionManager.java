@@ -1,4 +1,4 @@
-package io.github.jensvh.litematica.printermod.interfaces;
+package me.aleksilassila.litematica.printer.interfaces;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;

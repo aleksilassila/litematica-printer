@@ -1,17 +1,15 @@
-package io.github.jensvh.litematica.printermod.mixin;
+package me.aleksilassila.litematica.printer.mixin;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
+import fi.dy.masa.litematica.config.Configs;
+import fi.dy.masa.malilib.config.IConfigBase;
+import fi.dy.masa.malilib.config.options.ConfigHotkey;
+import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import com.google.common.collect.ImmutableList;
-
-import fi.dy.masa.litematica.config.Configs;
-import fi.dy.masa.malilib.config.IConfigBase;
-import fi.dy.masa.malilib.config.options.ConfigHotkey;
-import io.github.jensvh.litematica.printermod.LitematicaMixinMod;
+import java.util.List;
 
 @Mixin(value = Configs.class, remap = false)
 public class ConfigsMixin {

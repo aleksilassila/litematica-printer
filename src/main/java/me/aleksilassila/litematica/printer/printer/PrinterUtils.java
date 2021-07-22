@@ -1,4 +1,4 @@
-package io.github.jensvh.litematica.printermod.printer;
+package me.aleksilassila.litematica.printer.printer;
 
 import net.minecraft.block.*;
 import net.minecraft.state.property.IntProperty;

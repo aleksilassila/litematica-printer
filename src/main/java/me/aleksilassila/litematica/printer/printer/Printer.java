@@ -1,22 +1,14 @@
-package io.github.jensvh.litematica.printermod.printer;
+package me.aleksilassila.litematica.printer.printer;
 
-import java.util.Date;
-
-import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
 import fi.dy.masa.litematica.util.ItemUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import fi.dy.masa.malilib.gui.GuiBase;
-import io.github.jensvh.litematica.printermod.LitematicaMixinMod;
-import io.github.jensvh.litematica.printermod.interfaces.IClientPlayerInteractionManager;
-import net.minecraft.block.AbstractButtonBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.HopperBlock;
-import net.minecraft.block.LeverBlock;
-import net.minecraft.block.Material;
+import me.aleksilassila.litematica.printer.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -34,6 +26,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+
+import java.util.Date;
 
 public class Printer extends PrinterUtils {
     private final MinecraftClient client;

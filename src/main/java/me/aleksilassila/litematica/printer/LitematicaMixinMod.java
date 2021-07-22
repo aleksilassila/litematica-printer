@@ -1,6 +1,4 @@
-package io.github.jensvh.litematica.printermod;
-
-import java.util.List;
+package me.aleksilassila.litematica.printer;
 
 import com.google.common.collect.ImmutableList;
 import fi.dy.masa.litematica.config.Configs;
@@ -13,13 +11,15 @@ import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.hotkeys.KeyCallbackToggleBooleanConfigWithMessage;
 import net.fabricmc.api.ModInitializer;
 
+import java.util.List;
+
 public class LitematicaMixinMod implements ModInitializer {
 
 	// Config settings
-	public static final ConfigDouble        PRINTING_DELAY          = new ConfigDouble(     "printingDelay", 0.2, 0.0, 1.0, "Delay between printing blocks.\nDo not set to 0 if you are playing on a server.");
-    public static final ConfigInteger       PRINTING_RANGE          = new ConfigInteger(    "printingRange", 2, 1, 6, "Printing block place range\nLower values are recommended for servers.");
-    public static final ConfigBoolean 		PRINT_WATER = new ConfigBoolean( "printWater", false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
-    public static final ConfigBoolean 		PRINT_MODE 				= new ConfigBoolean( "printingMode", false, "Autobuild / print loaded selection.\nBe aware that some servers and anticheat plugins do not allow printing.");
+	public static final ConfigDouble  PRINTING_DELAY = new ConfigDouble( "printingDelay", 0.2,   0.0, 1.0, "Delay between printing blocks.\nDo not set to 0 if you are playing on a server.");
+    public static final ConfigInteger PRINTING_RANGE = new ConfigInteger("printingRange", 2,     1,   6,   "Printing block place range\nLower values are recommended for servers.");
+    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
+    public static final ConfigBoolean PRINT_MODE 	 = new ConfigBoolean("printingMode",  false, "Autobuild / print loaded selection.\nBe aware that some servers and anticheat plugins do not allow printing.");
     
 	public static final ImmutableList<IConfigBase> betterConfigList = ImmutableList.of(
 			Configs.Generic.AREAS_PER_WORLD,

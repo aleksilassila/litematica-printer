@@ -1,5 +1,6 @@
-package io.github.jensvh.litematica.printermod.mixin;
+package me.aleksilassila.litematica.printer.mixin;
 
+import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
@@ -14,8 +15,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import io.github.jensvh.litematica.printermod.interfaces.IClientPlayerInteractionManager;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MixinClientPlayerInteractionManager implements IClientPlayerInteractionManager {

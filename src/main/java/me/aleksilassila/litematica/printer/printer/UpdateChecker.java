@@ -1,4 +1,4 @@
-package io.github.jensvh.litematica.printermod.printer;
+package me.aleksilassila.litematica.printer.printer;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

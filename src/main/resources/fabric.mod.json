@@ -4,13 +4,13 @@
   "version": "${version}",
 
   "name": "Litematica Printer",
-  "description": "Replaces EasyPlace with a printer to make building even easier.",
+  "description": "A fork of Litematica that adds the missing printer functionality",
   "authors": [
-    "eatmyvenom"
+    "aleksilassila"
   ],
   "contact": {
-    "homepage": "https://github.com/jensvh/litematica-printer-1",
-    "sources": "https://github.com/jensvh/litematica-printer-1"
+    "homepage": "https://github.com/aleksilassila/litematica-printer",
+    "sources": "https://github.com/aleksilassila/litematica-printer"
   },
 
   "license": "CC0-1.0",
@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.jensvh.litematica.printermod.LitematicaMixinMod"
+      "me.aleksilassila.litematica.printer.LitematicaMixinMod"
     ]
   },
   "mixins": [
