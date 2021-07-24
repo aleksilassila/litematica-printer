@@ -8,6 +8,7 @@ import fi.dy.masa.litematica.world.WorldSchematic;
 import fi.dy.masa.malilib.gui.GuiBase;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
+import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -17,7 +18,6 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -87,9 +87,9 @@ public class Printer extends PrinterUtils {
 		if (!requiredState.canPlaceAt(clientWorld, pos)) return false;
 
 		// Check if player is holding right block
-		Item itemInHand = playerEntity.getInventory().getMainHandStack().getItem();
+		Item itemInHand = Implementation.getInventory(playerEntity).getMainHandStack().getItem();
 		if (!itemInHand.equals(requiredItemInHand(requiredState, currentState))) {
-			if (playerEntity.getAbilities().creativeMode) {
+			if (Implementation.getAbilities(playerEntity).creativeMode) {
 				ItemStack required = new ItemStack(requiredItemInHand(requiredState, currentState));
 				BlockEntity te = clientWorld.getBlockEntity(pos);
 
@@ -103,7 +103,7 @@ public class Printer extends PrinterUtils {
 
 				InventoryUtils.setPickedItemToHand(required, client);
 				client.interactionManager.clickCreativeStack(playerEntity.getStackInHand(Hand.MAIN_HAND),
-						36 + playerEntity.getInventory().selectedSlot);
+						36 + Implementation.getInventory(playerEntity).selectedSlot);
 
 			} else {
 				int slot = getBlockInventorySlot(requiredItemInHand(requiredState, currentState));
@@ -183,12 +183,12 @@ public class Printer extends PrinterUtils {
 	}
 
 	private void swapHandWithSlot(int slot) {
-		ItemStack stack = playerEntity.getInventory().getStack(slot);
+		ItemStack stack = Implementation.getInventory(playerEntity).getStack(slot);
 		InventoryUtils.setPickedItemToHand(stack, client);
 	}
 
 	private int getBlockInventorySlot(Item item) {
-    	Inventory inv = playerEntity.getInventory();
+    	Inventory inv = Implementation.getInventory(playerEntity);
 
     	for (int slot = 0; slot < inv.size(); slot++) {
     		if (inv.getStack(slot).getItem().equals(item)) return slot;
@@ -246,17 +246,16 @@ public class Printer extends PrinterUtils {
 
 	private void sendLookPacket(Direction playerShouldBeFacing) {
     	if (playerShouldBeFacing != null) {
-			float yaw = playerEntity.getYaw();
-			float pitch = playerEntity.getPitch();
+			float yaw = Implementation.getYaw(playerEntity);
+			float pitch = Implementation.getPitch(playerEntity);
 
 			if (playerShouldBeFacing.getAxis().isHorizontal()) {
 				yaw = playerShouldBeFacing.asRotation();
 			} else {
 				pitch = playerShouldBeFacing == Direction.DOWN ? 90 : -90;
 			}
-			
-			playerEntity.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-				yaw, pitch, playerEntity.isOnGround()));
+
+			Implementation.sendLookPacket(playerEntity, yaw, pitch);
 		}
 	}
 
