@@ -13,23 +13,23 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
  */
 public class Implementation {
     public static PlayerInventory getInventory(ClientPlayerEntity playerEntity) {
-        return playerEntity.getInventory();
+        return playerEntity.inventory;
     }
 
     public static PlayerAbilities getAbilities(ClientPlayerEntity playerEntity) {
-        return playerEntity.getAbilities();
+        return playerEntity.abilities;
     }
 
     public static float getYaw(ClientPlayerEntity playerEntity) {
-        return playerEntity.getYaw();
+        return playerEntity.yaw;
     }
 
     public static float getPitch(ClientPlayerEntity playerEntity) {
-        return playerEntity.getPitch();
+        return playerEntity.pitch;
     }
 
     public static void sendLookPacket(ClientPlayerEntity playerEntity, float yaw, float pitch) {
-        playerEntity.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+        playerEntity.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(
                 yaw, pitch, playerEntity.isOnGround()));
     }
 }
