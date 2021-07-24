@@ -1,9 +1,14 @@
 package me.aleksilassila.litematica.printer.interfaces;
 
+import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.MessageType;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.text.LiteralText;
 
 /**
  * Dirty class that contains anything and everything that is
@@ -30,6 +35,18 @@ public class Implementation {
 
     public static void sendLookPacket(ClientPlayerEntity playerEntity, float yaw, float pitch) {
         playerEntity.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(
-                yaw, pitch, playerEntity.isOnGround()));
+                yaw, pitch, playerEntity.onGround));
+    }
+
+    public static void showMessage(InGameHud inGameHud, String text) {
+        inGameHud.addChatMessage(MessageType.SYSTEM, new LiteralText(text));
+    }
+
+    public static int getInventorySize(Inventory inventory) {
+        return inventory.getInvSize();
+    }
+
+    public static ItemStack getInventoryStack(Inventory inventory, int slot) {
+        return inventory.getInvStack(slot);
     }
 }

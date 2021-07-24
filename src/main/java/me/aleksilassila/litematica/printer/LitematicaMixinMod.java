@@ -94,7 +94,6 @@ public class LitematicaMixinMod implements ModInitializer {
             Hotkeys.SAVE_AREA_AS_IN_MEMORY_SCHEMATIC,
             Hotkeys.SAVE_AREA_AS_SCHEMATIC_TO_FILE,
             Hotkeys.SCHEMATIC_REBUILD_BREAK_ALL,
-            Hotkeys.SCHEMATIC_REBUILD_BREAK_ALL_EXCEPT,
             Hotkeys.SCHEMATIC_REBUILD_BREAK_DIRECTION,
             Hotkeys.SCHEMATIC_REBUILD_REPLACE_ALL,
             Hotkeys.SCHEMATIC_REBUILD_REPLACE_DIRECTION,

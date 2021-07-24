@@ -63,7 +63,7 @@ public class Printer extends PrinterUtils {
 
 		// Check if block should be just clicked (repeaters etc.)
 		if (shouldClickBlock(currentState, requiredState)) {
-			addQueuedPacket(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
+			addQueuedPacket(pos, Direction.UP, new Vec3d(pos), null, false);
 
 			lastPlaced = new Date().getTime();
 			return true;
@@ -183,15 +183,15 @@ public class Printer extends PrinterUtils {
 	}
 
 	private void swapHandWithSlot(int slot) {
-		ItemStack stack = Implementation.getInventory(playerEntity).getStack(slot);
+		ItemStack stack = Implementation.getInventoryStack(Implementation.getInventory(playerEntity), slot);
 		InventoryUtils.setPickedItemToHand(stack, client);
 	}
 
 	private int getBlockInventorySlot(Item item) {
     	Inventory inv = Implementation.getInventory(playerEntity);
 
-    	for (int slot = 0; slot < inv.size(); slot++) {
-    		if (inv.getStack(slot).getItem().equals(item)) return slot;
+    	for (int slot = 0; slot < Implementation.getInventorySize(inv); slot++) {
+    		if (Implementation.getInventoryStack(inv, slot).getItem().equals(item)) return slot;
 		}
 
     	return -1;
@@ -200,7 +200,7 @@ public class Printer extends PrinterUtils {
     private boolean placeBlock(BlockPos pos) {
     	BlockState state = SchematicWorldHandler.getSchematicWorld().getBlockState(pos);
 
-		Vec3d posVec = Vec3d.ofCenter(pos);
+		Vec3d posVec = new Vec3d(pos);
 
 		Direction playerShouldBeFacing = getFacingDirection(state);
 		Direction.Axis axis = availableAxis(state);
@@ -227,7 +227,7 @@ public class Printer extends PrinterUtils {
 				neighbor = pos;
 			}
 
-			Vec3d hitVec = posVec.add(Vec3d.of(side.getVector()).multiply(0.5));
+			Vec3d hitVec = posVec.add(new Vec3d(side.getVector()).multiply(0.5));
 
 			if (half == 1 && !side.equals(Direction.UP)) {
 				hitVec = hitVec.add(0, 0.25, 0);

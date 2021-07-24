@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.mixin;
 import com.mojang.authlib.GameProfile;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import me.aleksilassila.litematica.printer.printer.Printer;
 import me.aleksilassila.litematica.printer.printer.UpdateChecker;
 import net.minecraft.client.MinecraftClient;
@@ -65,9 +66,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             String newVersion = UpdateChecker.getPrinterVersion();
 
             if (!version.equals(newVersion)) {
-                client.inGameHud.addChatMessage(MessageType.SYSTEM,
-                        new LiteralText("New version of Litematica Printer available in https://github.com/aleksilassila/litematica-printer/releases"),
-                        null);
+				Implementation.showMessage(client.inGameHud, "New version of Litematica Printer available in https://github.com/aleksilassila/litematica-printer/releases");
             }
         }).start();
 	}
