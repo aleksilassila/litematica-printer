@@ -1,15 +1,18 @@
-[![Curseforge](http://cf.way2muchnoise.eu/full_litematica_downloads.svg)](https://minecraft.curseforge.com/projects/litematica) [![Curseforge](http://cf.way2muchnoise.eu/versions/For%20MC_litematica_all.svg)](https://minecraft.curseforge.com/projects/litematica)
-
 ## Litematica Printing
 
-This fork adds printing functionality for Litematica fabric 1.16 version.
+This fork adds printing functionality for Litematica fabric 1.17 and 1.16 versions.
 Printer allows players to build big structures more quickly by automatically placing the correct blocks.
 
-Because the main branch is dedicated for 1.12 LiteLoader, my code can be found in [printer](https://github.com/aleksilassila/litematica-printing/tree/printing) branch. If you have issues with the printer, 
+Because the main branch is dedicated for 1.12 LiteLoader, my code can be found in [printing](https://github.com/aleksilassila/litematica-printing/tree/printing) branch. If you have issues with the printer, 
 **do not** bother the original creator of Litematica (maruohon) with them. Contact me instead.
 Feature requests or bugs can be reported via github issues.
 
 For downloads check out [releases](https://github.com/aleksilassila/litematica-printing/releases/latest).
+To install the mod, first download the original Litematica and MaLiLib from [here](https://www.curseforge.com/minecraft/mc-mods/litematica).
+You will also need [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/).
+Finally, move the printer's .jar from [releases](https://github.com/aleksilassila/litematica-printing/releases/latest) to your mods folder.
+
+[![Curseforge](http://cf.way2muchnoise.eu/full_litematica_downloads.svg)](https://minecraft.curseforge.com/projects/litematica) [![Curseforge](http://cf.way2muchnoise.eu/versions/For%20MC_litematica_all.svg)](https://minecraft.curseforge.com/projects/litematica)
 
 ## Litematica
 Litematica is a client-side schematic mod for Minecraft, with also lots of extra functionality
