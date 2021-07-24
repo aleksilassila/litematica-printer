@@ -101,6 +101,8 @@ public class PrinterUtils {
 				|| state.getBlock() instanceof GrindstoneBlock
 				|| state.getBlock() instanceof LeverBlock
 				|| state.getBlock() instanceof AbstractButtonBlock
+				|| state.getBlock() instanceof BedBlock
+				|| state.getBlock() instanceof DoorBlock
 				|| state.getBlock() instanceof ObserverBlock;
 	}
 

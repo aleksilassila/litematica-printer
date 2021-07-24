@@ -16,7 +16,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -40,6 +39,7 @@ public class Printer extends PrinterUtils {
 	public boolean lockCamera = false;
 
 	private boolean shouldPlaceWater;
+	private boolean shouldPrintInAir;
 
 	public static class Queue {
 		public static BlockPos neighbor;
@@ -58,8 +58,6 @@ public class Printer extends PrinterUtils {
 	 * @return true if block was placed.
 	 */
 	public boolean processBlock(BlockPos pos) {
-		if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) return false;
-
 		BlockState currentState = clientWorld.getBlockState(pos);
 		BlockState requiredState = worldSchematic.getBlockState(pos);
 
@@ -84,8 +82,6 @@ public class Printer extends PrinterUtils {
 			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return false;
 			if (!isWaterLogged(requiredState) && !currentState.isAir()) return false;
 		}
-
-		System.out.println(currentState.getBlock().getName() + ": " + requiredState.getBlock().getName() + ", " + isWaterLogged(currentState) + ", " + isWaterLogged(requiredState));
 
 		// Check if can be placed in world
 		if (!requiredState.canPlaceAt(clientWorld, pos)) return false;
@@ -130,14 +126,21 @@ public class Printer extends PrinterUtils {
 		if (new Date().getTime() < lastPlaced + 1000.0 * LitematicaMixinMod.PRINTING_DELAY.getDoubleValue()) return;
 
 		int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
-		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
+//		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
+		shouldPlaceWater = false;
+		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 		worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
 		forEachBlockInRadius:
 		for (int y = -range; y < range + 1; y++) {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
-					if (processBlock(playerEntity.getBlockPos().north(x).west(z).up(y))) return;
+					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
+
+					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
+
+
+					if (processBlock(pos)) return;
 				}
 			}
 		}
@@ -219,8 +222,10 @@ public class Printer extends PrinterUtils {
 
 			BlockPos neighbor = pos.offset(side);
 
-			if (!canBeClicked(neighbor))
-				continue;
+			if (!canBeClicked(neighbor)) {
+				if (!shouldPrintInAir) continue;
+				neighbor = pos;
+			}
 
 			Vec3d hitVec = posVec.add(Vec3d.of(side.getVector()).multiply(0.5));
 
@@ -256,12 +261,12 @@ public class Printer extends PrinterUtils {
 	}
 
     private Item requiredItemInHand(BlockState requiredState, BlockState currentState) {
-		// If block should be waterlogged
-		if (!currentState.isAir() && isWaterLogged(requiredState))
-			return Items.WATER_BUCKET;
-		else if (requiredState.getBlock().equals(Blocks.WATER))
-			return Items.WATER_BUCKET;
-		else
+//		// If block should be waterlogged
+//		if (!currentState.isAir() && isWaterLogged(requiredState))
+//			return Items.WATER_BUCKET;
+//		else if (requiredState.getBlock().equals(Blocks.WATER))
+//			return Items.WATER_BUCKET;
+//		else
 			return new ItemStack(requiredState.getBlock()).getItem();
 	}
 

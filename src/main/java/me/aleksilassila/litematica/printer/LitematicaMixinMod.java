@@ -18,7 +18,8 @@ public class LitematicaMixinMod implements ModInitializer {
 	// Config settings
 	public static final ConfigDouble  PRINTING_DELAY = new ConfigDouble( "printingDelay", 0.2,   0.0, 1.0, "Delay between printing blocks.\nDo not set to 0 if you are playing on a server.");
     public static final ConfigInteger PRINTING_RANGE = new ConfigInteger("printingRange", 2,     1,   6,   "Printing block place range\nLower values are recommended for servers.");
-    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
+//    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
+    public static final ConfigBoolean PRINT_IN_AIR = new ConfigBoolean("printInAir",    false, "Whether or not the printer should place blocks without anything to build on.\nBe aware that some anti-cheat plugins might notice this.");
     public static final ConfigBoolean PRINT_MODE 	 = new ConfigBoolean("printingMode",  false, "Autobuild / print loaded selection.\nBe aware that some servers and anticheat plugins do not allow printing.");
     
 	public static final ImmutableList<IConfigBase> betterConfigList = ImmutableList.of(
@@ -48,12 +49,13 @@ public class LitematicaMixinMod implements ModInitializer {
 
 			PRINTING_DELAY,
             PRINTING_RANGE,
-            PRINT_WATER,
+//            PRINT_WATER,
+			PRINT_IN_AIR,
             PRINT_MODE
 	);
 	
 	// Hotkeys
-	public static final ConfigHotkey TOGGLE_PRINTING_MODE 			= new ConfigHotkey("togglePrintingMode", "M,O", "Allows quickly toggling on/off Printing mode");
+	public static final ConfigHotkey TOGGLE_PRINTING_MODE = new ConfigHotkey("togglePrintingMode", "M,O", "Allows quickly toggling on/off Printing mode");
     
 	public static final List<ConfigHotkey> betterHotkeyList = ImmutableList.of(
             Hotkeys.ADD_SELECTION_BOX,
