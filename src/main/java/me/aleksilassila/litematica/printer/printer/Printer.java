@@ -11,6 +11,7 @@ import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionMa
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -77,7 +78,10 @@ public class Printer extends PrinterUtils {
 
 		// Check if target block is empty
 		if (!shouldPlaceWater)
-			if (!currentState.isAir()) return false;
+			if (!currentState.isAir()) {
+				if (!PrinterUtils.isDoubleSlab(requiredState)) return false;
+				else if (PrinterUtils.isDoubleSlab(currentState)) return false;
+			}
 		else {
 			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return false;
 			if (!isWaterLogged(requiredState) && !currentState.isAir()) return false;
@@ -116,7 +120,7 @@ public class Printer extends PrinterUtils {
 			}
 		}
 
-		return placeBlock(pos);
+		return placeBlock(pos, requiredState, currentState);
 	}
 
     public void print() {
@@ -197,15 +201,16 @@ public class Printer extends PrinterUtils {
     	return -1;
 	}
 
-    private boolean placeBlock(BlockPos pos) {
-    	BlockState state = SchematicWorldHandler.getSchematicWorld().getBlockState(pos);
-
+    private boolean placeBlock(BlockPos pos, BlockState state, BlockState currentState) {
 		Vec3d posVec = Vec3d.ofCenter(pos);
 
 		Direction playerShouldBeFacing = getFacingDirection(state);
 		Direction.Axis axis = availableAxis(state);
-		int half = getBlockHalf(state);
+		int half = getBlockHalf(state, currentState);
 
+		if (state.getBlock() instanceof SlabBlock) {
+			System.out.println("Slab half: " + half);
+		}
 //    	for (Property<?> prop : state.getProperties()) {
 //			System.out.println("Block " + state.getBlock().getName() + " has property " + prop.getName() + " with value " + state.get(prop).toString() + " class name " + state.get(prop).getClass().getName());
 //		}
