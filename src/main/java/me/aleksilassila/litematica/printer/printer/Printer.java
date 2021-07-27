@@ -11,7 +11,6 @@ import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionMa
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -41,6 +40,7 @@ public class Printer extends PrinterUtils {
 
 	private boolean shouldPlaceWater;
 	private boolean shouldPrintInAir;
+	private boolean shouldReplaceFluids;
 
 	public static class Queue {
 		public static BlockPos neighbor;
@@ -78,9 +78,11 @@ public class Printer extends PrinterUtils {
 
 		// Check if target block is empty
 		if (!shouldPlaceWater)
-			if (!currentState.isAir()) {
+			if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) {
 				if (!PrinterUtils.isDoubleSlab(requiredState)) return false;
 				else if (PrinterUtils.isDoubleSlab(currentState)) return false;
+			} else if (currentState.contains(FluidBlock.LEVEL)) {
+				if (currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids) return false;
 			}
 		else {
 			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return false;
@@ -133,6 +135,7 @@ public class Printer extends PrinterUtils {
 //		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
 		shouldPlaceWater = false;
 		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
+		shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
 		worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
 		forEachBlockInRadius:

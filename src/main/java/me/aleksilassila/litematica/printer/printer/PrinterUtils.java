@@ -3,9 +3,6 @@ package me.aleksilassila.litematica.printer.printer;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.fluid.FlowableFluid;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
 
@@ -147,7 +144,7 @@ public class PrinterUtils {
 	}
 
 	protected static boolean isFlowingBlock(BlockState state) {
-    	return state.contains(FlowableFluid.LEVEL) && state.get(FlowableFluid.LEVEL) > 0;
+    	return state.contains(FluidBlock.LEVEL) && state.get(FluidBlock.LEVEL) > 0;
 	}
 
     protected static boolean isDoubleSlab(BlockState state) {
