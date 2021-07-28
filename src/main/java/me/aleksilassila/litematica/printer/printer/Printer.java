@@ -11,6 +11,7 @@ import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionMa
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -214,9 +215,6 @@ public class Printer extends PrinterUtils {
 		if (state.getBlock() instanceof SlabBlock) {
 			System.out.println("Slab half: " + half);
 		}
-//    	for (Property<?> prop : state.getProperties()) {
-//			System.out.println("Block " + state.getBlock().getName() + " has property " + prop.getName() + " with value " + state.get(prop).toString() + " class name " + state.get(prop).getClass().getName());
-//		}
 
 		for (Direction side : Direction.values()) {
 			if (half == 1 && side.equals(Direction.DOWN)) continue;
@@ -243,7 +241,8 @@ public class Printer extends PrinterUtils {
 				hitVec = hitVec.add(0, -0.25, 0);
 			}
 
-			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, true);
+			boolean doubleChest = state.contains(ChestBlock.CHEST_TYPE) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
+			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, !doubleChest);
 
 			lastPlaced = new Date().getTime();
 			return true;
