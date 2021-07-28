@@ -11,6 +11,7 @@ import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionMa
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -40,6 +41,7 @@ public class Printer extends PrinterUtils {
 
 	private boolean shouldPlaceWater;
 	private boolean shouldPrintInAir;
+	private boolean shouldReplaceFluids;
 
 	public static class Queue {
 		public static BlockPos neighbor;
@@ -77,7 +79,12 @@ public class Printer extends PrinterUtils {
 
 		// Check if target block is empty
 		if (!shouldPlaceWater)
-			if (!currentState.isAir()) return false;
+			if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) {
+				if (!PrinterUtils.isDoubleSlab(requiredState)) return false;
+				else if (PrinterUtils.isDoubleSlab(currentState)) return false;
+			} else if (currentState.contains(FluidBlock.LEVEL)) {
+				if (currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids) return false;
+			}
 		else {
 			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return false;
 			if (!isWaterLogged(requiredState) && !currentState.isAir()) return false;
@@ -116,7 +123,7 @@ public class Printer extends PrinterUtils {
 			}
 		}
 
-		return placeBlock(pos);
+		return placeBlock(pos, requiredState, currentState);
 	}
 
     public void print() {
@@ -129,6 +136,7 @@ public class Printer extends PrinterUtils {
 //		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
 		shouldPlaceWater = false;
 		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
+		shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
 		worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
 		forEachBlockInRadius:
@@ -197,18 +205,16 @@ public class Printer extends PrinterUtils {
     	return -1;
 	}
 
-    private boolean placeBlock(BlockPos pos) {
-    	BlockState state = SchematicWorldHandler.getSchematicWorld().getBlockState(pos);
-
+    private boolean placeBlock(BlockPos pos, BlockState state, BlockState currentState) {
 		Vec3d posVec = Vec3d.ofCenter(pos);
 
 		Direction playerShouldBeFacing = getFacingDirection(state);
 		Direction.Axis axis = availableAxis(state);
-		int half = getBlockHalf(state);
+		int half = getBlockHalf(state, currentState);
 
-//    	for (Property<?> prop : state.getProperties()) {
-//			System.out.println("Block " + state.getBlock().getName() + " has property " + prop.getName() + " with value " + state.get(prop).toString() + " class name " + state.get(prop).getClass().getName());
-//		}
+		if (state.getBlock() instanceof SlabBlock) {
+			System.out.println("Slab half: " + half);
+		}
 
 		for (Direction side : Direction.values()) {
 			if (half == 1 && side.equals(Direction.DOWN)) continue;
@@ -235,7 +241,8 @@ public class Printer extends PrinterUtils {
 				hitVec = hitVec.add(0, -0.25, 0);
 			}
 
-			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, true);
+			boolean doubleChest = state.contains(ChestBlock.CHEST_TYPE) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
+			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, !doubleChest);
 
 			lastPlaced = new Date().getTime();
 			return true;

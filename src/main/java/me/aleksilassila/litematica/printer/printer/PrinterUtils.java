@@ -1,16 +1,26 @@
 package me.aleksilassila.litematica.printer.printer;
 
 import net.minecraft.block.*;
-import net.minecraft.state.property.IntProperty;
+import net.minecraft.block.enums.BlockHalf;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
 
 public class PrinterUtils {
-    protected static int getBlockHalf(BlockState state) {
-    	for (Property<?> prop : state.getProperties()) {
-			if (prop.getName().equals("type") || prop.getName().equals("half")) {
-				return state.get(prop).toString().equals("top") ? 1 : 0;
+    protected static int getBlockHalf(BlockState requiredState, BlockState currentState) {
+    	if (requiredState.contains(SlabBlock.TYPE)) {
+    		if (requiredState.get(SlabBlock.TYPE) == SlabType.DOUBLE) {
+    			if (currentState.contains(SlabBlock.TYPE))
+    				return currentState.get(SlabBlock.TYPE) == SlabType.TOP ? 0 : 1;
+    			else
+    				return 0;
+			} else {
+    			return requiredState.get(SlabBlock.TYPE) == SlabType.TOP ? 1 : 0;
 			}
+		} else if (requiredState.contains(StairsBlock.HALF)) {
+			return requiredState.get(StairsBlock.HALF) == BlockHalf.TOP ? 1 : 0;
+		} else if (requiredState.contains(TrapdoorBlock.HALF)) {
+    		return requiredState.get(TrapdoorBlock.HALF) == BlockHalf.TOP ? 1 : 0;
 		}
 
     	return -1;
@@ -126,26 +136,22 @@ public class PrinterUtils {
 	}
 
 	protected static Direction.Axis availableAxis(BlockState state) {
-    	if (state.getBlock() instanceof PillarBlock) {
-    		for (Property<?> prop : state.getProperties()) {
-    			if (state.get(prop) instanceof Direction.Axis) {
-    				return (Direction.Axis) state.get(prop);
-				}
-			}
+    	if (state.getBlock() instanceof PillarBlock && state.contains(PillarBlock.AXIS)) {
+    		return state.get(PillarBlock.AXIS);
 		}
 
     	return null;
 	}
 
 	protected static boolean isFlowingBlock(BlockState state) {
-		if (state.getMaterial().equals(Material.WATER) || state.getMaterial().equals(Material.LAVA)) {
-			for (Property<?> prop : state.getProperties()) {
-				if (prop instanceof IntProperty) {
-					if ((Integer) state.get(prop) > 0) return true;
-				}
-			}
-		}
+    	return state.contains(FluidBlock.LEVEL) && state.get(FluidBlock.LEVEL) > 0;
+	}
 
-		return false;
+    protected static boolean isDoubleSlab(BlockState state) {
+    	return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) == SlabType.DOUBLE;
+    }
+
+	protected static boolean isHalfSlab(BlockState state) {
+    	return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) != SlabType.DOUBLE;
 	}
 }

@@ -21,7 +21,8 @@ public class LitematicaMixinMod implements ModInitializer {
 //    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
     public static final ConfigBoolean PRINT_IN_AIR = new ConfigBoolean("printInAir",    false, "Whether or not the printer should place blocks without anything to build on.\nBe aware that some anti-cheat plugins might notice this.");
     public static final ConfigBoolean PRINT_MODE 	 = new ConfigBoolean("printingMode",  false, "Autobuild / print loaded selection.\nBe aware that some servers and anticheat plugins do not allow printing.");
-    
+    public static final ConfigBoolean REPLACE_FLUIDS = new ConfigBoolean("replaceFluids", false, "Whether or not fluid source blocks should be replaced by the printer.");
+
 	public static final ImmutableList<IConfigBase> betterConfigList = ImmutableList.of(
 			Configs.Generic.AREAS_PER_WORLD,
 			//BETTER_RENDER_ORDER,
@@ -51,7 +52,8 @@ public class LitematicaMixinMod implements ModInitializer {
             PRINTING_RANGE,
 //            PRINT_WATER,
 			PRINT_IN_AIR,
-            PRINT_MODE
+            PRINT_MODE,
+			REPLACE_FLUIDS
 	);
 	
 	// Hotkeys
