@@ -13,6 +13,8 @@ To install the mod, first download the original Litematica and MaLiLib from [her
 You will also need [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/).
 Finally, move the printer's .jar from [releases](https://github.com/aleksilassila/litematica-printing/releases/latest) to your mods folder.
 
+![Demo](printer_demo.gif)
+
 How To Use
 ----------
 Using the printer is straightforward: You can toggle the feature by pressing `M + O` by default. To configure variables such as
