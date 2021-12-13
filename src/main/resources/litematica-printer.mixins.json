@@ -10,7 +10,8 @@
     "GuiConfigsMixin",
 	"InputHandlerMixin",
 	"MixinClientPlayerEntity",
-	"MixinClientPlayerInteractionManager"
+	"MixinClientPlayerInteractionManager",
+    "ClientPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
