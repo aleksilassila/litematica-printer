@@ -171,6 +171,8 @@ public class Printer extends PrinterUtils {
 		BlockState currentState = clientWorld.getBlockState(pos);
 		BlockState requiredState = worldSchematic.getBlockState(pos);
 
+		if (shouldClickBlock(currentState, requiredState)) return false;
+
 		// FIXME water and lava
 		// Check if something should be placed in target block
 		if (requiredState.isAir()
