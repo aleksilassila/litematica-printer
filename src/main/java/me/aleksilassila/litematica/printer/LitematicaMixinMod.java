@@ -5,7 +5,6 @@ import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.config.Hotkeys;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
-import fi.dy.masa.malilib.config.options.ConfigDouble;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.hotkeys.KeyCallbackToggleBooleanConfigWithMessage;
@@ -16,7 +15,7 @@ import java.util.List;
 public class LitematicaMixinMod implements ModInitializer {
 
 	// Config settings
-	public static final ConfigDouble  PRINTING_DELAY = new ConfigDouble( "printingDelay", 0.2,   0.0, 1.0, "Delay between printing blocks.\nDo not set to 0 if you are playing on a server.");
+	public static final ConfigInteger PRINT_INTERVAL = new ConfigInteger( "printInterval", 4,   2, 20, "Print interval in game ticks. Lower values mean faster printing speed.\nIf the printer creates \"ghost blocks\", raise this value.");
     public static final ConfigInteger PRINTING_RANGE = new ConfigInteger("printingRange", 2,     1,   6,   "Printing block place range\nLower values are recommended for servers.");
 //    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
     public static final ConfigBoolean PRINT_IN_AIR = new ConfigBoolean("printInAir",    false, "Whether or not the printer should place blocks without anything to build on.\nBe aware that some anti-cheat plugins might notice this.");
@@ -48,7 +47,7 @@ public class LitematicaMixinMod implements ModInitializer {
 			Configs.Generic.PICK_BLOCKABLE_SLOTS,
 			Configs.Generic.TOOL_ITEM,
 
-			PRINTING_DELAY,
+			PRINT_INTERVAL,
             PRINTING_RANGE,
 //            PRINT_WATER,
 			PRINT_IN_AIR,

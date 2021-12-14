@@ -20,14 +20,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-
-import java.util.Date;
 
 public class Printer extends PrinterUtils {
     private final MinecraftClient client;
@@ -35,7 +32,8 @@ public class Printer extends PrinterUtils {
     private final ClientWorld clientWorld;
     private WorldSchematic worldSchematic;
 
-	public long lastPlaced = new Date().getTime();
+	int tick = 0;
+	static boolean blockLooks = false;
 
 	public boolean lockCamera = false;
 
@@ -43,17 +41,61 @@ public class Printer extends PrinterUtils {
 	private boolean shouldPrintInAir;
 	private boolean shouldReplaceFluids;
 
+	public static boolean shouldBlockLookPackets() {
+		return blockLooks;
+	}
+
 	public static class Queue {
 		public static BlockPos neighbor;
 		public static Direction side;
 		public static Vec3d hitVec;
 		public static boolean useShift;
+		public static Direction playerShouldBeFacing;
 	}
 
 	public Printer(MinecraftClient client, ClientPlayerEntity playerEntity, ClientWorld clientWorld) {
         this.client = client;
         this.playerEntity = playerEntity;
         this.clientWorld = clientWorld;
+    }
+
+    public void onTick() {
+		tick = tick == 0x7fffffff ? 0 : tick + 1;
+//		lockCamera = false;
+//		sendQueuedPackets();
+
+		int tickRate = LitematicaMixinMod.PRINT_INTERVAL.getIntegerValue();
+//		if (tick % tickRate == tickRate / 2) {
+//			sendQueuedLookPacket();
+//			return;
+//		} else
+		if (tick % tickRate != 0) {
+			return;
+		}
+
+		int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
+//		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
+		shouldPlaceWater = false;
+		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
+		shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
+		worldSchematic = SchematicWorldHandler.getSchematicWorld();
+
+		// FIXME if is in range
+		sendQueuedPlacement();
+
+		// forEachBlockInRadius:
+		for (int y = -range; y < range + 1; y++) {
+			for (int x = -range; x < range + 1; x++) {
+				for (int z = -range; z < range + 1; z++) {
+					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
+
+					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
+					if (shouldSkipPosition(pos)) continue;
+
+					if (processBlock(pos)) return;
+				}
+			}
+		}
     }
 
 	/**
@@ -67,7 +109,6 @@ public class Printer extends PrinterUtils {
 		if (shouldClickBlock(currentState, requiredState)) {
 			addQueuedPacket(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
 
-			lastPlaced = new Date().getTime();
 			return true;
 		}
 
@@ -126,73 +167,33 @@ public class Printer extends PrinterUtils {
 		return placeBlock(pos, requiredState, currentState);
 	}
 
-    public void print() {
-		lockCamera = false;
-		sendQueuedPackets();
+	public boolean shouldSkipPosition(BlockPos pos) {
+		BlockState currentState = clientWorld.getBlockState(pos);
+		BlockState requiredState = worldSchematic.getBlockState(pos);
 
-		if (new Date().getTime() < lastPlaced + 1000.0 * LitematicaMixinMod.PRINTING_DELAY.getDoubleValue()) return;
+		if (shouldClickBlock(currentState, requiredState)) return false;
 
-		int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
-//		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
-		shouldPlaceWater = false;
-		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
-		shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
-		worldSchematic = SchematicWorldHandler.getSchematicWorld();
+		// FIXME water and lava
+		// Check if something should be placed in target block
+		if (requiredState.isAir()
+				|| requiredState.getMaterial().equals(Material.WATER)
+				|| requiredState.getMaterial().equals(Material.LAVA)) return true;
 
-		forEachBlockInRadius:
-		for (int y = -range; y < range + 1; y++) {
-			for (int x = -range; x < range + 1; x++) {
-				for (int z = -range; z < range + 1; z++) {
-					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
-
-					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
-
-
-					if (processBlock(pos)) return;
-				}
+		// Check if target block is empty
+		if (!shouldPlaceWater)
+			if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) {
+				if (!PrinterUtils.isDoubleSlab(requiredState)) return true;
+				else if (PrinterUtils.isDoubleSlab(currentState)) return true;
+			} else if (currentState.contains(FluidBlock.LEVEL)) {
+				if (currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids) return true;
 			}
+		else {
+			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return true;
+			if (!isWaterLogged(requiredState) && !currentState.isAir()) return true;
 		}
-    }
 
-    public void addQueuedPacket(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
-		if (Queue.neighbor != null) return;
-
-		lockCamera = true;
-
-		sendLookPacket(playerShouldBeFacing);
-
-		Queue.neighbor = neighbor;
-		Queue.side = side;
-		Queue.hitVec = hitVec;
-		Queue.useShift = useShift;
-	}
-
-	public void sendQueuedPackets() {
-		if (Queue.neighbor != null) {
-			boolean wasSneaking = playerEntity.isSneaking();
-
-			if (Queue.useShift && !wasSneaking)
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-			else if (!Queue.useShift && wasSneaking)
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-
-			((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(Queue.neighbor,
-					Queue.side.getOpposite(), Queue.hitVec);
-
-			if (Queue.useShift && !wasSneaking)
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-			else if (!Queue.useShift && wasSneaking)
-				playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-
-			Queue.neighbor = null;
-			Queue.hitVec = null;
-			Queue.side = null;
-		}
-	}
-
-	private void swapHandWithSlot(int slot) {
-		ItemStack stack = Implementation.getInventory(playerEntity).getStack(slot);
-		InventoryUtils.setPickedItemToHand(stack, client);
+		// Check if can be placed in world
+		return !requiredState.canPlaceAt(clientWorld, pos);
 	}
 
 	private int getBlockInventorySlot(Item item) {
@@ -244,26 +245,10 @@ public class Printer extends PrinterUtils {
 			boolean doubleChest = state.contains(ChestBlock.CHEST_TYPE) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
 			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, !doubleChest);
 
-			lastPlaced = new Date().getTime();
 			return true;
 		}
 
 		return false;
-	}
-
-	private void sendLookPacket(Direction playerShouldBeFacing) {
-    	if (playerShouldBeFacing != null) {
-			float yaw = Implementation.getYaw(playerEntity);
-			float pitch = Implementation.getPitch(playerEntity);
-
-			if (playerShouldBeFacing.getAxis().isHorizontal()) {
-				yaw = playerShouldBeFacing.asRotation();
-			} else {
-				pitch = playerShouldBeFacing == Direction.DOWN ? 90 : -90;
-			}
-
-			Implementation.sendLookPacket(playerEntity, yaw, pitch);
-		}
 	}
 
     private Item requiredItemInHand(BlockState requiredState, BlockState currentState) {
@@ -276,42 +261,6 @@ public class Printer extends PrinterUtils {
 			return new ItemStack(requiredState.getBlock()).getItem();
 	}
 
-	private boolean canBeClicked(BlockPos pos)
-	{
-		return getOutlineShape(pos) != VoxelShapes.empty();
-	}
-
-	private boolean needsShift(BlockState state, BlockHitResult blockHitResult) {
-		// FIXME needShift
-//		Block block = state.getBlock();
-//
-//		ActionResult actionResult = state.onUse(client.world, client.player, Hand.MAIN_HAND, blockHitResult);
-//		System.out.println("Result: " + actionResult.name());
-//		if (actionResult.isAccepted()) {
-//			System.out.println("ACCEPTED OR SOMETHING");
-//			return true;
-//		}
-
-
-
-//		return block instanceof DoorBlock
-//				|| block instanceof ChestBlock
-//				|| block instanceof CraftingTableBlock
-//				|| block instanceof AnvilBlock
-//				|| block instanceof AbstractFurnaceBlock
-//				|| block instanceof BarrelBlock
-//				|| block instanceof ChestBlock
-//				|| block instanceof BedBlock
-//				|| block instanceof BellBlock
-//				|| block instanceof BrewingStandBlock
-//				|| block instanceof ChestBlock
-//				|| block instanceof ChestBlock
-//				|| block instanceof ChestBlock
-//				|| block instanceof TrapdoorBlock;
-
-		return true;
-	}
-
 	private VoxelShape getOutlineShape(BlockPos pos)
 	{
 		return getState(pos).getOutlineShape(clientWorld, pos);
@@ -321,4 +270,57 @@ public class Printer extends PrinterUtils {
 	{
 		return clientWorld.getBlockState(pos);
 	}
+
+	private void sendQueuedPlacement() {
+		if (Queue.neighbor == null) return;
+
+		boolean wasSneaking = playerEntity.isSneaking();
+
+		if (Queue.useShift && !wasSneaking)
+			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+		else if (!Queue.useShift && wasSneaking)
+			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+
+		((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(Queue.neighbor,
+				Queue.side.getOpposite(), Queue.hitVec);
+
+		if (Queue.useShift && !wasSneaking)
+			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+		else if (!Queue.useShift && wasSneaking)
+			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+
+		Queue.neighbor = null;
+		blockLooks = false;
+	}
+
+	public void addQueuedPacket(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
+
+		// Skip if last packet hasn't been sent yet.
+		if (Queue.neighbor != null) return;
+
+		if (playerShouldBeFacing != null) {
+			Implementation.sendLookPacket(playerEntity, playerShouldBeFacing);
+
+			blockLooks = true;
+		} else {
+			blockLooks = false;
+		}
+
+		Queue.playerShouldBeFacing = playerShouldBeFacing;
+		Queue.neighbor = neighbor;
+		Queue.side = side;
+		Queue.hitVec = hitVec;
+		Queue.useShift = useShift;
+	}
+
+	private void swapHandWithSlot(int slot) {
+		ItemStack stack = Implementation.getInventory(playerEntity).getStack(slot);
+		InventoryUtils.setPickedItemToHand(stack, client);
+	}
+
+	private boolean canBeClicked(BlockPos pos)
+	{
+		return getOutlineShape(pos) != VoxelShapes.empty();
+	}
+
 }
