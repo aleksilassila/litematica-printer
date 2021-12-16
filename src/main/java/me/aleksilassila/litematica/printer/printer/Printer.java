@@ -2,19 +2,20 @@ package me.aleksilassila.litematica.printer.printer;
 
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
-import fi.dy.masa.litematica.util.ItemUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
-import fi.dy.masa.malilib.gui.GuiBase;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.FluidBlock;
+import net.minecraft.block.Material;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -35,9 +36,6 @@ public class Printer extends PrinterUtils {
 	int tick = 0;
 	static boolean blockLooks = false;
 
-	public boolean lockCamera = false;
-
-	private boolean shouldPlaceWater;
 	private boolean shouldPrintInAir;
 	private boolean shouldReplaceFluids;
 
@@ -60,27 +58,18 @@ public class Printer extends PrinterUtils {
     }
 
     public void onTick() {
-		tick = tick == 0x7fffffff ? 0 : tick + 1;
-//		lockCamera = false;
-//		sendQueuedPackets();
-
 		int tickRate = LitematicaMixinMod.PRINT_INTERVAL.getIntegerValue();
-//		if (tick % tickRate == tickRate / 2) {
-//			sendQueuedLookPacket();
-//			return;
-//		} else
+
+		tick = tick == 0x7fffffff ? 0 : tick + 1;
 		if (tick % tickRate != 0) {
 			return;
 		}
 
 		int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
-//		shouldPlaceWater = LitematicaMixinMod.PRINT_WATER.getBooleanValue();
-		shouldPlaceWater = false;
-		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
+//		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 		shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
 		worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-		// FIXME if is in range
 		sendQueuedPlacement();
 
 		// forEachBlockInRadius:
@@ -88,29 +77,48 @@ public class Printer extends PrinterUtils {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
 					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
+					BlockState currentState = clientWorld.getBlockState(pos);
+					BlockState requiredState = worldSchematic.getBlockState(pos);
 
 					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
-					if (shouldSkipPosition(pos)) continue;
 
-					if (processBlock(pos)) return;
+					PlacementGuide.Placement placement = PlacementGuide.getPlacement(requiredState);
+					ClickGuide.Click click = ClickGuide.shouldClickBlock(requiredState, currentState);
+
+					if (click.click && (click.item == null || playerHasAccessToItem(click.item))) {
+						sendClick(pos, Vec3d.ofCenter(pos));
+						switchToItem(click.item);
+						return;
+					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(requiredState.getBlock().asItem())) {
+						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
+						Direction side = placement.side == null ? Direction.DOWN : placement.side;
+						BlockPos neighbor = pos; // If placing in air, there's no neighbor
+
+						Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(side.getVector()).multiply(0.5));
+
+						if (placement.hitModifier != null) {
+							hit = hit.add(placement.hitModifier);
+						}
+
+						queuePlacement(neighbor,
+								side,
+								hit,
+								placement.look,
+								!doubleChest);
+
+						switchToItem(requiredState.getBlock().asItem());
+						return;
+					}
 				}
 			}
 		}
     }
 
-	/**
-	 * @return true if block was placed.
-	 */
-	public boolean processBlock(BlockPos pos) {
-		BlockState currentState = clientWorld.getBlockState(pos);
-		BlockState requiredState = worldSchematic.getBlockState(pos);
+	private boolean shouldPrintHere(BlockPos position, PlacementGuide.Placement placement) {
+		BlockState currentState = clientWorld.getBlockState(position);
+		BlockState requiredState = worldSchematic.getBlockState(position);
 
-		// Check if block should be just clicked (repeaters etc.)
-		if (shouldClickBlock(currentState, requiredState)) {
-			queuePlacement(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
-
-			return true;
-		}
+		if (placement.skip) return false;
 
 		// FIXME water and lava
 		// Check if something should be placed in target block
@@ -119,159 +127,47 @@ public class Printer extends PrinterUtils {
 				|| requiredState.getMaterial().equals(Material.LAVA)) return false;
 
 		// Check if target block is empty
-		if (!shouldPlaceWater)
-			if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) {
-				if (!PrinterUtils.isDoubleSlab(requiredState)) return false;
-				else if (PrinterUtils.isDoubleSlab(currentState)) return false;
-			} else if (currentState.contains(FluidBlock.LEVEL)) {
-				if (currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids) return false;
-			}
-		else {
-			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return false;
-			if (!isWaterLogged(requiredState) && !currentState.isAir()) return false;
+		if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) { //current = solid
+			// Don't skip unfinished double slabs
+			return PrinterUtils.isDoubleSlab(requiredState) && PrinterUtils.isHalfSlab(currentState);
+		} else if (currentState.contains(FluidBlock.LEVEL)) { // current = fluid
+			return currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids;
 		}
 
 		// Check if can be placed in world
-		if (!requiredState.canPlaceAt(clientWorld, pos)) return false;
-
-		// Check if player is holding right block
-		Item itemInHand = Implementation.getInventory(playerEntity).getMainHandStack().getItem();
-		if (!itemInHand.equals(requiredItemInHand(requiredState, currentState))) {
-			if (Implementation.getAbilities(playerEntity).creativeMode) {
-				ItemStack required = new ItemStack(requiredItemInHand(requiredState, currentState));
-				BlockEntity te = clientWorld.getBlockEntity(pos);
-
-				// The creative mode pick block with NBT only works correctly
-				// if the server world doesn't have a TileEntity in that position.
-				// Otherwise it would try to write whatever that TE is into the picked ItemStack.
-				if (GuiBase.isCtrlDown() && te != null && clientWorld.isAir(pos))
-				{
-					ItemUtils.storeTEInStack(required, te);
-				}
-
-				InventoryUtils.setPickedItemToHand(required, client);
-				client.interactionManager.clickCreativeStack(playerEntity.getStackInHand(Hand.MAIN_HAND),
-						36 + Implementation.getInventory(playerEntity).selectedSlot);
-
-			} else {
-				int slot = getBlockInventorySlot(requiredItemInHand(requiredState, currentState));
-
-				if (slot == -1) {
-					return false;
-				}
-
-				swapHandWithSlot(slot);
-			}
-		}
-
-		return attemptPlacement(pos, requiredState, currentState);
+		return requiredState.canPlaceAt(clientWorld, position);
 	}
 
-	public boolean shouldSkipPosition(BlockPos pos) {
-		BlockState currentState = clientWorld.getBlockState(pos);
-		BlockState requiredState = worldSchematic.getBlockState(pos);
+	private void switchToItem(Item item) {
+		PlayerInventory inv = Implementation.getInventory(playerEntity);
+		if (inv.getMainHandStack().getItem() == item) return;
 
-		if (shouldClickBlock(currentState, requiredState)) return false;
-
-		// FIXME water and lava
-		// Check if something should be placed in target block
-		if (requiredState.isAir()
-				|| requiredState.getMaterial().equals(Material.WATER)
-				|| requiredState.getMaterial().equals(Material.LAVA)) return true;
-
-		// Check if target block is empty
-		if (!shouldPlaceWater)
-			if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) {
-				if (!PrinterUtils.isDoubleSlab(requiredState)) return true;
-				else if (PrinterUtils.isDoubleSlab(currentState)) return true;
-			} else if (currentState.contains(FluidBlock.LEVEL)) {
-				if (currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids) return true;
+		if (Implementation.getAbilities(playerEntity).creativeMode) {
+			InventoryUtils.setPickedItemToHand(new ItemStack(item), client);
+			client.interactionManager.clickCreativeStack(client.player.getStackInHand(Hand.MAIN_HAND), 36 + inv.selectedSlot);
+		} else {
+			int slot = 0;
+			for (int i = 0; i < inv.size(); i++) {
+				if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
+					slot = i;
 			}
+
+			swapHandWithSlot(slot);
+		}
+	}
+
+	private boolean playerHasAccessToItem(Item item) {
+		if (item == null) return false;
+		if (Implementation.getAbilities(playerEntity).creativeMode) return true;
 		else {
-			if (isWaterLogged(requiredState) && isWaterLogged(currentState)) return true;
-			if (!isWaterLogged(requiredState) && !currentState.isAir()) return true;
+			Inventory inv = Implementation.getInventory(playerEntity);
+			for (int i = 0; i < inv.size(); i++) {
+				if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
+					return true;
+			}
 		}
 
-		// Check if can be placed in world
-		return !requiredState.canPlaceAt(clientWorld, pos);
-	}
-
-	private int getBlockInventorySlot(Item item) {
-    	Inventory inv = Implementation.getInventory(playerEntity);
-
-    	for (int slot = 0; slot < inv.size(); slot++) {
-    		if (inv.getStack(slot).getItem().equals(item)) return slot;
-		}
-
-    	return -1;
-	}
-
-    private boolean attemptPlacement(BlockPos pos, BlockState requiredState, BlockState currentState) {
-		PlacementGuide.Placement placement = PlacementGuide.getPlacement(requiredState);
-
-		if (placement.skip) return false;
-
-		boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
-		Direction side = placement.side == null ? Direction.DOWN : placement.side;
-		BlockPos neighbor = pos; // If placing in air, there's no neighbor
-
-		// FIXME now it prints in air all the time
-//		if (!shouldPrintInAir) {
-//			if (placement.side == null) {
-//				if (!canBeClicked(pos.offset(side))) {
-//					for (Direction dir : Direction.values()) {
-//						if (canBeClicked(pos.offset(side))) {
-//
-//						}
-//					}
-//				} else {w
-//
-//				}
-//
-//				for (Direction side : Direction.values()) {
-//					if (canBeClicked(pos.offset(side))) {
-//						addQueuedPacket(pos.offset(side),
-//								side,
-//								hit,
-//								placement.look,
-//								!doubleChest);
-//						return true;
-//					}
-//				}
-//			} else {
-//				if (canBeClicked(pos.offset(placement.side))) {
-//					addQueuedPacket(pos.offset(placement.side),
-//							placement.side,
-//							hit,
-//							placement.look,
-//							!doubleChest);
-//					return true;
-//				}
-//			}
-//		}
-
-		Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(side.getVector()).multiply(0.5));
-
-		if (placement.hitModifier != null) {
-			hit = hit.add(placement.hitModifier);
-		}
-
-		queuePlacement(neighbor,
-				side,
-				hit,
-				placement.look,
-				!doubleChest);
-		return true;
-	}
-
-    private Item requiredItemInHand(BlockState requiredState, BlockState currentState) {
-//		// If block should be waterlogged
-//		if (!currentState.isAir() && isWaterLogged(requiredState))
-//			return Items.WATER_BUCKET;
-//		else if (requiredState.getBlock().equals(Blocks.WATER))
-//			return Items.WATER_BUCKET;
-//		else
-			return new ItemStack(requiredState.getBlock()).getItem();
+		return false;
 	}
 
 	private VoxelShape getOutlineShape(BlockPos pos)
@@ -306,13 +202,18 @@ public class Printer extends PrinterUtils {
 		blockLooks = false;
 	}
 
+	private void sendClick(BlockPos neighbor, Vec3d hitVec) {
+		((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(neighbor,
+						Direction.UP, hitVec);
+	}
+
 	/**
 	 * Adds a placement packet to queue
 	 * @param neighbor Neighboring block to be clicked
 	 * @param side Direction where the neighboring block is
 	 * @param hitVec Position where the player would click
 	 */
-	public void queuePlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
+	private void queuePlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
 
 		// Skip if last packet hasn't been sent yet.
 		if (Queue.neighbor != null) return;

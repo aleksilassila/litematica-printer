@@ -30,6 +30,8 @@ public class ClientPlayNetworkHandlerMixin {
             }
 
             return;
+        } else {
+
         }
     }
 }

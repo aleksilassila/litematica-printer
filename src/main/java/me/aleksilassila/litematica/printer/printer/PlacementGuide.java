@@ -6,8 +6,6 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.WorldView;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum PlacementGuide {
@@ -21,7 +19,7 @@ public enum PlacementGuide {
     ANVIL(AnvilBlock.class),
     HOPPER(HopperBlock.class),
     WALLMOUNTED(LeverBlock.class, AbstractButtonBlock.class),
-    GRINDSTONE(GrindstoneBlock.class),
+//    GRINDSTONE(GrindstoneBlock.class),
     GATE(FenceGateBlock.class),
     CAMPFIRE(CampfireBlock.class),
     SHULKER(ShulkerBoxBlock.class),
@@ -29,6 +27,8 @@ public enum PlacementGuide {
     BELL(BellBlock.class),
     AMETHYST(AmethystClusterBlock.class),
     DOOR(DoorBlock.class),
+    COCOA(CocoaBlock.class),
+    SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, AbstractLichenBlock.class, VineBlock.class),
     DEFAULT;
 
     private final Class<?>[] matchClasses;
@@ -51,7 +51,7 @@ public enum PlacementGuide {
 
     public static Placement getPlacement(BlockState requiredState) {
         switch (getGuide(requiredState)) {
-            case TORCH, ROD, AMETHYST -> { // FIXME check if the wall exists?
+            case WALLTORCH, ROD, AMETHYST -> { // FIXME check if the wall exists?
                 return new Placement(((Direction) getPropertyByName(requiredState, "FACING")).getOpposite(),
                         null,
                         null);
@@ -82,8 +82,8 @@ public enum PlacementGuide {
                         null,
                         requiredState.get(AnvilBlock.FACING).rotateYCounterclockwise());
             }
-            case HOPPER -> {
-                return new Placement(requiredState.get(HopperBlock.FACING),
+            case HOPPER, COCOA -> {
+                return new Placement((Direction) getPropertyByName(requiredState, "FACING"),
                         null,
                         null);
             }
@@ -160,6 +160,9 @@ public enum PlacementGuide {
                         hitModifier,
                         requiredState.get(DoorBlock.FACING));
             }
+            case SKIP -> {
+                return new Placement();
+            }
             default -> { // Try to guess how the rest of the blocks are placed.
                 Direction look = null;
 
@@ -225,39 +228,4 @@ public enum PlacementGuide {
             this.skip = true;
         }
     }
-//
-//    public enum PlacementSide {
-//        FORWARD,
-//        BACKWARDS,
-//        RIGHT,
-//        LEFT,
-//        UP,
-//        DOWN,
-//        UNDEFINED;
-//    }
-//
-//    private enum PlacementHalf {
-//        TOP,
-//        BOTTOM,
-//        UNDEFINED;
-//    }
-//
-//    public enum PlacementLookDirection {
-//        FORWARD,
-//        BACKWARDS,
-//        RIGHT,
-//        LEFT,
-//        UP,
-//        DOWN,
-//        UNDEFINED;
-//    }
 }
-/*
-
-PlacementGuide.getPlacement(requiredState)
-
--> requiredState
-Block class, State
-return where to click
-
- */
