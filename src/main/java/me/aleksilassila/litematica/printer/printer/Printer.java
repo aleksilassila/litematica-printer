@@ -224,7 +224,7 @@ public class Printer extends PrinterUtils {
 //
 //						}
 //					}
-//				} else {
+//				} else {w
 //
 //				}
 //
@@ -252,12 +252,8 @@ public class Printer extends PrinterUtils {
 
 		Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(side.getVector()).multiply(0.5));
 
-		if (side.getAxis() != Direction.Axis.Y) {
-			if (placement.half == Direction.UP) {
-				hit = hit.add(0, 0.25, 0);
-			} else if (placement.half == Direction.DOWN) {
-				hit = hit.add(0, -0.25, 0);
-			}
+		if (placement.hitModifier != null) {
+			hit = hit.add(placement.hitModifier);
 		}
 
 		queuePlacement(neighbor,

@@ -1,13 +1,12 @@
 package me.aleksilassila.litematica.printer.printer;
 
 import net.minecraft.block.*;
-import net.minecraft.block.enums.BedPart;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.block.enums.WallMountLocation;
+import net.minecraft.block.enums.*;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,11 +20,15 @@ public enum PlacementGuide {
     PILLAR(PillarBlock.class),
     ANVIL(AnvilBlock.class),
     HOPPER(HopperBlock.class),
+    WALLMOUNTED(LeverBlock.class, AbstractButtonBlock.class),
     GRINDSTONE(GrindstoneBlock.class),
     GATE(FenceGateBlock.class),
     CAMPFIRE(CampfireBlock.class),
     SHULKER(ShulkerBoxBlock.class),
     BED(BedBlock.class),
+    BELL(BellBlock.class),
+    AMETHYST(AmethystClusterBlock.class),
+    DOOR(DoorBlock.class),
     DEFAULT;
 
     private final Class<?>[] matchClasses;
@@ -48,25 +51,20 @@ public enum PlacementGuide {
 
     public static Placement getPlacement(BlockState requiredState) {
         switch (getGuide(requiredState)) {
-            case ROD -> {
-                return new Placement(requiredState.get(RodBlock.FACING),
-                        null,
-                        null);
-            }
-            case WALLTORCH -> { // FIXME check if the wall exists?
-                return new Placement(requiredState.get(WallTorchBlock.FACING).getOpposite(),
+            case TORCH, ROD, AMETHYST -> { // FIXME check if the wall exists?
+                return new Placement(((Direction) getPropertyByName(requiredState, "FACING")).getOpposite(),
                         null,
                         null);
             }
             case SLAB -> {
                 Direction half = requiredState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? Direction.DOWN : Direction.UP;
                 return new Placement(half,
-                        half,
+                        null,
                         null);
             }
             case STAIR -> {
                 return new Placement(requiredState.get(StairsBlock.FACING), // FIXME before shipping
-                        getHalf(requiredState.get(StairsBlock.HALF)),
+                        Vec3d.of(getHalf(requiredState.get(StairsBlock.HALF)).getVector()).multiply(0.25), //getHalf(requiredState.get(StairsBlock.HALF)),
                         requiredState.get(StairsBlock.FACING));
             }
             case TRAPDOOR -> {
@@ -82,29 +80,41 @@ public enum PlacementGuide {
             case ANVIL -> {
                 return new Placement(null,
                         null,
-                        requiredState.get(AnvilBlock.FACING).rotateCounterclockwise(Direction.Axis.X)); // FIXME test
+                        requiredState.get(AnvilBlock.FACING).rotateYCounterclockwise());
             }
             case HOPPER -> {
                 return new Placement(requiredState.get(HopperBlock.FACING),
                         null,
                         null);
             }
-            case GRINDSTONE -> {
-                Direction look = requiredState.get(GrindstoneBlock.FACING);
-                Direction side = switch (requiredState.get(GrindstoneBlock.FACE)) {
+            case WALLMOUNTED -> {
+                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
                     case FLOOR -> Direction.DOWN;
-                    case WALL -> requiredState.get(GrindstoneBlock.FACING).getOpposite();
                     case CEILING -> Direction.UP;
+                    default -> (Direction) getPropertyByName(requiredState, "FACING");
                 };
 
-                if (requiredState.get(GrindstoneBlock.FACE) == WallMountLocation.WALL) {
-                    look = look.getOpposite();
-                }
+                Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
+                        null : (Direction) getPropertyByName(requiredState, "FACING");
 
-                return new Placement(side, // FIXME test
+                return new Placement(side,
                         null,
                         look);
             }
+//            case GRINDSTONE -> { // Tese are broken
+//                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
+//                    case FLOOR -> Direction.DOWN;
+//                    case CEILING -> Direction.UP;
+//                    default -> (Direction) getPropertyByName(requiredState, "FACING");
+//                };
+//
+//                Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
+//                        null : (Direction) getPropertyByName(requiredState, "FACING");
+//
+//                return new Placement(Direction.DOWN, // FIXME test
+//                        Vec3d.of(side.getVector()).multiply(0.5),
+//                        look);
+//            }
             case GATE, CAMPFIRE -> {
                 return new Placement(null,
                         null,
@@ -121,6 +131,34 @@ public enum PlacementGuide {
                 } else {
                     return new Placement(null, null, requiredState.get(BedBlock.FACING));
                 }
+            }
+            case BELL -> {
+                Direction side = switch (requiredState.get(BellBlock.ATTACHMENT)) {
+                    case FLOOR -> Direction.DOWN;
+                    case CEILING -> Direction.UP;
+                    default -> requiredState.get(BellBlock.FACING);
+                };
+
+                Direction look = requiredState.get(BellBlock.ATTACHMENT) != Attachment.SINGLE_WALL &&
+                        requiredState.get(BellBlock.ATTACHMENT) != Attachment.DOUBLE_WALL ?
+                        requiredState.get(BellBlock.FACING) : null;
+
+                return new Placement(side,
+                        null,
+                        look);
+            }
+            case DOOR -> {
+                Direction hinge = requiredState.get(DoorBlock.FACING);
+                if (requiredState.get(DoorBlock.HINGE) == DoorHinge.RIGHT) {
+                    hinge = hinge.rotateYClockwise();
+                } else {
+                    hinge = hinge.rotateYCounterclockwise();
+                }
+
+                Vec3d hitModifier = Vec3d.of(hinge.getVector()).multiply(0.25);
+                return new Placement(Direction.DOWN,
+                        hitModifier,
+                        requiredState.get(DoorBlock.FACING));
             }
             default -> { // Try to guess how the rest of the blocks are placed.
                 Direction look = null;
@@ -162,24 +200,24 @@ public enum PlacementGuide {
         @Nullable
         public final Direction side;
         @Nullable
-        public final Direction half;
+        public final Vec3d hitModifier;
         @Nullable
         public final Direction look;
 
         final boolean sideIsAxis;
         boolean skip;
 
-        public Placement(@Nullable Direction side, @Nullable Direction half, @Nullable Direction look, boolean sideIsAxis) {
+        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look, boolean sideIsAxis) {
             this.side = side;
-            this.half = half;
+            this.hitModifier = hitModifier;
             this.look = look;
 
             this.sideIsAxis = sideIsAxis;
             this.skip = false;
         }
 
-        public Placement(@Nullable Direction side, @Nullable Direction half, @Nullable Direction look) {
-            this(side, half, look, false);
+        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look) {
+            this(side, hitModifier, look, false);
         }
 
         public Placement() {
