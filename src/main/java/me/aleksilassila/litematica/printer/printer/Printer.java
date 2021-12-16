@@ -107,7 +107,7 @@ public class Printer extends PrinterUtils {
 
 		// Check if block should be just clicked (repeaters etc.)
 		if (shouldClickBlock(currentState, requiredState)) {
-			addQueuedPacket(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
+			queuePlacement(pos, Direction.UP, Vec3d.ofCenter(pos), null, false);
 
 			return true;
 		}
@@ -164,7 +164,7 @@ public class Printer extends PrinterUtils {
 			}
 		}
 
-		return placeBlock(pos, requiredState, currentState);
+		return attemptPlacement(pos, requiredState, currentState);
 	}
 
 	public boolean shouldSkipPosition(BlockPos pos) {
@@ -206,49 +206,66 @@ public class Printer extends PrinterUtils {
     	return -1;
 	}
 
-    private boolean placeBlock(BlockPos pos, BlockState state, BlockState currentState) {
-		Vec3d posVec = Vec3d.ofCenter(pos);
+    private boolean attemptPlacement(BlockPos pos, BlockState requiredState, BlockState currentState) {
+		PlacementGuide.Placement placement = PlacementGuide.getPlacement(requiredState);
 
-		Direction playerShouldBeFacing = getFacingDirection(state);
-		Direction.Axis axis = availableAxis(state);
-		int half = getBlockHalf(state, currentState);
+		if (placement.skip) return false;
 
-		if (state.getBlock() instanceof SlabBlock) {
-			System.out.println("Slab half: " + half);
+		boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
+		Direction side = placement.side == null ? Direction.DOWN : placement.side;
+		BlockPos neighbor = pos; // If placing in air, there's no neighbor
+
+		// FIXME now it prints in air all the time
+//		if (!shouldPrintInAir) {
+//			if (placement.side == null) {
+//				if (!canBeClicked(pos.offset(side))) {
+//					for (Direction dir : Direction.values()) {
+//						if (canBeClicked(pos.offset(side))) {
+//
+//						}
+//					}
+//				} else {
+//
+//				}
+//
+//				for (Direction side : Direction.values()) {
+//					if (canBeClicked(pos.offset(side))) {
+//						addQueuedPacket(pos.offset(side),
+//								side,
+//								hit,
+//								placement.look,
+//								!doubleChest);
+//						return true;
+//					}
+//				}
+//			} else {
+//				if (canBeClicked(pos.offset(placement.side))) {
+//					addQueuedPacket(pos.offset(placement.side),
+//							placement.side,
+//							hit,
+//							placement.look,
+//							!doubleChest);
+//					return true;
+//				}
+//			}
+//		}
+
+		Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(side.getVector()).multiply(0.5));
+
+		if (side.getAxis() != Direction.Axis.Y) {
+			if (placement.half == Direction.UP) {
+				hit = hit.add(0, 0.25, 0);
+			} else if (placement.half == Direction.DOWN) {
+				hit = hit.add(0, -0.25, 0);
+			}
 		}
 
-		for (Direction side : Direction.values()) {
-			if (half == 1 && side.equals(Direction.DOWN)) continue;
-			if (half == 0 && side.equals(Direction.UP)) continue;
-			if (axis != null && side.getAxis() != axis) continue;
-			if (isTorchOnWall(state) && playerShouldBeFacing != side) continue;
-			if (state.getBlock() instanceof HopperBlock && playerShouldBeFacing != side.getOpposite()) continue;
-			if ((state.getBlock() instanceof AbstractButtonBlock || state.getBlock() instanceof LeverBlock)
-					&& isLeverOnWall(state)
-					&& playerShouldBeFacing != side.getOpposite()) continue;
-
-			BlockPos neighbor = pos.offset(side);
-
-			if (!canBeClicked(neighbor)) {
-				if (!shouldPrintInAir) continue;
-				neighbor = pos;
-			}
-
-			Vec3d hitVec = posVec.add(Vec3d.of(side.getVector()).multiply(0.5));
-
-			if (half == 1 && !side.equals(Direction.UP)) {
-				hitVec = hitVec.add(0, 0.25, 0);
-			} else if (half == 0 && !side.equals(Direction.DOWN)) {
-				hitVec = hitVec.add(0, -0.25, 0);
-			}
-
-			boolean doubleChest = state.contains(ChestBlock.CHEST_TYPE) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
-			addQueuedPacket(neighbor, side, hitVec, playerShouldBeFacing, !doubleChest);
-
-			return true;
-		}
-
-		return false;
+		queuePlacement(neighbor,
+				side,
+				hit,
+				placement.look,
+				!doubleChest);
+		return true;
 	}
 
     private Item requiredItemInHand(BlockState requiredState, BlockState currentState) {
@@ -293,7 +310,13 @@ public class Printer extends PrinterUtils {
 		blockLooks = false;
 	}
 
-	public void addQueuedPacket(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
+	/**
+	 * Adds a placement packet to queue
+	 * @param neighbor Neighboring block to be clicked
+	 * @param side Direction where the neighboring block is
+	 * @param hitVec Position where the player would click
+	 */
+	public void queuePlacement(BlockPos neighbor, Direction side, Vec3d hitVec, Direction playerShouldBeFacing, boolean useShift) {
 
 		// Skip if last packet hasn't been sent yet.
 		if (Queue.neighbor != null) return;
@@ -308,7 +331,7 @@ public class Printer extends PrinterUtils {
 
 		Queue.playerShouldBeFacing = playerShouldBeFacing;
 		Queue.neighbor = neighbor;
-		Queue.side = side;
+		Queue.side = side == null ? Direction.DOWN : side;
 		Queue.hitVec = hitVec;
 		Queue.useShift = useShift;
 	}
