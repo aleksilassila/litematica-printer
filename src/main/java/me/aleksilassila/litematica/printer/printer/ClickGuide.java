@@ -1,5 +1,6 @@
 package me.aleksilassila.litematica.printer.printer;
 
+import me.aleksilassila.litematica.printer.interfaces.Implementation;
 import net.minecraft.block.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 public enum ClickGuide {
     SNOW(SnowBlock.class),
-    CANDLES(AbstractCandleBlock.class),
+    CANDLES(Implementation.NewBlocks.CANDLES.clazz),
     LEVER(LeverBlock.class),
     REPEATER(RepeaterBlock.class),
     COMPARATOR(ComparatorBlock.class),
@@ -28,7 +29,8 @@ public enum ClickGuide {
     private static ClickGuide getGuide(BlockState requiredState, BlockState currentState) {
         for (ClickGuide guide : ClickGuide.values()) {
             for (Class<?> clazz : guide.matchClasses) {
-                if (clazz.isInstance(requiredState.getBlock()) &&
+                if (clazz != null &&
+                        clazz.isInstance(requiredState.getBlock()) &&
                         clazz.isInstance(currentState.getBlock())) {
                     return guide;
                 }
@@ -40,41 +42,41 @@ public enum ClickGuide {
 
     public static Click shouldClickBlock(BlockState requiredState, BlockState currentState) {
         switch(getGuide(requiredState, currentState)) {
-            case SNOW -> {
+            case SNOW: {
                 if (currentState.get(SnowBlock.LAYERS) < requiredState.get(SnowBlock.LAYERS)) {
                     return new Click(true, Items.SNOW);
                 }
             }
-            case DOOR -> {
+            case DOOR: {
                 if (requiredState.get(DoorBlock.OPEN) != currentState.get(DoorBlock.OPEN))
                     return new Click(true);
             }
-            case LEVER -> {
+            case LEVER: {
                 System.out.println("Caught lever, required: " + requiredState.get(LeverBlock.POWERED) + ", current: " + currentState.get(LeverBlock.POWERED));
                 if (requiredState.get(LeverBlock.POWERED) != currentState.get(LeverBlock.POWERED))
                     return new Click(true);
             }
-            case CANDLES -> {
-                if (currentState.get(CandleBlock.CANDLES) < requiredState.get(CandleBlock.CANDLES))
+            case CANDLES: {
+                if ((Integer) PrinterUtils.getPropertyByName(currentState, "CANDLES") < (Integer) PrinterUtils.getPropertyByName(requiredState, "CANDLES"))
                     return new Click(true, requiredState.getBlock().asItem());
             }
-            case PICKLES -> {
+            case PICKLES: {
                 if (currentState.get(SeaPickleBlock.PICKLES) < requiredState.get(SeaPickleBlock.PICKLES))
                     return new Click(true, Items.SEA_PICKLE);
             }
-            case REPEATER -> {
+            case REPEATER: {
                 if (!Objects.equals(requiredState.get(RepeaterBlock.DELAY), currentState.get(RepeaterBlock.DELAY)))
                     return new Click(true);
             }
-            case COMPARATOR -> {
+            case COMPARATOR: {
                 if (requiredState.get(ComparatorBlock.MODE) != currentState.get(ComparatorBlock.MODE))
                     return new Click(true);
             }
-            case TRAPDOOR -> {
+            case TRAPDOOR: {
                 if (requiredState.get(TrapdoorBlock.OPEN) != currentState.get(TrapdoorBlock.OPEN))
                     return new Click(true);
             }
-            case FENCE -> {
+            case FENCE: {
                 if (requiredState.get(FenceGateBlock.OPEN) != currentState.get(FenceGateBlock.OPEN))
                     return new Click(true);
             }
