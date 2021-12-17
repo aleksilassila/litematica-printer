@@ -34,10 +34,12 @@ public class LitematicaMixinMod implements ModInitializer {
 	}
 	
 	// Hotkeys
-	public static final ConfigHotkey TOGGLE_PRINTING_MODE = new ConfigHotkey("togglePrintingMode", "M,O", "Allows quickly toggling on/off Printing mode");
+	public static final ConfigHotkey PRINT = new ConfigHotkey("print", "V", "Prints while pressed");
+	public static final ConfigHotkey TOGGLE_PRINTING_MODE = new ConfigHotkey("togglePrintingMode", "CAPS_LOCK", "Allows quickly toggling on/off Printing mode");
 
 	public static List<ConfigHotkey> getHotkeyList() {
 		List<ConfigHotkey> list = new java.util.ArrayList<>(List.copyOf(Hotkeys.HOTKEY_LIST));
+		list.add(PRINT);
 		list.add(TOGGLE_PRINTING_MODE);
 
 		return ImmutableList.copyOf(list);

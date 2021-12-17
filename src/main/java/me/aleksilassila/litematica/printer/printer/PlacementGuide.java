@@ -28,6 +28,8 @@ public enum PlacementGuide {
     AMETHYST(AmethystClusterBlock.class),
     DOOR(DoorBlock.class),
     COCOA(CocoaBlock.class),
+    OBSERVER(ObserverBlock.class),
+    WALLSKULL(WallSkullBlock.class),
     SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, AbstractLichenBlock.class, VineBlock.class),
     DEFAULT;
 
@@ -51,7 +53,7 @@ public enum PlacementGuide {
 
     public static Placement getPlacement(BlockState requiredState) {
         switch (getGuide(requiredState)) {
-            case WALLTORCH, ROD, AMETHYST -> { // FIXME check if the wall exists?
+            case WALLTORCH, ROD, AMETHYST, SHULKER -> {
                 return new Placement(((Direction) getPropertyByName(requiredState, "FACING")).getOpposite(),
                         null,
                         null);
@@ -91,7 +93,7 @@ public enum PlacementGuide {
                 Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
                     case FLOOR -> Direction.DOWN;
                     case CEILING -> Direction.UP;
-                    default -> (Direction) getPropertyByName(requiredState, "FACING");
+                    default -> ((Direction) getPropertyByName(requiredState, "FACING")).getOpposite();
                 };
 
                 Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
@@ -99,7 +101,7 @@ public enum PlacementGuide {
 
                 return new Placement(side,
                         null,
-                        look);
+                        look).setCantPlaceInAir(true);
             }
 //            case GRINDSTONE -> { // Tese are broken
 //                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
@@ -119,11 +121,6 @@ public enum PlacementGuide {
                 return new Placement(null,
                         null,
                         (Direction) getPropertyByName(requiredState, "FACING"));
-            }
-            case SHULKER -> {
-                return new Placement(requiredState.get(ShulkerBoxBlock.FACING).getOpposite(),
-                        null,
-                        null);
             }
             case BED -> {
                 if (requiredState.get(BedBlock.PART) != BedPart.FOOT) {
@@ -159,6 +156,9 @@ public enum PlacementGuide {
                 return new Placement(Direction.DOWN,
                         hitModifier,
                         requiredState.get(DoorBlock.FACING));
+            }
+            case WALLSKULL -> {
+                return new Placement(requiredState.get(WallSkullBlock.FACING).getOpposite(), null, null);
             }
             case SKIP -> {
                 return new Placement();
@@ -207,7 +207,9 @@ public enum PlacementGuide {
         @Nullable
         public final Direction look;
 
-        final boolean sideIsAxis;
+        boolean sideIsAxis = false;
+
+        boolean cantPlaceInAir = false;
         boolean skip;
 
         public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look, boolean sideIsAxis) {
@@ -226,6 +228,17 @@ public enum PlacementGuide {
         public Placement() {
             this(null, null, null, false);
             this.skip = true;
+        }
+
+        public Placement setSideIsAxis(boolean sideIsAxis) {
+            this.sideIsAxis = sideIsAxis;
+
+            return this;
+        }
+
+        public Placement setCantPlaceInAir(boolean cantPlaceInAir) {
+            this.cantPlaceInAir = cantPlaceInAir;
+            return this;
         }
     }
 }

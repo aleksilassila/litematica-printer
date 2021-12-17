@@ -92,7 +92,7 @@ public class Printer extends PrinterUtils {
 					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(requiredState.getBlock().asItem())) {
 						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
 						Direction side = placement.side == null ? Direction.DOWN : placement.side;
-						BlockPos neighbor = pos; // If placing in air, there's no neighbor
+						BlockPos neighbor = placement.cantPlaceInAir ? pos.offset(side) : pos; // If placing in air, there's no neighbor
 
 						Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(side.getVector()).multiply(0.5));
 

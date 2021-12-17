@@ -46,7 +46,9 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			return;
 		}
 
-		if (SchematicWorldHandler.getSchematicWorld() == null || !LitematicaMixinMod.PRINT_MODE.getBooleanValue()) return;
+		if (SchematicWorldHandler.getSchematicWorld() == null ||
+				!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
+			return;
 
 		printer.onTick();
 	}
