@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
@@ -30,13 +29,6 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 	protected MinecraftClient client;
 
 	protected Printer printer;
-
-	@Inject(at = @At("RETURN"), method = "isCamera", cancellable = true)
-	protected void isCamera(CallbackInfoReturnable<Boolean> cir) {
-		if (printer != null && printer.lockCamera) {
-			cir.setReturnValue(false); // Fix for placing correctly pistons for example
-		}
-	}
 
 	@Inject(at = @At("HEAD"), method = "tick")
 	public void tick(CallbackInfo ci) {
@@ -54,7 +46,9 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			return;
 		}
 
-		if (SchematicWorldHandler.getSchematicWorld() == null || !LitematicaMixinMod.PRINT_MODE.getBooleanValue()) return;
+		if (SchematicWorldHandler.getSchematicWorld() == null ||
+				!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
+			return;
 
 		printer.onTick();
 	}
