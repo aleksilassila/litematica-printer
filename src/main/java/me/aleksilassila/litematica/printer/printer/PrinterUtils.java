@@ -154,4 +154,26 @@ public class PrinterUtils {
 	protected static boolean isHalfSlab(BlockState state) {
     	return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) != SlabType.DOUBLE;
 	}
+
+    public static Direction getHalf(BlockHalf half) {
+        return half == BlockHalf.TOP ? Direction.UP : Direction.DOWN;
+    }
+
+    public static Direction axisToDirection(Direction.Axis axis) {
+        for (Direction direction : Direction.values()) {
+            if (direction.getAxis() == axis) return direction;
+        }
+
+        return Direction.DOWN;
+    }
+
+    public static Comparable<?> getPropertyByName(BlockState state, String name) {
+        for (Property<?> prop : state.getProperties()) {
+            if (prop.getName().equalsIgnoreCase(name)) {
+                return state.get(prop);
+            }
+        }
+
+        return null;
+    }
 }

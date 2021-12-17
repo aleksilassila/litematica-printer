@@ -23,7 +23,7 @@ public class LitematicaMixinMod implements ModInitializer {
     public static final ConfigBoolean REPLACE_FLUIDS = new ConfigBoolean("replaceFluids", false, "Whether or not fluid source blocks should be replaced by the printer.");
 
 	public static ImmutableList<IConfigBase> getConfigList() {
-		List<IConfigBase> list = new java.util.ArrayList<>(List.copyOf(Configs.Generic.OPTIONS));
+		List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
 		list.add(PRINT_INTERVAL);
 		list.add(PRINTING_RANGE);
 //		list.add(PRINT_IN_AIR);
@@ -32,13 +32,13 @@ public class LitematicaMixinMod implements ModInitializer {
 
 		return ImmutableList.copyOf(list);
 	}
-	
+
 	// Hotkeys
 	public static final ConfigHotkey PRINT = new ConfigHotkey("print", "V", "Prints while pressed");
 	public static final ConfigHotkey TOGGLE_PRINTING_MODE = new ConfigHotkey("togglePrintingMode", "CAPS_LOCK", "Allows quickly toggling on/off Printing mode");
 
 	public static List<ConfigHotkey> getHotkeyList() {
-		List<ConfigHotkey> list = new java.util.ArrayList<>(List.copyOf(Hotkeys.HOTKEY_LIST));
+		List<ConfigHotkey> list = new java.util.ArrayList<>(Hotkeys.HOTKEY_LIST);
 		list.add(PRINT);
 		list.add(TOGGLE_PRINTING_MODE);
 

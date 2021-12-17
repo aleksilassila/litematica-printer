@@ -4,7 +4,7 @@ plugins {
 }
 
 
-sourceCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_1_8 // For that 1.16 compatibility
 targetCompatibility = JavaVersion.VERSION_17
 
 
