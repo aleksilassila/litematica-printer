@@ -46,39 +46,56 @@ public enum ClickGuide {
                 if (currentState.get(SnowBlock.LAYERS) < requiredState.get(SnowBlock.LAYERS)) {
                     return new Click(true, Items.SNOW);
                 }
+
+                break;
             }
             case DOOR: {
                 if (requiredState.get(DoorBlock.OPEN) != currentState.get(DoorBlock.OPEN))
                     return new Click(true);
+
+                break;
             }
             case LEVER: {
-                System.out.println("Caught lever, required: " + requiredState.get(LeverBlock.POWERED) + ", current: " + currentState.get(LeverBlock.POWERED));
                 if (requiredState.get(LeverBlock.POWERED) != currentState.get(LeverBlock.POWERED))
                     return new Click(true);
+
+                break;
             }
             case CANDLES: {
                 if ((Integer) PrinterUtils.getPropertyByName(currentState, "CANDLES") < (Integer) PrinterUtils.getPropertyByName(requiredState, "CANDLES"))
                     return new Click(true, requiredState.getBlock().asItem());
+
+                break;
             }
             case PICKLES: {
                 if (currentState.get(SeaPickleBlock.PICKLES) < requiredState.get(SeaPickleBlock.PICKLES))
                     return new Click(true, Items.SEA_PICKLE);
+
+                break;
             }
             case REPEATER: {
                 if (!Objects.equals(requiredState.get(RepeaterBlock.DELAY), currentState.get(RepeaterBlock.DELAY)))
                     return new Click(true);
+
+                break;
             }
             case COMPARATOR: {
                 if (requiredState.get(ComparatorBlock.MODE) != currentState.get(ComparatorBlock.MODE))
                     return new Click(true);
+
+                break;
             }
             case TRAPDOOR: {
                 if (requiredState.get(TrapdoorBlock.OPEN) != currentState.get(TrapdoorBlock.OPEN))
                     return new Click(true);
+
+                break;
             }
             case FENCE: {
                 if (requiredState.get(FenceGateBlock.OPEN) != currentState.get(FenceGateBlock.OPEN))
                     return new Click(true);
+
+                break;
             }
         }
 
