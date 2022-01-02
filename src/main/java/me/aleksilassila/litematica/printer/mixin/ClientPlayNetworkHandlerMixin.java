@@ -20,13 +20,13 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Overwrite
     public void sendPacket(Packet<?> packet) {
-        if (Implementation.isLookPacket(packet) && Printer.shouldBlockLookPackets()) {
-            Packet<?> positionOnlyPacket = Implementation.getMoveOnlyPacket(client.player, packet);
+        if (Implementation.isLookAndMovePacket(packet) && Printer.shouldBlockLookPackets()) {
+            Packet<?> fixedPacket = Implementation.getFixedLookPacket(client.player, packet);
 
-            if (positionOnlyPacket != null) {
-                this.connection.send(positionOnlyPacket);
+            if (fixedPacket != null) {
+                this.connection.send(fixedPacket);
             }
-        } else {
+        } else if (!(Implementation.isLookOnlyPacket(packet) && Printer.shouldBlockLookPackets())) {
             this.connection.send(packet);
         }
     }

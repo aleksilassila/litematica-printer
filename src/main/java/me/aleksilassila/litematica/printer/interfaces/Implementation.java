@@ -1,5 +1,6 @@
 package me.aleksilassila.litematica.printer.interfaces;
 
+import me.aleksilassila.litematica.printer.mixin.PlayerMoveC2SPacketAccessor;
 import me.aleksilassila.litematica.printer.printer.Printer;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -41,29 +42,26 @@ public class Implementation {
                 playerEntity.isOnGround()));
     }
 
-    public static boolean isLookPacket(Packet<?> packet) {
-        return packet instanceof PlayerMoveC2SPacket &&
-                !(packet instanceof PlayerMoveC2SPacket.PositionAndOnGround) &&
-                !(packet instanceof  PlayerMoveC2SPacket.OnGroundOnly);
+    public static boolean isLookOnlyPacket(Packet<?> packet) {
+        return packet instanceof PlayerMoveC2SPacket.LookAndOnGround;
     }
 
-    public static Packet<?> getMoveOnlyPacket(ClientPlayerEntity playerEntity, Packet<?> packet) {
+    public static boolean isLookAndMovePacket(Packet<?> packet) {
+        return packet instanceof PlayerMoveC2SPacket.Full;
+    }
+
+    public static Packet<?> getFixedLookPacket(ClientPlayerEntity playerEntity, Packet<?> packet) {
         if (Printer.Queue.playerShouldBeFacing == null) return packet;
-        try {
-            Field yawField = PlayerMoveC2SPacket.class.getDeclaredField("yaw");
-            Field pitchField = PlayerMoveC2SPacket.class.getDeclaredField("pitch");
 
-            yawField.setAccessible(true);
-            pitchField.setAccessible(true);
+        float yaw = Implementation.getRequiredYaw(playerEntity, Printer.Queue.playerShouldBeFacing);
+        float pitch = Implementation.getRequiredPitch(playerEntity, Printer.Queue.playerShouldBeFacing);
 
-            yawField.setFloat(packet, Implementation.getRequiredYaw(playerEntity, Printer.Queue.playerShouldBeFacing));
-            pitchField.setFloat(packet, Implementation.getRequiredPitch(playerEntity, Printer.Queue.playerShouldBeFacing));
+        double x = ((PlayerMoveC2SPacketAccessor) packet).getX();
+        double y = ((PlayerMoveC2SPacketAccessor) packet).getY();
+        double z = ((PlayerMoveC2SPacketAccessor) packet).getZ();
+        boolean onGround = ((PlayerMoveC2SPacketAccessor) packet).getOnGround();
 
-            return packet;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-            return packet;
-        }
+        return new PlayerMoveC2SPacket.Full(x, y, z, yaw, pitch, onGround);
     }
 
     protected static float getRequiredYaw(ClientPlayerEntity playerEntity, Direction playerShouldBeFacing) {
