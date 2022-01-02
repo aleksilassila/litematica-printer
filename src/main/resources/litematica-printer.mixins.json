@@ -11,7 +11,8 @@
 	"InputHandlerMixin",
 	"MixinClientPlayerEntity",
 	"MixinClientPlayerInteractionManager",
-    "ClientPlayNetworkHandlerMixin"
+    "ClientPlayNetworkHandlerMixin",
+    "PlayerMoveC2SPacketAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
