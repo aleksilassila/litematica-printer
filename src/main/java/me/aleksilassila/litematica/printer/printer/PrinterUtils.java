@@ -112,8 +112,7 @@ public class PrinterUtils {
 				|| state.getBlock() instanceof LeverBlock
 				|| state.getBlock() instanceof AbstractButtonBlock
 				|| state.getBlock() instanceof BedBlock
-				|| state.getBlock() instanceof DoorBlock
-				|| state.getBlock() instanceof ObserverBlock;
+				|| state.getBlock() instanceof DoorBlock;
 	}
 
 	protected static boolean shouldClickBlock(BlockState state, BlockState targetState) {
