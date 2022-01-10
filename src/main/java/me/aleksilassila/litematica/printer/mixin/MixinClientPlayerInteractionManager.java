@@ -30,7 +30,7 @@ public abstract class MixinClientPlayerInteractionManager implements IClientPlay
 		interactBlock(client.player, client.world, Hand.MAIN_HAND,
 			new BlockHitResult(hitVec, side, pos, false));
 		interactItem(client.player, client.world, Hand.MAIN_HAND);
-		System.out.println("Printer interactBlock: pos: (" + pos.toShortString() + "), side: " + side.getName() + ", vector: " + hitVec.toString());
+//		System.out.println("Printer interactBlock: pos: (" + pos.toShortString() + "), side: " + side.getName() + ", vector: " + hitVec.toString());
 	}
 
 	@Shadow
@@ -42,8 +42,8 @@ public abstract class MixinClientPlayerInteractionManager implements IClientPlay
 	public abstract ActionResult interactItem(PlayerEntity playerEntity_1,
                                               World world_1, Hand hand_1);
 
-	@Inject(at = @At("HEAD"), method = "interactBlock")
-	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-		System.out.println("Player interactBlock: pos: (" + hitResult.getBlockPos().toShortString() + "), side: " + hitResult.getSide().getName() + ", vector: " + hitResult.getPos().toString());
-	}
+//	@Inject(at = @At("HEAD"), method = "interactBlock")
+//	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+//		System.out.println("Player interactBlock: pos: (" + hitResult.getBlockPos().toShortString() + "), side: " + hitResult.getSide().getName() + ", vector: " + hitResult.getPos().toString());
+//	}
 }
