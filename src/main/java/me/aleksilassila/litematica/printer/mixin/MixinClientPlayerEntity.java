@@ -40,7 +40,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 		if (printer == null) {
 			if (client != null && client.player != null && client.world != null) {
-				printer = new Printer(client, client.player, client.world);
+				printer = new Printer(client);
 			}
 
 			return;

@@ -25,12 +25,14 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import org.jetbrains.annotations.NotNull;
 
 public class Printer extends PrinterUtils {
-    private final MinecraftClient client;
-    private final ClientPlayerEntity playerEntity;
-    private final ClientWorld clientWorld;
+    @NotNull private final MinecraftClient client;
+	@NotNull private final ClientPlayerEntity pEntity;
+    @NotNull private final ClientWorld world;
     private WorldSchematic worldSchematic;
+	private final PlacementGuide guide;
 
 	int tick = 0;
 	static boolean blockLooks = false;
@@ -50,10 +52,12 @@ public class Printer extends PrinterUtils {
 		public static Direction playerShouldBeFacing;
 	}
 
-	public Printer(MinecraftClient client, ClientPlayerEntity playerEntity, ClientWorld clientWorld) {
+	public Printer(MinecraftClient client) {
         this.client = client;
-        this.playerEntity = playerEntity;
-        this.clientWorld = clientWorld;
+        this.pEntity = client.player;
+        this.world = client.world;
+
+		this.guide = new PlacementGuide(client, worldSchematic);
     }
 
     public void onTick() {
@@ -76,21 +80,50 @@ public class Printer extends PrinterUtils {
 		for (int y = -range; y < range + 1; y++) {
 			for (int x = -range; x < range + 1; x++) {
 				for (int z = -range; z < range + 1; z++) {
-					BlockPos pos = playerEntity.getBlockPos().north(x).west(z).up(y);
-					BlockState currentState = clientWorld.getBlockState(pos);
+					BlockPos pos = pEntity.getBlockPos().north(x).west(z).up(y);
+
+					PlacementGuide.Action action = guide.getAction(pos);
+					/*
+						if not exist, click: item, where, how
+						if exists: maybe click
+						if wrong: maybe click
+					 */
+
+					if (action == null) continue;
+
+					Direction[] neighbors = action.getValidTargets();
+
+					if (playerHasAccessToItem(pEntity, action.getRequiredItem(worldSchematic.getBlockState(pos)))) {
+						boolean doubleChest = worldSchematic.getBlockState(pos).contains(ChestBlock.CHEST_TYPE) &&
+								worldSchematic.getBlockState(pos).get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
+
+						switchToItem(action.getRequiredItem(worldSchematic.getBlockState(pos)));
+
+						queuePlacement(neighbors.length > 0 ? pos.offset(neighbors[0]) : pos,
+								neighbors.length > 0 ? neighbors[0] : Direction.DOWN,
+								action.getHitVector(),
+								action.getLookDirection(),
+								!doubleChest);
+
+						return;
+					}
+
+
+					/*
+					BlockState currentState = world.getBlockState(pos);
 					BlockState requiredState = worldSchematic.getBlockState(pos);
 
 					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
 
-					PlacementGuide.Placement placement = PlacementGuide.getPlacement(requiredState, client);
+					PlacementGuide.Placement placement = PlacementGuide.getPlacement(client, pos);
 					ClickGuide.Click click = ClickGuide.shouldClickBlock(requiredState, currentState);
 
-					if (click.click && (click.items == null || playerHasAccessToItems(playerEntity, click.items))) {
+					if (click.click && (click.items == null || playerHasAccessToItems(pEntity, click.items))) {
 						switchToItems(click.items);
 						sendClick(pos, Vec3d.ofCenter(pos));
 						return;
-					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(playerEntity, placement.item)) {
-						System.out.println("Placing " + requiredState.getBlock().getName() + " at " + pos.offset(placement.side).toShortString() + ", " + clientWorld.getBlockState(pos.offset(placement.side)).getBlock().getName() + ", " + clientWorld.getBlockState(pos.offset(placement.side)).getMaterial().isSolid());
+					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(pEntity, placement.item)) {
+						System.out.println("Placing " + requiredState.getBlock().getName() + " at " + pos.offset(placement.side).toShortString() + ", " + world.getBlockState(pos.offset(placement.side)).getBlock().getName() + ", " + world.getBlockState(pos.offset(placement.side)).getMaterial().isSolid());
 
 						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
 						BlockPos neighbor = placement.cantPlaceInAir ? pos.offset(placement.side) : pos; // If placing in air, there's no neighbor
@@ -110,39 +143,39 @@ public class Printer extends PrinterUtils {
 								!doubleChest);
 
 						return;
-					}
+					}*/
 				}
 			}
 		}
     }
 
-	private boolean shouldPrintHere(BlockPos position, PlacementGuide.Placement placement) {
-		BlockState currentState = clientWorld.getBlockState(position);
-		BlockState requiredState = worldSchematic.getBlockState(position);
-
-		if (placement.skip) return false;
-
-		if (!shouldPrintInAir) {
-			if (!clientWorld.getBlockState(position.offset(placement.side)).getMaterial().isSolid()) return false;
-		}
-
-		// FIXME water and lava
-		// Check if something should be placed in target block
-		if (requiredState.isAir()
-				|| requiredState.getMaterial().equals(Material.WATER)
-				|| requiredState.getMaterial().equals(Material.LAVA)) return false;
-
-		// Check if target block is empty
-		if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) { //current = solid
-			// Don't skip unfinished double slabs
-			return PrinterUtils.isDoubleSlab(requiredState) && PrinterUtils.isHalfSlab(currentState);
-		} else if (currentState.contains(FluidBlock.LEVEL)) { // current = fluid
-			return currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids;
-		}
-
-		// Check if can be placed in world
-		return requiredState.canPlaceAt(clientWorld, position);
-	}
+//	private boolean shouldPrintHere(BlockPos position, PlacementGuide.Placement placement) {
+//		BlockState currentState = world.getBlockState(position);
+//		BlockState requiredState = worldSchematic.getBlockState(position);
+//
+//		if (placement.skip) return false;
+//
+//		if (!shouldPrintInAir) {
+//			if (!world.getBlockState(position.offset(placement.side)).getMaterial().isSolid()) return false;
+//		}
+//
+//		// FIXME water and lava
+//		// Check if something should be placed in target block
+//		if (requiredState.isAir()
+//				|| requiredState.getMaterial().equals(Material.WATER)
+//				|| requiredState.getMaterial().equals(Material.LAVA)) return false;
+//
+//		// Check if target block is empty
+//		if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) { //current = solid
+//			// Don't skip unfinished double slabs
+//			return PrinterUtils.isDoubleSlab(requiredState) && PrinterUtils.isHalfSlab(currentState);
+//		} else if (currentState.contains(FluidBlock.LEVEL)) { // current = fluid
+//			return currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids;
+//		}
+//
+//		// Check if can be placed in world
+//		return requiredState.canPlaceAt(world, position);
+//	}
 
 	private void switchToItem(Item item) {
 		switchToItems(new Item[]{item});
@@ -151,12 +184,12 @@ public class Printer extends PrinterUtils {
 	private void switchToItems(Item[] items) {
 		if (items == null) return;
 
-		PlayerInventory inv = Implementation.getInventory(playerEntity);
+		PlayerInventory inv = Implementation.getInventory(pEntity);
 //		InventoryUtils.;
 
 		for (Item item : items) {
 			if (inv.getMainHandStack().getItem() == item) return;
-			if (Implementation.getAbilities(playerEntity).creativeMode) {
+			if (Implementation.getAbilities(pEntity).creativeMode) {
 				InventoryUtils.setPickedItemToHand(new ItemStack(item), client);
 				client.interactionManager.clickCreativeStack(client.player.getStackInHand(Hand.MAIN_HAND), 36 + inv.selectedSlot);
 				return;
@@ -177,31 +210,31 @@ public class Printer extends PrinterUtils {
 
 	private VoxelShape getOutlineShape(BlockPos pos)
 	{
-		return getState(pos).getOutlineShape(clientWorld, pos);
+		return getState(pos).getOutlineShape(world, pos);
 	}
 
 	private BlockState getState(BlockPos pos)
 	{
-		return clientWorld.getBlockState(pos);
+		return world.getBlockState(pos);
 	}
 
 	private void sendQueuedPlacement() {
 		if (Queue.neighbor == null) return;
 
-		boolean wasSneaking = playerEntity.isSneaking();
+		boolean wasSneaking = pEntity.isSneaking();
 
 		if (Queue.useShift && !wasSneaking)
-			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+			pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
 		else if (!Queue.useShift && wasSneaking)
-			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+			pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
 		((IClientPlayerInteractionManager) client.interactionManager).rightClickBlock(Queue.neighbor,
 				Queue.side.getOpposite(), Queue.hitVec);
 
 		if (Queue.useShift && !wasSneaking)
-			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+			pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 		else if (!Queue.useShift && wasSneaking)
-			playerEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(playerEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+			pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
 
 		Queue.neighbor = null;
 		blockLooks = false;
@@ -224,7 +257,7 @@ public class Printer extends PrinterUtils {
 		if (Queue.neighbor != null) return;
 
 		if (playerShouldBeFacing != null) {
-			Implementation.sendLookPacket(playerEntity, playerShouldBeFacing);
+			Implementation.sendLookPacket(pEntity, playerShouldBeFacing);
 
 			blockLooks = true;
 		} else {
@@ -239,7 +272,7 @@ public class Printer extends PrinterUtils {
 	}
 
 	private void swapHandWithSlot(int slot) {
-		ItemStack stack = Implementation.getInventory(playerEntity).getStack(slot);
+		ItemStack stack = Implementation.getInventory(pEntity).getStack(slot);
 		InventoryUtils.setPickedItemToHand(stack, client);
 	}
 

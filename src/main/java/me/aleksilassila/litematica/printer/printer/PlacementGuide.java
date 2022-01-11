@@ -1,89 +1,74 @@
 package me.aleksilassila.litematica.printer.printer;
 
+import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
-import net.fabricmc.fabric.api.tag.FabricTag;
 import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.AxeItem;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public enum PlacementGuide {
-    ROD(Implementation.NewBlocks.ROD.clazz),
-    WALLTORCH(WallTorchBlock.class),
-    TORCH(TorchBlock.class),
-    SLAB(SlabBlock.class),
-    STAIR(StairsBlock.class),
-    TRAPDOOR(TrapdoorBlock.class),
-    PILLAR(PillarBlock.class),
-    ANVIL(AnvilBlock.class),
-    HOPPER(HopperBlock.class),
-    WALLMOUNTED(LeverBlock.class, AbstractButtonBlock.class),
-    //    GRINDSTONE(GrindstoneBlock.class),
-    GATE(FenceGateBlock.class),
-    CAMPFIRE(CampfireBlock.class),
-    SHULKER(ShulkerBoxBlock.class),
-    BED(BedBlock.class),
-    BELL(BellBlock.class),
-    AMETHYST(Implementation.NewBlocks.AMETHYST.clazz),
-    DOOR(DoorBlock.class),
-    COCOA(CocoaBlock.class),
-    OBSERVER(ObserverBlock.class),
-    WALLSKULL(WallSkullBlock.class),
-    SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, Implementation.NewBlocks.LICHEN.clazz, VineBlock.class),
-    FARMLAND(FarmlandBlock.class),
-    FLOWER_POT(FlowerPotBlock.class),
-    BIG_DRIPLEAF_STEM(BigDripleafStemBlock.class),
-    DEFAULT;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-    private final Class<?>[] matchClasses;
+public class PlacementGuide {
+    @NotNull protected final MinecraftClient client;
+    @NotNull protected final ClientWorld world;
+    @NotNull protected final WorldSchematic worldSchematic;
 
-    PlacementGuide(Class<?>... classes) {
-        matchClasses = classes;
+    public PlacementGuide(@NotNull MinecraftClient client, @NotNull WorldSchematic worldSchematic) {
+        this.client = client;
+        this.world = client.world;
+        this.worldSchematic = worldSchematic;
     }
 
-    private static PlacementGuide getGuide(BlockState requiredState) {
-        for (PlacementGuide guide : PlacementGuide.values()) {
-            for (Class<?> clazz : guide.matchClasses) {
-                if (clazz != null && clazz.isInstance(requiredState.getBlock())) {
-                    return guide;
+    public Action getAction(BlockPos pos) {
+        for (ClassHook hook : ClassHook.values()) {
+            if (hook.state != getState(pos)) continue;
+
+            for (Class<?> clazz : hook.classes) {
+                if (clazz != null && clazz.isInstance(worldSchematic.getBlockState(pos).getBlock())) {
+                    return buildAction(pos, hook);
                 }
             }
         }
 
-        return DEFAULT;
+        return null;
     }
 
-    public static Placement getPlacement(BlockState requiredState, MinecraftClient client) {
-        Placement placement = _getPlacement(requiredState, client);
-        return placement.setItem(placement.item == null ? requiredState.getBlock().asItem() : placement.item);
-    }
+//    public static Placement getPlacement(BlockState requiredState, MinecraftClient client) {
+//        Placement placement = _getPlacement(requiredState, client);
+//        return placement.setItem(placement.item == null ? requiredState.getBlock().asItem() : placement.item);
+//    }
 
-    private static Placement _getPlacement(BlockState requiredState, MinecraftClient client) {
-        switch (getGuide(requiredState)) {
+    private @Nullable Action buildAction(BlockPos pos, ClassHook hook) {
+        BlockState requiredState = worldSchematic.getBlockState(pos);
+        BlockState currentState = world.getBlockState(pos);
+
+        switch (hook) {
             case WALLTORCH:
             case ROD:
             case AMETHYST:
             case SHULKER: {
-                return new Placement(((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING")).getOpposite(),
-                        null,
-                        null);
+                return new Action(((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING")).getOpposite());
             }
             case SLAB: {
                 Direction half = requiredState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? Direction.DOWN : Direction.UP;
-                return new Placement(half,
-                        null,
-                        null);
+                return new Action(half);
             }
+            /*
             case STAIR: {
                 return new Placement(requiredState.get(StairsBlock.FACING), // FIXME before shipping
                         Vec3d.of(PrinterUtils.getHalf(requiredState.get(StairsBlock.HALF)).getVector()).multiply(0.25), //getHalf(requiredState.get(StairsBlock.HALF)),
@@ -254,52 +239,200 @@ public enum PlacementGuide {
                 }
 
                 return placement;
+            }*/
+        }
+
+        return null;
+    }
+//
+//    public static class Placement {
+//        @NotNull
+//        public final Direction side;
+//        @Nullable
+//        public final Vec3d hitModifier;
+//        @Nullable
+//        public final Direction look;
+//
+//        boolean sideIsAxis = false;
+//
+//        boolean cantPlaceInAir = false;
+//        boolean skip;
+//
+//        Item item = null;
+//
+//        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look) {
+//            this.side = side == null ? Direction.DOWN : side;
+//            this.hitModifier = hitModifier;
+//            this.look = look;
+//
+//            this.skip = false;
+//        }
+//
+//        public Placement() {
+//            this(null, null, null);
+//            this.skip = true;
+//        }
+//
+//        public Placement setSideIsAxis(boolean sideIsAxis) {
+//            this.sideIsAxis = sideIsAxis;
+//
+//            return this;
+//        }
+//
+//        public Placement setCantPlaceInAir(boolean cantPlaceInAir) {
+//            this.cantPlaceInAir = cantPlaceInAir;
+//            return this;
+//        }
+//
+//        public Placement setItem(Item item) {
+//            this.item = item;
+//            return this;
+//        }
+//    }
+//
+//    public static class Click {
+//        public final boolean click;
+//        @Nullable
+//        public final Item[] items;
+//
+//        public Click(boolean click, @Nullable Item ...item) {
+//            this.click = click;
+//            this.items = item;
+//        }
+//
+//        public Click(boolean click) {
+//            this(click, null);
+//        }
+//
+//        public Click() {
+//            this(false, null);
+//        }
+//    }
+
+    public class Action {
+//        BlockPos neighbor;
+        private Direction[] neighbors;
+        private Direction lookDirection;
+        private Vec3d hitModifier;
+        @Nullable private Item requiredItem;
+
+//        private boolean cantPlaceInAir = false;
+
+        public Action(Direction... neighbors) {
+            this.setValidNeighbors(neighbors);
+        }
+
+        public Direction[] getValidTargets() {
+            if (neighbors == null) return new Direction[]{};
+            return neighbors;
+        }
+
+        public Vec3d getHitVector() {
+            return hitModifier;
+        }
+
+        public Direction getLookDirection() {
+            return lookDirection;
+        }
+
+        public @Nullable Item getRequiredItem(BlockState requiredState) {
+            return requiredItem == null ? requiredState.getBlock().asItem() : requiredItem;
+        }
+
+
+
+        public Action setValidNeighbors(Direction... neighbors) {
+            this.neighbors = neighbors;
+            return this;
+        }
+
+        public Action setValidNeighbors(Direction.Axis... axis) {
+            List<Direction> neighbors = new ArrayList<>();
+
+            for (Direction.Axis a : axis) {
+                for (Direction d : Direction.values()) {
+                    if (d.getAxis() == a) {
+                        neighbors.add(d);
+                    }
+                }
             }
+            
+            this.neighbors = neighbors.toArray(Direction[]::new);
+            return this;
+        }
+
+        public Action setInvalidNeighbors(Direction... neighbors) {
+            List<Direction> dirs = Arrays.asList(Direction.values());
+            dirs.removeAll(Arrays.asList(neighbors));
+            this.neighbors = dirs.toArray(Direction[]::new);
+            return this;
+        }
+
+        public Action setLookDirection(Direction lookDirection) {
+            this.lookDirection = lookDirection;
+            return this;
         }
     }
 
-    public static class Placement {
-        @NotNull
-        public final Direction side;
-        @Nullable
-        public final Vec3d hitModifier;
-        @Nullable
-        public final Direction look;
+    private State getState(BlockPos pos) {
+        if (!worldSchematic.getBlockState(pos).isAir() &&
+                client.world.getBlockState(pos).isAir())
+            return State.MISSING_BLOCK;
+        else if (!worldSchematic.getBlockState(pos).getBlock()
+                .equals(client.world.getBlockState(pos).getBlock()))
+            return State.WRONG_STATE;
+        else if (!worldSchematic.getBlockState(pos)
+                .equals(client.world.getBlockState(pos).isAir()))
+            return State.WRONG_STATE;
 
-        boolean sideIsAxis = false;
+        return State.CORRECT;
+    }
 
-        boolean cantPlaceInAir = false;
-        boolean skip;
+    enum State {
+        MISSING_BLOCK,
+        WRONG_STATE,
+        CORRECT;
+    }
 
-        Item item = null;
+    enum ClassHook {
+        ROD(Implementation.NewBlocks.ROD.clazz),
+        WALLTORCH(WallTorchBlock.class),
+        TORCH(TorchBlock.class),
+        SLAB(SlabBlock.class),
+        STAIR(StairsBlock.class),
+        TRAPDOOR(TrapdoorBlock.class),
+        PILLAR(PillarBlock.class),
+        ANVIL(AnvilBlock.class),
+        HOPPER(HopperBlock.class),
+        WALLMOUNTED(LeverBlock.class, AbstractButtonBlock.class),
+        //    GRINDSTONE(GrindstoneBlock.class),
+        GATE(FenceGateBlock.class),
+        CAMPFIRE(CampfireBlock.class),
+        SHULKER(ShulkerBoxBlock.class),
+        BED(BedBlock.class),
+        BELL(BellBlock.class),
+        AMETHYST(Implementation.NewBlocks.AMETHYST.clazz),
+        DOOR(DoorBlock.class),
+        COCOA(CocoaBlock.class),
+        OBSERVER(ObserverBlock.class),
+        WALLSKULL(WallSkullBlock.class),
+        SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, Implementation.NewBlocks.LICHEN.clazz, VineBlock.class),
+        FARMLAND(FarmlandBlock.class),
+        FLOWER_POT(FlowerPotBlock.class),
+        BIG_DRIPLEAF_STEM(BigDripleafStemBlock.class),
+        DEFAULT_MISSING(State.MISSING_BLOCK),
+        DEFAULT_CLICKABLE(State.WRONG_STATE);
 
-        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look) {
-            this.side = side == null ? Direction.DOWN : side;
-            this.hitModifier = hitModifier;
-            this.look = look;
+        private final Class<?>[] classes;
+        private final State state;
 
-            this.skip = false;
+        ClassHook(Class<?>... classes) {
+            this(State.MISSING_BLOCK, classes);
         }
 
-        public Placement() {
-            this(null, null, null);
-            this.skip = true;
-        }
-
-        public Placement setSideIsAxis(boolean sideIsAxis) {
-            this.sideIsAxis = sideIsAxis;
-
-            return this;
-        }
-
-        public Placement setCantPlaceInAir(boolean cantPlaceInAir) {
-            this.cantPlaceInAir = cantPlaceInAir;
-            return this;
-        }
-
-        public Placement setItem(Item item) {
-            this.item = item;
-            return this;
+        ClassHook(State state, Class<?>... classes) {
+            this.state = state;
+            this.classes = classes;
         }
     }
 }
