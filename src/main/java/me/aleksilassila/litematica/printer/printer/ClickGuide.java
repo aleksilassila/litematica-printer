@@ -1,6 +1,8 @@
 package me.aleksilassila.litematica.printer.printer;
 
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
+import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
+import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
 import net.minecraft.block.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -18,6 +20,10 @@ public enum ClickGuide {
     DOOR(DoorBlock.class),
     PICKLES(SeaPickleBlock.class),
     FENCE(FenceGateBlock.class),
+    NOTE_BLOCK(NoteBlock.class),
+    CAMPFIRE(CampfireBlock.class),
+    PILLAR(PillarBlock.class),
+    END_PORTAL_FRAME(EndPortalFrameBlock.class),
     DEFAULT;
 
     private final Class<?>[] matchClasses;
@@ -97,6 +103,40 @@ public enum ClickGuide {
 
                 break;
             }
+            case NOTE_BLOCK: {
+                if (!Objects.equals(requiredState.get(NoteBlock.NOTE), currentState.get(NoteBlock.NOTE)))
+                    return new Click(true);
+
+                break;
+            }
+            case CAMPFIRE: {
+                if (requiredState.get(CampfireBlock.LIT) != currentState.get(CampfireBlock.LIT))
+                    return new Click(true, FabricToolTags.SHOVELS.values().toArray(Item[]::new));
+
+                break;
+            }
+            case PILLAR: {
+                Block stripped = AxeItemAccessor.getStrippedBlocks().get(currentState.getBlock());
+                if (stripped != null && stripped == requiredState.getBlock()) {
+                    return new Click(true, FabricToolTags.AXES.values().toArray(Item[]::new));
+                }
+                break;
+            }
+            case END_PORTAL_FRAME: {
+                if (requiredState.get(EndPortalFrameBlock.EYE) && !currentState.get(EndPortalFrameBlock.EYE))
+                    return new Click(true, Items.ENDER_EYE);
+
+                break;
+            }
+            case DEFAULT: {
+                if (currentState.getBlock().equals(Blocks.DIRT) && requiredState.getBlock().equals(Blocks.FARMLAND)) {
+                    return new Click(true, FabricToolTags.HOES.values().toArray(Item[]::new));
+                } else if (currentState.getBlock().equals(Blocks.DIRT) && requiredState.getBlock().equals(Blocks.DIRT_PATH)) {
+                    return new Click(true, FabricToolTags.SHOVELS.values().toArray(Item[]::new));
+                }
+
+                break;
+            }
         }
 
         return new Click();
@@ -105,11 +145,11 @@ public enum ClickGuide {
     public static class Click {
         public final boolean click;
         @Nullable
-        public final Item item;
+        public final Item[] items;
 
-        public Click(boolean click, @Nullable Item item) {
+        public Click(boolean click, @Nullable Item ...item) {
             this.click = click;
-            this.item = item;
+            this.items = item;
         }
 
         public Click(boolean click) {

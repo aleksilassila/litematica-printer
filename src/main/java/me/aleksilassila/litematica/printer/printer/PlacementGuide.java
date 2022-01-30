@@ -1,12 +1,20 @@
 package me.aleksilassila.litematica.printer.printer;
 
+import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
+import net.fabricmc.fabric.api.tag.FabricTag;
+import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.*;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum PlacementGuide {
@@ -20,7 +28,7 @@ public enum PlacementGuide {
     ANVIL(AnvilBlock.class),
     HOPPER(HopperBlock.class),
     WALLMOUNTED(LeverBlock.class, AbstractButtonBlock.class),
-//    GRINDSTONE(GrindstoneBlock.class),
+    //    GRINDSTONE(GrindstoneBlock.class),
     GATE(FenceGateBlock.class),
     CAMPFIRE(CampfireBlock.class),
     SHULKER(ShulkerBoxBlock.class),
@@ -32,11 +40,14 @@ public enum PlacementGuide {
     OBSERVER(ObserverBlock.class),
     WALLSKULL(WallSkullBlock.class),
     SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, Implementation.NewBlocks.LICHEN.clazz, VineBlock.class),
+    FARMLAND(FarmlandBlock.class),
+    FLOWER_POT(FlowerPotBlock.class),
+    BIG_DRIPLEAF_STEM(BigDripleafStemBlock.class),
     DEFAULT;
 
     private final Class<?>[] matchClasses;
 
-    PlacementGuide(Class<?> ... classes) {
+    PlacementGuide(Class<?>... classes) {
         matchClasses = classes;
     }
 
@@ -52,7 +63,12 @@ public enum PlacementGuide {
         return DEFAULT;
     }
 
-    public static Placement getPlacement(BlockState requiredState) {
+    public static Placement getPlacement(BlockState requiredState, MinecraftClient client) {
+        Placement placement = _getPlacement(requiredState, client);
+        return placement.setItem(placement.item == null ? requiredState.getBlock().asItem() : placement.item);
+    }
+
+    private static Placement _getPlacement(BlockState requiredState, MinecraftClient client) {
         switch (getGuide(requiredState)) {
             case WALLTORCH:
             case ROD:
@@ -79,9 +95,28 @@ public enum PlacementGuide {
                         requiredState.get(StairsBlock.FACING).getOpposite());
             }
             case PILLAR: {
-                return new Placement(PrinterUtils.axisToDirection(requiredState.get(PillarBlock.AXIS)),
+                Placement placement = new Placement(PrinterUtils.axisToDirection(requiredState.get(PillarBlock.AXIS)),
                         null,
-                        null, true);
+                        null).setSideIsAxis(true);
+
+                // If is stripped log && should use normal log instead
+                if (AxeItemAccessor.getStrippedBlocks().containsValue(requiredState.getBlock()) &&
+                        LitematicaMixinMod.STRIP_LOGS.getBooleanValue()) {
+                    Block stripped = requiredState.getBlock();
+
+                    for (Block log : AxeItemAccessor.getStrippedBlocks().keySet()) {
+                        if (AxeItemAccessor.getStrippedBlocks().get(log) != stripped) continue;
+
+                        if (!PrinterUtils.playerHasAccessToItem(client.player, stripped.asItem()) &&
+                                PrinterUtils.playerHasAccessToItem(client.player, log.asItem())) {
+                            placement.item = log.asItem();
+                        }
+                        break;
+
+                    }
+                }
+
+                return placement;
             }
             case ANVIL: {
                 return new Placement(null,
@@ -133,6 +168,7 @@ public enum PlacementGuide {
 //                        look);
 //            }
             case GATE:
+            case OBSERVER:
             case CAMPFIRE: {
                 return new Placement(null,
                         null,
@@ -189,6 +225,18 @@ public enum PlacementGuide {
             case SKIP: {
                 return new Placement();
             }
+            case FARMLAND: {
+                if (!PrinterUtils.playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
+                    return new Placement(null, null, null).setItem(Items.DIRT);
+                }
+                break;
+            }
+            case FLOWER_POT: {
+                return new Placement(null, null, null).setItem(Items.FLOWER_POT);
+            }
+            case BIG_DRIPLEAF_STEM: {
+                return new Placement(null, null, null).setItem(Items.BIG_DRIPLEAF);
+            }
             default: { // Try to guess how the rest of the blocks are placed.
                 Direction look = null;
 
@@ -198,13 +246,20 @@ public enum PlacementGuide {
                     }
                 }
 
-                return new Placement(null, null, look);
+                Placement placement = new Placement(null, null, look);
+
+                // If required == dirt path place dirt
+                if (requiredState.getBlock().equals(Blocks.DIRT_PATH) && !PrinterUtils.playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
+                    placement.setItem(Items.DIRT);
+                }
+
+                return placement;
             }
         }
     }
 
     public static class Placement {
-        @Nullable
+        @NotNull
         public final Direction side;
         @Nullable
         public final Vec3d hitModifier;
@@ -216,21 +271,18 @@ public enum PlacementGuide {
         boolean cantPlaceInAir = false;
         boolean skip;
 
-        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look, boolean sideIsAxis) {
-            this.side = side;
+        Item item = null;
+
+        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look) {
+            this.side = side == null ? Direction.DOWN : side;
             this.hitModifier = hitModifier;
             this.look = look;
 
-            this.sideIsAxis = sideIsAxis;
             this.skip = false;
         }
 
-        public Placement(@Nullable Direction side, @Nullable Vec3d hitModifier, @Nullable Direction look) {
-            this(side, hitModifier, look, false);
-        }
-
         public Placement() {
-            this(null, null, null, false);
+            this(null, null, null);
             this.skip = true;
         }
 
@@ -242,6 +294,11 @@ public enum PlacementGuide {
 
         public Placement setCantPlaceInAir(boolean cantPlaceInAir) {
             this.cantPlaceInAir = cantPlaceInAir;
+            return this;
+        }
+
+        public Placement setItem(Item item) {
+            this.item = item;
             return this;
         }
     }

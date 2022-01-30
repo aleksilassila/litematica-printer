@@ -16,7 +16,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
@@ -66,7 +65,8 @@ public class Printer extends PrinterUtils {
 		}
 
 		int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
-//		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
+
+		shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 		shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
 		worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
@@ -82,31 +82,33 @@ public class Printer extends PrinterUtils {
 
 					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
 
-					PlacementGuide.Placement placement = PlacementGuide.getPlacement(requiredState);
+					PlacementGuide.Placement placement = PlacementGuide.getPlacement(requiredState, client);
 					ClickGuide.Click click = ClickGuide.shouldClickBlock(requiredState, currentState);
 
-					if (click.click && (click.item == null || playerHasAccessToItem(click.item))) {
+					if (click.click && (click.items == null || playerHasAccessToItems(playerEntity, click.items))) {
+						switchToItems(click.items);
 						sendClick(pos, Vec3d.ofCenter(pos));
-						switchToItem(click.item);
 						return;
-					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(requiredState.getBlock().asItem())) {
-						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
-						Direction side = placement.side == null ? Direction.DOWN : placement.side;
-						BlockPos neighbor = placement.cantPlaceInAir ? pos.offset(side) : pos; // If placing in air, there's no neighbor
+					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(playerEntity, placement.item)) {
+						System.out.println("Placing " + requiredState.getBlock().getName() + " at " + pos.offset(placement.side).toShortString() + ", " + clientWorld.getBlockState(pos.offset(placement.side)).getBlock().getName() + ", " + clientWorld.getBlockState(pos.offset(placement.side)).getMaterial().isSolid());
 
-						Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(side.getVector()).multiply(0.5));
+						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
+						BlockPos neighbor = placement.cantPlaceInAir ? pos.offset(placement.side) : pos; // If placing in air, there's no neighbor
+
+						Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(placement.side.getVector()).multiply(0.5));
 
 						if (placement.hitModifier != null) {
 							hit = hit.add(placement.hitModifier);
 						}
 
+						switchToItem(placement.item);
+
 						queuePlacement(neighbor,
-								side,
+								placement.side,
 								hit,
 								placement.look,
 								!doubleChest);
 
-						switchToItem(requiredState.getBlock().asItem());
 						return;
 					}
 				}
@@ -119,6 +121,10 @@ public class Printer extends PrinterUtils {
 		BlockState requiredState = worldSchematic.getBlockState(position);
 
 		if (placement.skip) return false;
+
+		if (!shouldPrintInAir) {
+			if (!clientWorld.getBlockState(position.offset(placement.side)).getMaterial().isSolid()) return false;
+		}
 
 		// FIXME water and lava
 		// Check if something should be placed in target block
@@ -139,35 +145,34 @@ public class Printer extends PrinterUtils {
 	}
 
 	private void switchToItem(Item item) {
-		PlayerInventory inv = Implementation.getInventory(playerEntity);
-		if (inv.getMainHandStack().getItem() == item) return;
-
-		if (Implementation.getAbilities(playerEntity).creativeMode) {
-			InventoryUtils.setPickedItemToHand(new ItemStack(item), client);
-			client.interactionManager.clickCreativeStack(client.player.getStackInHand(Hand.MAIN_HAND), 36 + inv.selectedSlot);
-		} else {
-			int slot = 0;
-			for (int i = 0; i < inv.size(); i++) {
-				if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
-					slot = i;
-			}
-
-			swapHandWithSlot(slot);
-		}
+		switchToItems(new Item[]{item});
 	}
 
-	private boolean playerHasAccessToItem(Item item) {
-		if (item == null) return false;
-		if (Implementation.getAbilities(playerEntity).creativeMode) return true;
-		else {
-			Inventory inv = Implementation.getInventory(playerEntity);
-			for (int i = 0; i < inv.size(); i++) {
-				if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
-					return true;
+	private void switchToItems(Item[] items) {
+		if (items == null) return;
+
+		PlayerInventory inv = Implementation.getInventory(playerEntity);
+//		InventoryUtils.;
+
+		for (Item item : items) {
+			if (inv.getMainHandStack().getItem() == item) return;
+			if (Implementation.getAbilities(playerEntity).creativeMode) {
+				InventoryUtils.setPickedItemToHand(new ItemStack(item), client);
+				client.interactionManager.clickCreativeStack(client.player.getStackInHand(Hand.MAIN_HAND), 36 + inv.selectedSlot);
+				return;
+			} else {
+				int slot = -1;
+				for (int i = 0; i < inv.size(); i++) {
+					if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
+						slot = i;
+				}
+
+				if (slot != -1) {
+					swapHandWithSlot(slot);
+					return;
+				}
 			}
 		}
-
-		return false;
 	}
 
 	private VoxelShape getOutlineShape(BlockPos pos)
