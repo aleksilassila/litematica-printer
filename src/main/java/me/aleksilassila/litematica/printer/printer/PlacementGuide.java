@@ -256,6 +256,8 @@ public enum PlacementGuide {
                 return placement;
             }
         }
+
+        return new Placement();
     }
 
     public static class Placement {

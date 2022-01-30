@@ -90,8 +90,6 @@ public class Printer extends PrinterUtils {
 						sendClick(pos, Vec3d.ofCenter(pos));
 						return;
 					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(playerEntity, placement.item)) {
-						System.out.println("Placing " + requiredState.getBlock().getName() + " at " + pos.offset(placement.side).toShortString() + ", " + clientWorld.getBlockState(pos.offset(placement.side)).getBlock().getName() + ", " + clientWorld.getBlockState(pos.offset(placement.side)).getMaterial().isSolid());
-
 						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
 						BlockPos neighbor = placement.cantPlaceInAir ? pos.offset(placement.side) : pos; // If placing in air, there's no neighbor
 
