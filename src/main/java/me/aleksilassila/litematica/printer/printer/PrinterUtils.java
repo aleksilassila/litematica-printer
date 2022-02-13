@@ -11,6 +11,8 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
 
 public class PrinterUtils {
+	public static Direction[] horizontalDirections = new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+
 	public static boolean playerHasAccessToItem(ClientPlayerEntity playerEntity, Item item) {
 		return playerHasAccessToItems(playerEntity, new Item[]{item});
 	}
