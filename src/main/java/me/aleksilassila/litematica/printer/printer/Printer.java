@@ -1,12 +1,13 @@
 package me.aleksilassila.litematica.printer.printer;
 
+import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
-import me.aleksilassila.litematica.printer.printer.Printer.Queue;
+import me.aleksilassila.litematica.printer.mixin.ClientPlayNetworkHandlerMixin;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.enums.ChestType;
@@ -24,8 +25,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Printer extends PrinterUtils {
+    private static Printer INSTANCE;
     @NotNull
     private final MinecraftClient client;
     @NotNull
@@ -34,25 +37,43 @@ public class Printer extends PrinterUtils {
     private final ClientWorld world;
     private WorldSchematic worldSchematic;
     private final PlacementGuide guide;
-    private final Queue queue;
+    public final Queue queue;
 
     int tick = 0;
-    static boolean blockLooks = false;
 
     private boolean shouldPrintInAir;
     private boolean shouldReplaceFluids;
 
-    public static boolean shouldBlockLookPackets() {
-        return blockLooks;
+    public static @Nullable Printer init(MinecraftClient client) {
+        if (client == null || client.player == null || client.world == null) {
+            return null;
+        }
+
+        if (INSTANCE == null) {
+            INSTANCE = new Printer(client);
+        }
+
+        return INSTANCE;
     }
 
-    public Printer(MinecraftClient client) {
+    public static @Nullable Printer getPrinter() {
+//        if (INSTANCE == null) {
+//            INSTANCE = new Printer(client);
+//        }
+
+        return INSTANCE;
+    }
+
+    private Printer(MinecraftClient client) {
         this.client = client;
         this.pEntity = client.player;
         this.world = client.world;
+        this.worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-        this.guide = new PlacementGuide(client, worldSchematic);
+        this.guide = new PlacementGuide(client, client.world, this.worldSchematic);
         this.queue = new Queue(this);
+
+        INSTANCE = this;
     }
 
     public void onTick() {
@@ -67,7 +88,6 @@ public class Printer extends PrinterUtils {
 
         shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
         shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
-        worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
         queue.sendQueue();
 
@@ -96,10 +116,10 @@ public class Printer extends PrinterUtils {
                     Sides: Map<Direction, hitvec>?
                      */
 
+                    BlockPos center = pEntity.getBlockPos().north(x).west(z).up(y);
+                    if (!DataManager.getRenderLayerRange().isPositionWithinRange(center)) continue;
 
-                    BlockPos pos = pEntity.getBlockPos().north(x).west(z).up(y);
-
-                    PlacementGuide.Action action = guide.getAction(pos);
+                    PlacementGuide.Action action = guide.getAction(center);
 					/*
 						if not exist, click: item, where, how
 						if exists: maybe click
@@ -108,93 +128,24 @@ public class Printer extends PrinterUtils {
 
                     if (action == null) continue;
 
-                    Direction side = action.getValidSide();
-                    Item requiredItem = action.getRequiredItem(pos);
+                    Direction side = shouldPrintInAir ? action.getSide() : getSupportedSide(world, center, action.getSides());
+                    if (side == null) continue;
 
-                    if (playerHasAccessToItem(pEntity, requiredItem)) {
-//                        boolean doubleChest = worldSchematic.getBlockState(pos).contains(ChestBlock.CHEST_TYPE) &&
-//                                worldSchematic.getBlockState(pos).get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
-
+                    Item requiredItem = action.getRequiredItem(worldSchematic.getBlockState(center).getBlock());
+                    if (playerHasAccessToItem(pEntity, requiredItem) &&
+                            worldSchematic.getBlockState(center).canPlaceAt(world, center)) {
                         switchToItem(requiredItem);
-                        queue.queueClick(action,
-                                action instanceof PlacementGuide.Click ? pos : pos.offset(side));
-//                        queuePlacement(neighbors.length > 0 ? pos.offset(neighbors[0]) : pos,
-//                                neighbors.length > 0 ? neighbors[0] : Direction.DOWN,
-//                                action.getHitVector(),
-//                                action.getLookDirection(),
-//                                !doubleChest);
+                        sendLook(action.getLookDirection());
+
+                        System.out.println("Queued click?: " + center.offset(side).toString() + ", side: " + side);
+                        queue.queueClick(center.offset(side), side.getOpposite(), action.getSides().get(side));
 
                         return;
                     }
-
-
-					/*
-					BlockState currentState = world.getBlockState(pos);
-					BlockState requiredState = worldSchematic.getBlockState(pos);
-
-					if (!DataManager.getRenderLayerRange().isPositionWithinRange(pos)) continue;
-
-					PlacementGuide.Placement placement = PlacementGuide.getPlacement(client, pos);
-					ClickGuide.Click click = ClickGuide.shouldClickBlock(requiredState, currentState);
-
-					if (click.click && (click.items == null || playerHasAccessToItems(pEntity, click.items))) {
-						switchToItems(click.items);
-						sendClick(pos, Vec3d.ofCenter(pos));
-						return;
-					} else if (shouldPrintHere(pos, placement) && playerHasAccessToItem(pEntity, placement.item)) {
-						System.out.println("Placing " + requiredState.getBlock().getName() + " at " + pos.offset(placement.side).toShortString() + ", " + world.getBlockState(pos.offset(placement.side)).getBlock().getName() + ", " + world.getBlockState(pos.offset(placement.side)).getMaterial().isSolid());
-
-						boolean doubleChest = requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE;
-						BlockPos neighbor = placement.cantPlaceInAir ? pos.offset(placement.side) : pos; // If placing in air, there's no neighbor
-
-						Vec3d hit = Vec3d.ofCenter(pos).add(Vec3d.of(placement.side.getVector()).multiply(0.5));
-
-						if (placement.hitModifier != null) {
-							hit = hit.add(placement.hitModifier);
-						}
-
-						switchToItem(placement.item);
-
-						queuePlacement(neighbor,
-								placement.side,
-								hit,
-								placement.look,
-								!doubleChest);
-
-						return;
-					}*/
                 }
             }
         }
     }
-
-//	private boolean shouldPrintHere(BlockPos position, PlacementGuide.Placement placement) {
-//		BlockState currentState = world.getBlockState(position);
-//		BlockState requiredState = worldSchematic.getBlockState(position);
-//
-//		if (placement.skip) return false;
-//
-//		if (!shouldPrintInAir) {
-//			if (!world.getBlockState(position.offset(placement.side)).getMaterial().isSolid()) return false;
-//		}
-//
-//		// FIXME water and lava
-//		// Check if something should be placed in target block
-//		if (requiredState.isAir()
-//				|| requiredState.getMaterial().equals(Material.WATER)
-//				|| requiredState.getMaterial().equals(Material.LAVA)) return false;
-//
-//		// Check if target block is empty
-//		if (!currentState.isAir() && !currentState.contains(FluidBlock.LEVEL)) { //current = solid
-//			// Don't skip unfinished double slabs
-//			return PrinterUtils.isDoubleSlab(requiredState) && PrinterUtils.isHalfSlab(currentState);
-//		} else if (currentState.contains(FluidBlock.LEVEL)) { // current = fluid
-//			return currentState.get(FluidBlock.LEVEL) == 0 && !shouldReplaceFluids;
-//		}
-//
-//		// Check if can be placed in world
-//		return requiredState.canPlaceAt(world, position);
-//	}
 
     private void switchToItem(Item item) {
         switchToItems(new Item[]{item});
@@ -298,11 +249,22 @@ public class Printer extends PrinterUtils {
         return getOutlineShape(pos) != VoxelShapes.empty();
     }
 
-    public static class Queue {
-        BlockPos target;
-        PlacementGuide.Action action;
-        final Printer printerInstance;
+    public void sendLook(Direction direction) {
+        if (direction != null) {
+            Implementation.sendLookPacket(client.player, direction);
+        }
 
+        queue.lookDir = direction;
+    }
+
+    public static class Queue {
+        public BlockPos target;
+        public Direction side;
+        public Vec3d hitVec;
+
+        public Direction lookDir = null;
+
+        final Printer printerInstance;
         final ClientPlayerEntity pEntity;
 
         public Queue(Printer printerInstance) {
@@ -310,15 +272,23 @@ public class Printer extends PrinterUtils {
             this.pEntity = printerInstance.pEntity;
         }
 
-        public void queueClick(PlacementGuide.Action action, BlockPos target) {
-            this.action = action;
+        public void queueClick(@NotNull BlockPos target, @NotNull Direction side, @NotNull Vec3d hitVec) {
+            if (this.target != null) {
+                System.out.println("Was not ready yet.");
+                return;
+            }
+
             this.target = target;
+            this.side = side;
+            this.hitVec = hitVec;
         }
 
         public void sendQueue() {
-            if (this.action == null) return;
+            if (target == null || side == null || hitVec == null) return;
 
             boolean wasSneaking = pEntity.isSneaking();
+
+            hitVec = Vec3d.ofCenter(target).add(hitVec.multiply(0.5));
 
             boolean useShift = !(printerInstance.worldSchematic.getBlockState(target).contains(ChestBlock.CHEST_TYPE) &&
                     printerInstance.worldSchematic.getBlockState(target).get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE);
@@ -328,19 +298,24 @@ public class Printer extends PrinterUtils {
             else if (!useShift && wasSneaking)
                 pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
-
-            Direction direction = action.getValidSide();
             ((IClientPlayerInteractionManager) printerInstance.client.interactionManager)
-                    .rightClickBlock(target, direction, action.getSides().get(direction));
+                    .rightClickBlock(target, side, hitVec);
+
+            System.out.println("Right clicked block " + (target.toString()) + ", " + side + ", modifier: " + hitVec);
 
             if (useShift && !wasSneaking)
                 pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             else if (!useShift && wasSneaking)
                 pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
 
-            this.action = null;
-            Printer.blockLooks = false;
+            clearQueue();
+        }
+
+        public void clearQueue() {
+            this.target = null;
+            this.side = null;
+            this.hitVec = null;
+            this.lookDir = null;
         }
     }
-
 }

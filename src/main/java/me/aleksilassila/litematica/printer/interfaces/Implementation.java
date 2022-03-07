@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.interfaces;
 
 import me.aleksilassila.litematica.printer.mixin.PlayerMoveC2SPacketAccessor;
+import me.aleksilassila.litematica.printer.printer.PlacementGuide;
 import me.aleksilassila.litematica.printer.printer.Printer;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -50,11 +51,11 @@ public class Implementation {
         return packet instanceof PlayerMoveC2SPacket.Full;
     }
 
-    public static Packet<?> getFixedLookPacket(ClientPlayerEntity playerEntity, Packet<?> packet) {
-        if (Printer.Queue.playerShouldBeFacing == null) return packet;
+    public static Packet<?> getFixedLookPacket(ClientPlayerEntity playerEntity, Packet<?> packet, Direction direction) {
+        if (direction == null) return packet;
 
-        float yaw = Implementation.getRequiredYaw(playerEntity, Printer.Queue.playerShouldBeFacing);
-        float pitch = Implementation.getRequiredPitch(playerEntity, Printer.Queue.playerShouldBeFacing);
+        float yaw = Implementation.getRequiredYaw(playerEntity, direction);
+        float pitch = Implementation.getRequiredPitch(playerEntity, direction);
 
         double x = ((PlayerMoveC2SPacketAccessor) packet).getX();
         double y = ((PlayerMoveC2SPacketAccessor) packet).getY();

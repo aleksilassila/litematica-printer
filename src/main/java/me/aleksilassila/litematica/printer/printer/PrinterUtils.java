@@ -5,10 +5,16 @@ import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 public class PrinterUtils {
 	public static Direction[] horizontalDirections = new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
@@ -52,6 +58,15 @@ public class PrinterUtils {
         }
 
         return Direction.DOWN;
+    }
+
+	public static @Nullable Direction getSupportedSide(ClientWorld world, BlockPos pos, Map<Direction, Vec3d> sides) {
+		for (Direction side : sides.keySet()) {
+			if (world.getBlockState(pos.offset(side)).isSolidBlock(world, pos.offset(side)))
+				return side;
+		}
+
+		return null;
     }
 
     public static Comparable<?> getPropertyByName(BlockState state, String name) {

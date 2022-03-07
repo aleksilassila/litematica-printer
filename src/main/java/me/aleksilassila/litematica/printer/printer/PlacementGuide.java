@@ -29,15 +29,16 @@ public class PlacementGuide {
     @NotNull
     protected final WorldSchematic worldSchematic;
 
-    public PlacementGuide(@NotNull MinecraftClient client, @NotNull WorldSchematic worldSchematic) {
+    public PlacementGuide(@NotNull MinecraftClient client, @NotNull ClientWorld world, @NotNull WorldSchematic worldSchematic) {
         this.client = client;
-        this.world = client.world;
+        this.world = world;
         this.worldSchematic = worldSchematic;
     }
 
     public Action getAction(BlockPos pos) {
         for (ClassHook hook : ClassHook.values()) {
-            if (hook.state != getState(pos)) continue;
+            // Fixme state
+//            if (hook.state != getState(pos)) continue;
 
             for (Class<?> clazz : hook.classes) {
                 if (clazz != null && clazz.isInstance(worldSchematic.getBlockState(pos).getBlock())) {
@@ -46,7 +47,7 @@ public class PlacementGuide {
             }
         }
 
-        return null;
+        return buildAction(pos, ClassHook.DEFAULT);
     }
 
 //    public static Placement getPlacement(BlockState requiredState, MinecraftClient client) {
@@ -59,198 +60,207 @@ public class PlacementGuide {
         BlockState requiredState = worldSchematic.getBlockState(pos);
         BlockState currentState = world.getBlockState(pos);
 
-        switch (type) {
-            case WALLTORCH:
-            case ROD:
-            case AMETHYST:
-            case SHULKER: {
-                return new Placement().setSides(
-                        ((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING"))
-                                .getOpposite());
-            }
-            case SLAB: {
-                Direction half = requiredState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? Direction.DOWN : Direction.UP;
-                return new Placement().setSides(half);
-            }
-            case STAIR: {
-                Direction half = PrinterUtils.getHalf(requiredState.get(StairsBlock.HALF));
+        State state = getState(requiredState, currentState);
 
-                Map<Direction, Vec3d> sides = new HashMap<>();
-                sides.put(half, new Vec3d(0, 0, 0));
+        if (state == State.CORRECT) return null;
 
-                for (Direction d : PrinterUtils.horizontalDirections) {
-                    sides.put(d, Vec3d.of(half.getVector()).multiply(0.25));
+        if (state == State.MISSING_BLOCK) {
+            switch (type) {
+                case WALLTORCH:
+                case ROD:
+                case AMETHYST:
+                case SHULKER: {
+                    return new Placement().setSides(
+                            ((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING"))
+                                    .getOpposite());
                 }
-
-                return new Placement()
-                        .setSides(sides)
-                        .setLookDirection(requiredState.get(StairsBlock.FACING));
-            }
-            case TRAPDOOR: {
-                Direction half = PrinterUtils.getHalf(requiredState.get(TrapdoorBlock.HALF));
-
-                Map<Direction, Vec3d> sides = new HashMap<>();
-                sides.put(half, new Vec3d(0, 0, 0));
-
-                for (Direction d : PrinterUtils.horizontalDirections) {
-                    sides.put(d, Vec3d.of(half.getVector()).multiply(0.25));
+                case SLAB: {
+                    Direction half = requiredState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? Direction.DOWN : Direction.UP;
+                    return new Placement().setSides(half);
                 }
+                case STAIR: {
+                    Direction half = PrinterUtils.getHalf(requiredState.get(StairsBlock.HALF));
 
-                return new Placement()
-                        .setSides(sides)
-                        .setLookDirection(requiredState.get(StairsBlock.FACING).getOpposite());
-            }
-            case PILLAR: {
-                Action action = new Placement().setSides(requiredState.get(PillarBlock.AXIS));
+                    Map<Direction, Vec3d> sides = new HashMap<>();
+                    sides.put(half, new Vec3d(0, 0, 0));
 
-                // If is stripped log && should use normal log instead
-                if (AxeItemAccessor.getStrippedBlocks().containsValue(requiredState.getBlock()) &&
-                        LitematicaMixinMod.STRIP_LOGS.getBooleanValue()) {
-                    Block stripped = requiredState.getBlock();
+                    for (Direction d : PrinterUtils.horizontalDirections) {
+                        sides.put(d, Vec3d.of(half.getVector()).multiply(0.25));
+                    }
 
-                    for (Block log : AxeItemAccessor.getStrippedBlocks().keySet()) {
-                        if (AxeItemAccessor.getStrippedBlocks().get(log) != stripped) continue;
+                    return new Placement()
+                            .setSides(sides)
+                            .setLookDirection(requiredState.get(StairsBlock.FACING));
+                }
+                case TRAPDOOR: {
+                    Direction half = PrinterUtils.getHalf(requiredState.get(TrapdoorBlock.HALF));
 
-                        if (!PrinterUtils.playerHasAccessToItem(client.player, stripped.asItem()) &&
-                                PrinterUtils.playerHasAccessToItem(client.player, log.asItem())) {
-                            action.setItem(log.asItem());
+                    Map<Direction, Vec3d> sides = new HashMap<>();
+                    sides.put(half, new Vec3d(0, 0, 0));
+
+                    for (Direction d : PrinterUtils.horizontalDirections) {
+                        sides.put(d, Vec3d.of(half.getVector()).multiply(0.25));
+                    }
+
+                    return new Placement()
+                            .setSides(sides)
+                            .setLookDirection(requiredState.get(StairsBlock.FACING).getOpposite());
+                }
+                case PILLAR: {
+                    Action action = new Placement().setSides(requiredState.get(PillarBlock.AXIS));
+
+                    // If is stripped log && should use normal log instead
+                    if (AxeItemAccessor.getStrippedBlocks().containsValue(requiredState.getBlock()) &&
+                            LitematicaMixinMod.STRIP_LOGS.getBooleanValue()) {
+                        Block stripped = requiredState.getBlock();
+
+                        for (Block log : AxeItemAccessor.getStrippedBlocks().keySet()) {
+                            if (AxeItemAccessor.getStrippedBlocks().get(log) != stripped) continue;
+
+                            if (!PrinterUtils.playerHasAccessToItem(client.player, stripped.asItem()) &&
+                                    PrinterUtils.playerHasAccessToItem(client.player, log.asItem())) {
+                                action.setItem(log.asItem());
+                            }
+                            break;
+
                         }
-                        break;
+                    }
 
+                    return action;
+                }
+                case ANVIL: {
+                    return new Placement().setLookDirection(requiredState.get(AnvilBlock.FACING).rotateYCounterclockwise());
+                }
+                case HOPPER: // FIXME add all sides
+                case COCOA: {
+                    return new Placement().setSides((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING"));
+                }
+                case WALLMOUNTED: {
+                    Direction side;
+                    switch ((WallMountLocation) PrinterUtils.getPropertyByName(requiredState, "FACE")) {
+                        case FLOOR: {
+                            side = Direction.DOWN;
+                            break;
+                        }
+                        case CEILING: {
+                            side = Direction.UP;
+                            break;
+                        }
+                        default: {
+                            side = ((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING")).getOpposite();
+                            break;
+                        }
+                    }
+
+                    Direction look = PrinterUtils.getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
+                            null : (Direction) PrinterUtils.getPropertyByName(requiredState, "FACING");
+
+                    return new Placement().setSides(side).setLookDirection(look).setRequiresSupport();
+                }
+    //            case GRINDSTONE -> { // Tese are broken
+    //                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
+    //                    case FLOOR -> Direction.DOWN;
+    //                    case CEILING -> Direction.UP;
+    //                    default -> (Direction) getPropertyByName(requiredState, "FACING");
+    //                };
+    //
+    //                Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
+    //                        null : (Direction) getPropertyByName(requiredState, "FACING");
+    //
+    //                return new Placement(Direction.DOWN, // FIXME test
+    //                        Vec3d.of(side.getVector()).multiply(0.5),
+    //                        look);
+    //            }
+                case GATE:
+                case OBSERVER:
+                case CAMPFIRE: {
+                    return new Placement()
+                            .setLookDirection((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING"));
+                }
+                case BED: {
+                    if (requiredState.get(BedBlock.PART) != BedPart.FOOT) {
+                        break;
+                    } else {
+                        return new Placement().setLookDirection(requiredState.get(BedBlock.FACING));
                     }
                 }
+                case BELL: {
+                    Direction side;
+                    switch (requiredState.get(BellBlock.ATTACHMENT)) {
+                        case FLOOR: {
+                            side = Direction.DOWN;
+                            break;
+                        }
+                        case CEILING: {
+                            side = Direction.UP;
+                            break;
+                        }
+                        default: {
+                            side = requiredState.get(BellBlock.FACING);
+                            break;
+                        }
+                    }
 
-                return action;
-            }
-            case ANVIL: {
-                return new Placement().setLookDirection(requiredState.get(AnvilBlock.FACING).rotateYCounterclockwise());
-            }
-            case HOPPER: // FIXME add all sides
-            case COCOA: {
-                return new Placement().setSides((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING"));
-            }
-            case WALLMOUNTED: {
-                Direction side;
-                switch ((WallMountLocation) PrinterUtils.getPropertyByName(requiredState, "FACE")) {
-                    case FLOOR: {
-                        side = Direction.DOWN;
-                        break;
-                    }
-                    case CEILING: {
-                        side = Direction.UP;
-                        break;
-                    }
-                    default: {
-                        side = ((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING")).getOpposite();
-                        break;
-                    }
+                    Direction look = requiredState.get(BellBlock.ATTACHMENT) != Attachment.SINGLE_WALL &&
+                            requiredState.get(BellBlock.ATTACHMENT) != Attachment.DOUBLE_WALL ?
+                            requiredState.get(BellBlock.FACING) : null;
+
+                    return new Placement().setSides(side).setLookDirection(look);
                 }
-
-                Direction look = PrinterUtils.getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
-                        null : (Direction) PrinterUtils.getPropertyByName(requiredState, "FACING");
-
-                return new Placement().setSides(side).setLookDirection(look).setRequiresSupport();
-            }
-//            case GRINDSTONE -> { // Tese are broken
-//                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
-//                    case FLOOR -> Direction.DOWN;
-//                    case CEILING -> Direction.UP;
-//                    default -> (Direction) getPropertyByName(requiredState, "FACING");
-//                };
-//
-//                Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
-//                        null : (Direction) getPropertyByName(requiredState, "FACING");
-//
-//                return new Placement(Direction.DOWN, // FIXME test
-//                        Vec3d.of(side.getVector()).multiply(0.5),
-//                        look);
-//            }
-            case GATE:
-            case OBSERVER:
-            case CAMPFIRE: {
-                return new Placement()
-                        .setLookDirection((Direction) PrinterUtils.getPropertyByName(requiredState, "FACING"));
-            }
-            case BED: {
-                if (requiredState.get(BedBlock.PART) != BedPart.FOOT) {
+                // Fixme
+    //            case DOOR: {
+    //                Direction hinge = requiredState.get(DoorBlock.FACING);
+    //                if (requiredState.get(DoorBlock.HINGE) == DoorHinge.RIGHT) {
+    //                    hinge = hinge.rotateYClockwise();
+    //                } else {
+    //                    hinge = hinge.rotateYCounterclockwise();
+    //                }
+    //
+    //                Vec3d hitModifier = Vec3d.of(hinge.getVector()).multiply(0.25);
+    //                return new Placement(Direction.DOWN,
+    //                        hitModifier,
+    //                        requiredState.get(DoorBlock.FACING));
+    //            }
+                case WALLSKULL: {
+                    return new Placement().setSides(requiredState.get(WallSkullBlock.FACING).getOpposite());
+                }
+                case FARMLAND: {
+                    if (!PrinterUtils.playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
+                        return new Placement().setItem(Items.DIRT);
+                    }
                     break;
-                } else {
-                    return new Placement().setLookDirection(requiredState.get(BedBlock.FACING));
                 }
-            }
-            case BELL: {
-                Direction side;
-                switch (requiredState.get(BellBlock.ATTACHMENT)) {
-                    case FLOOR: {
-                        side = Direction.DOWN;
-                        break;
+                case FLOWER_POT: { // Fixme these
+                    return new Placement().setItem(Items.FLOWER_POT);
+                }
+                case BIG_DRIPLEAF_STEM: {
+                    return new Placement().setItem(Items.BIG_DRIPLEAF);
+                }
+                case SKIP: {
+                    break;
+                }
+                case DEFAULT:
+                default: { // Try to guess how the rest of the blocks are placed.
+                    Direction look = null;
+
+                    for (Property<?> prop : requiredState.getProperties()) {
+                        if (prop instanceof DirectionProperty && prop.getName().equalsIgnoreCase("FACING")) {
+                            look = ((Direction) requiredState.get(prop)).getOpposite();
+                        }
                     }
-                    case CEILING: {
-                        side = Direction.UP;
-                        break;
+
+                    Action placement = new Placement().setLookDirection(look);
+
+                    // If required == dirt path place dirt
+                    if (requiredState.getBlock().equals(Blocks.DIRT_PATH) && !PrinterUtils.playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
+                        placement.setItem(Items.DIRT);
                     }
-                    default: {
-                        side = requiredState.get(BellBlock.FACING);
-                        break;
-                    }
+
+                    return placement;
                 }
-
-                Direction look = requiredState.get(BellBlock.ATTACHMENT) != Attachment.SINGLE_WALL &&
-                        requiredState.get(BellBlock.ATTACHMENT) != Attachment.DOUBLE_WALL ?
-                        requiredState.get(BellBlock.FACING) : null;
-
-                return new Placement().setSides(side).setLookDirection(look);
             }
-            // Fixme
-//            case DOOR: {
-//                Direction hinge = requiredState.get(DoorBlock.FACING);
-//                if (requiredState.get(DoorBlock.HINGE) == DoorHinge.RIGHT) {
-//                    hinge = hinge.rotateYClockwise();
-//                } else {
-//                    hinge = hinge.rotateYCounterclockwise();
-//                }
-//
-//                Vec3d hitModifier = Vec3d.of(hinge.getVector()).multiply(0.25);
-//                return new Placement(Direction.DOWN,
-//                        hitModifier,
-//                        requiredState.get(DoorBlock.FACING));
-//            }
-            case WALLSKULL: {
-                return new Placement().setSides(requiredState.get(WallSkullBlock.FACING).getOpposite());
-            }
-            case FARMLAND: {
-                if (!PrinterUtils.playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
-                    return new Placement().setItem(Items.DIRT);
-                }
-                break;
-            }
-            case FLOWER_POT: { // Fixme these
-                return new Placement().setItem(Items.FLOWER_POT);
-            }
-            case BIG_DRIPLEAF_STEM: {
-                return new Placement().setItem(Items.BIG_DRIPLEAF);
-            }
-            case SKIP: {
-                break;
-            }
-            default: { // Try to guess how the rest of the blocks are placed.
-                Direction look = null;
-
-                for (Property<?> prop : requiredState.getProperties()) {
-                    if (prop instanceof DirectionProperty && prop.getName().equalsIgnoreCase("FACING")) {
-                        look = ((Direction) requiredState.get(prop)).getOpposite();
-                    }
-                }
-
-                Action placement = new Placement().setLookDirection(look);
-
-                // If required == dirt path place dirt
-                if (requiredState.getBlock().equals(Blocks.DIRT_PATH) && !PrinterUtils.playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
-                    placement.setItem(Items.DIRT);
-                }
-
-                return placement;
-            }
+        } else {
+            return null;
         }
 
         return null;
@@ -373,8 +383,8 @@ public class PlacementGuide {
             return lookDirection;
         }
 
-        public @Nullable Item getRequiredItem(BlockPos pos) {
-            return clickItem == null ? worldSchematic.getBlockState(pos).getBlock().asItem() : clickItem;
+        public @Nullable Item getRequiredItem(Block backup) {
+            return clickItem == null ? backup.asItem() : clickItem;
         }
 
         public @NotNull Map<Direction, Vec3d> getSides() {
@@ -388,7 +398,7 @@ public class PlacementGuide {
             return this.sides;
         }
 
-        public @Nullable Direction getValidSide() {
+        public @Nullable Direction getSide() {
             Map<Direction, Vec3d> sides = getSides();
 
             for (Direction d : Direction.values()) {
@@ -486,15 +496,11 @@ public class PlacementGuide {
         }
     }
 
-    private State getState(BlockPos pos) {
-        if (!worldSchematic.getBlockState(pos).isAir() &&
-                client.world.getBlockState(pos).isAir())
+    private State getState(BlockState schematicBlockState, BlockState currentBlockState) {
+        if (!schematicBlockState.isAir() && currentBlockState.isAir())
             return State.MISSING_BLOCK;
-        else if (!worldSchematic.getBlockState(pos).getBlock()
-                .equals(client.world.getBlockState(pos).getBlock()))
-            return State.WRONG_STATE;
-        else if (!worldSchematic.getBlockState(pos)
-                .equals(client.world.getBlockState(pos).isAir()))
+        else if (schematicBlockState.getBlock().equals(currentBlockState.getBlock())
+                && !schematicBlockState.equals(currentBlockState))
             return State.WRONG_STATE;
 
         return State.CORRECT;
@@ -532,18 +538,11 @@ public class PlacementGuide {
         FARMLAND(FarmlandBlock.class),
         FLOWER_POT(FlowerPotBlock.class),
         BIG_DRIPLEAF_STEM(BigDripleafStemBlock.class),
-        DEFAULT_MISSING(State.MISSING_BLOCK),
-        DEFAULT_CLICKABLE(State.WRONG_STATE);
+        DEFAULT;
 
         private final Class<?>[] classes;
-        private final State state;
 
         ClassHook(Class<?>... classes) {
-            this(State.MISSING_BLOCK, classes);
-        }
-
-        ClassHook(State state, Class<?>... classes) {
-            this.state = state;
             this.classes = classes;
         }
     }
