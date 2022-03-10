@@ -60,6 +60,10 @@ public class PlacementGuide {
         BlockState requiredState = worldSchematic.getBlockState(pos);
         BlockState currentState = world.getBlockState(pos);
 
+        if (!requiredState.canPlaceAt(world, pos)) {
+            return null;
+        }
+
         State state = getState(requiredState, currentState);
 
         if (state == State.CORRECT) return null;
@@ -76,31 +80,39 @@ public class PlacementGuide {
                 }
                 case SLAB: {
                     Direction half = requiredState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? Direction.DOWN : Direction.UP;
-                    return new Placement().setSides(half);
+                    Map<Direction, Vec3d> sides = new HashMap<>();
+                    for (Direction direction : PrinterUtils.horizontalDirections) {
+                        sides.put(direction, Vec3d.of(half.getVector()).multiply(0.25));
+                    }
+
+                    sides.put(half, new Vec3d(0, 0, 0));
+
+                    return new Placement().setSides(sides);
                 }
                 case STAIR: {
                     Direction half = PrinterUtils.getHalf(requiredState.get(StairsBlock.HALF));
 
                     Map<Direction, Vec3d> sides = new HashMap<>();
-                    sides.put(half, new Vec3d(0, 0, 0));
-
-                    for (Direction d : PrinterUtils.horizontalDirections) {
-                        sides.put(d, Vec3d.of(half.getVector()).multiply(0.25));
+                    for (Direction direction : PrinterUtils.horizontalDirections) {
+                        sides.put(direction, Vec3d.of(half.getVector()).multiply(0.25));
                     }
 
+                    sides.put(half, new Vec3d(0, 0, 0));
+
                     return new Placement()
-                            .setSides(sides)
-                            .setLookDirection(requiredState.get(StairsBlock.FACING));
+                        .setSides(sides)
+                        .setLookDirection(requiredState.get(StairsBlock.FACING));
                 }
                 case TRAPDOOR: {
                     Direction half = PrinterUtils.getHalf(requiredState.get(TrapdoorBlock.HALF));
 
                     Map<Direction, Vec3d> sides = new HashMap<>();
-                    sides.put(half, new Vec3d(0, 0, 0));
 
                     for (Direction d : PrinterUtils.horizontalDirections) {
                         sides.put(d, Vec3d.of(half.getVector()).multiply(0.25));
                     }
+
+                    sides.put(half, new Vec3d(0, 0, 0));
 
                     return new Placement()
                             .setSides(sides)
@@ -207,20 +219,27 @@ public class PlacementGuide {
 
                     return new Placement().setSides(side).setLookDirection(look);
                 }
-                // Fixme
-    //            case DOOR: {
-    //                Direction hinge = requiredState.get(DoorBlock.FACING);
-    //                if (requiredState.get(DoorBlock.HINGE) == DoorHinge.RIGHT) {
-    //                    hinge = hinge.rotateYClockwise();
-    //                } else {
-    //                    hinge = hinge.rotateYCounterclockwise();
-    //                }
-    //
-    //                Vec3d hitModifier = Vec3d.of(hinge.getVector()).multiply(0.25);
-    //                return new Placement(Direction.DOWN,
-    //                        hitModifier,
-    //                        requiredState.get(DoorBlock.FACING));
-    //            }
+                case DOOR: {
+                    Map<Direction, Vec3d> sides = new HashMap<>();
+
+                    Direction facing, hinge;
+                    facing = hinge = requiredState.get(DoorBlock.FACING);
+
+                    Vec3d hingeVec = new Vec3d(requiredState.get(DoorBlock.HINGE) == DoorHinge.RIGHT ?
+                            0.25 : -0.25, 0, 0);
+
+                    if (requiredState.get(DoorBlock.HINGE) == DoorHinge.RIGHT) {
+                        hinge = hinge.rotateYClockwise();
+                    } else {
+                        hinge = hinge.rotateYCounterclockwise();
+                    }
+
+                    sides.put(hinge, new Vec3d(0, 0, 0));
+                    sides.put(Direction.DOWN, hingeVec);
+                    sides.put(facing, hingeVec);
+
+                    return new Placement().setLookDirection(requiredState.get(DoorBlock.FACING)).setSides(sides);
+                }
                 case WALLSKULL: {
                     return new Placement().setSides(requiredState.get(WallSkullBlock.FACING).getOpposite());
                 }

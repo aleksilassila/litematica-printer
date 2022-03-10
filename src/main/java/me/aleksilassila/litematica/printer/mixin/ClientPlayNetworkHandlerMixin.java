@@ -22,10 +22,6 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Overwrite
     public void sendPacket(Packet<?> packet) {
-        if (packet instanceof PlayerMoveC2SPacket.LookAndOnGround || packet instanceof PlayerMoveC2SPacket.Full) {
-            System.out.println("Got look packet with yaw: " + ((PlayerMoveC2SPacketAccessor) packet).getYaw());
-        }
-
         if (Printer.getPrinter() == null) {
             this.connection.send(packet);
             return;
@@ -37,7 +33,6 @@ public class ClientPlayNetworkHandlerMixin {
             Packet<?> fixedPacket = Implementation.getFixedLookPacket(client.player, packet, direction);
 
             if (fixedPacket != null) {
-                System.out.println("Sending yaw: " + ((PlayerMoveC2SPacketAccessor) fixedPacket).getYaw());
                 this.connection.send(fixedPacket);
             }
         } else if (direction == null || !Implementation.isLookOnlyPacket(packet)) {

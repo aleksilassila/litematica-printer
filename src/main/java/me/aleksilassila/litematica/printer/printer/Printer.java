@@ -7,7 +7,6 @@ import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
-import me.aleksilassila.litematica.printer.mixin.ClientPlayNetworkHandlerMixin;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.enums.ChestType;
@@ -23,7 +22,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,7 +97,7 @@ public class Printer extends PrinterUtils {
                     1. See if should print in this tick, else return
                     2. Empty (send) queue
                     3. For every block:
-                        1. Check if in range
+                        *1. Check if in range
                         2. get required possible placement
                         3. get required possible click
                         4. click if necessary and possible
@@ -178,14 +176,6 @@ public class Printer extends PrinterUtils {
         }
     }
 
-    private VoxelShape getOutlineShape(BlockPos pos) {
-        return getState(pos).getOutlineShape(world, pos);
-    }
-
-    private BlockState getState(BlockPos pos) {
-        return world.getBlockState(pos);
-    }
-
 //    private void sendQueuedPlacement() {
 //        if (Queue.neighbor == null) return;
 //
@@ -245,10 +235,6 @@ public class Printer extends PrinterUtils {
         InventoryUtils.setPickedItemToHand(stack, client);
     }
 
-    private boolean canBeClicked(BlockPos pos) {
-        return getOutlineShape(pos) != VoxelShapes.empty();
-    }
-
     public void sendLook(Direction direction) {
         if (direction != null) {
             Implementation.sendLookPacket(client.player, direction);
@@ -260,7 +246,7 @@ public class Printer extends PrinterUtils {
     public static class Queue {
         public BlockPos target;
         public Direction side;
-        public Vec3d hitVec;
+        public Vec3d hitModifier;
 
         public Direction lookDir = null;
 
@@ -272,7 +258,7 @@ public class Printer extends PrinterUtils {
             this.pEntity = printerInstance.pEntity;
         }
 
-        public void queueClick(@NotNull BlockPos target, @NotNull Direction side, @NotNull Vec3d hitVec) {
+        public void queueClick(@NotNull BlockPos target, @NotNull Direction side, @NotNull Vec3d hitModifier) {
             if (this.target != null) {
                 System.out.println("Was not ready yet.");
                 return;
@@ -280,18 +266,28 @@ public class Printer extends PrinterUtils {
 
             this.target = target;
             this.side = side;
-            this.hitVec = hitVec;
+            this.hitModifier = hitModifier;
         }
 
         public void sendQueue() {
-            if (target == null || side == null || hitVec == null) return;
+            if (target == null || side == null || hitModifier == null) return;
 
             boolean wasSneaking = pEntity.isSneaking();
 
-            hitVec = Vec3d.ofCenter(target).add(hitVec.multiply(0.5));
+            Direction direction = side.getAxis() == Direction.Axis.Y ?
+                    ((lookDir == null || !lookDir.getAxis().isHorizontal())
+                            ? Direction.NORTH : lookDir) : side;
 
-            boolean useShift = !(printerInstance.worldSchematic.getBlockState(target).contains(ChestBlock.CHEST_TYPE) &&
-                    printerInstance.worldSchematic.getBlockState(target).get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE);
+            hitModifier = new Vec3d(hitModifier.z, hitModifier.y, hitModifier.x);
+            hitModifier = hitModifier.rotateY((direction.asRotation() + 90) % 360);
+
+            Vec3d hitVec = Vec3d.ofCenter(target)
+                    .add(Vec3d.of(side.getVector()).multiply(0.5))
+                    .add(hitModifier.multiply(0.5));
+
+            boolean useShift = true; // fixme block tag for clickable blocks
+//            boolean useShift = !(printerInstance.worldSchematic.getBlockState(target).contains(ChestBlock.CHEST_TYPE) &&
+//                    printerInstance.worldSchematic.getBlockState(target).get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE);
 
             if (useShift && !wasSneaking)
                 pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
@@ -314,7 +310,7 @@ public class Printer extends PrinterUtils {
         public void clearQueue() {
             this.target = null;
             this.side = null;
-            this.hitVec = null;
+            this.hitModifier = null;
             this.lookDir = null;
         }
     }

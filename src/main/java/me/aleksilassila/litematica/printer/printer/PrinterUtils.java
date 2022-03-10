@@ -12,6 +12,8 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -62,7 +64,7 @@ public class PrinterUtils {
 
 	public static @Nullable Direction getSupportedSide(ClientWorld world, BlockPos pos, Map<Direction, Vec3d> sides) {
 		for (Direction side : sides.keySet()) {
-			if (world.getBlockState(pos.offset(side)).isSolidBlock(world, pos.offset(side)))
+			if (canBeClicked(world, pos.offset(side)))
 				return side;
 		}
 
@@ -77,5 +79,13 @@ public class PrinterUtils {
         }
 
         return null;
+    }
+
+    public static boolean canBeClicked(ClientWorld world, BlockPos pos) {
+        return getOutlineShape(world, pos) != VoxelShapes.empty();
+    }
+
+    public static VoxelShape getOutlineShape(ClientWorld world, BlockPos pos) {
+        return world.getBlockState(pos).getOutlineShape(world, pos);
     }
 }
