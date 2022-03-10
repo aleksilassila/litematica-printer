@@ -168,7 +168,9 @@ public enum PlacementGuide {
 //                        look);
 //            }
             case GATE:
-            case OBSERVER:
+            case OBSERVER: {
+                return new Placement(null, null, requiredState.get(ObserverBlock.FACING));
+            }
             case CAMPFIRE: {
                 return new Placement(null,
                         null,
