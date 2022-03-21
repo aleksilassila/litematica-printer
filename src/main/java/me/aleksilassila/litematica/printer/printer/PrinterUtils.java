@@ -14,8 +14,10 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class PrinterUtils {
@@ -26,7 +28,7 @@ public class PrinterUtils {
 	}
 
 	public static boolean playerHasAccessToItems(ClientPlayerEntity playerEntity, Item[] items) {
-		if (items == null) return false;
+		if (items == null || items.length == 0) return true;
 		if (Implementation.getAbilities(playerEntity).creativeMode) return true;
 		else {
 			Inventory inv = Implementation.getInventory(playerEntity);
@@ -62,15 +64,6 @@ public class PrinterUtils {
         return Direction.DOWN;
     }
 
-	public static @Nullable Direction getSupportedSide(ClientWorld world, BlockPos pos, Map<Direction, Vec3d> sides) {
-		for (Direction side : sides.keySet()) {
-			if (canBeClicked(world, pos.offset(side)))
-				return side;
-		}
-
-		return null;
-    }
-
     public static Comparable<?> getPropertyByName(BlockState state, String name) {
         for (Property<?> prop : state.getProperties()) {
             if (prop.getName().equalsIgnoreCase(name)) {
@@ -87,5 +80,28 @@ public class PrinterUtils {
 
     public static VoxelShape getOutlineShape(ClientWorld world, BlockPos pos) {
         return world.getBlockState(pos).getOutlineShape(world, pos);
+    }
+
+    public static Map<Direction, Vec3d> getSlabSides(World world, BlockPos pos, SlabType half) {
+        if (half == SlabType.DOUBLE) half = SlabType.BOTTOM;
+        Direction halfDir = half == SlabType.TOP ? Direction.UP : Direction.DOWN;
+
+        Map<Direction, Vec3d> sides = new HashMap<>(){{
+            put(halfDir, new Vec3d(0, 0, 0));
+        }};
+
+        for (Direction side : horizontalDirections) {
+            BlockState neighborCurrentState = world.getBlockState(pos.offset(side));
+
+            if (neighborCurrentState.contains(SlabBlock.TYPE) && neighborCurrentState.get(SlabBlock.TYPE) != SlabType.DOUBLE) {
+                if (neighborCurrentState.get(SlabBlock.TYPE) != half) {
+                    continue;
+                }
+            }
+
+            sides.put(side, Vec3d.of(halfDir.getVector()).multiply(0.25));
+        }
+
+        return sides;
     }
 }

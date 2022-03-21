@@ -1,6 +1,12 @@
 package me.aleksilassila.litematica.printer.mixin;
 
 import me.aleksilassila.litematica.printer.interfaces.IClientPlayerInteractionManager;
+import me.aleksilassila.litematica.printer.printer.PlacementGuide;
+import me.aleksilassila.litematica.printer.printer.Printer;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.MappingResolver;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
@@ -18,6 +24,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.lang.reflect.Method;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MixinClientPlayerInteractionManager implements IClientPlayerInteractionManager {
@@ -42,8 +50,14 @@ public abstract class MixinClientPlayerInteractionManager implements IClientPlay
 	public abstract ActionResult interactItem(PlayerEntity playerEntity_1,
                                               World world_1, Hand hand_1);
 
-	@Inject(at = @At("HEAD"), method = "interactBlock")
-	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-		System.out.println("Player interactBlock: pos: (" + hitResult.getBlockPos().toShortString() + "), side: " + hitResult.getSide().getName() + ", vector: " + hitResult.getPos().toString());
-	}
+//	@Inject(at = @At("HEAD"), method = "interactBlock")
+//	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+//		System.out.println("Player interactBlock: pos: (" + hitResult.getBlockPos().toShortString() + "), side: " + hitResult.getSide().getName() + ", vector: " + hitResult.getPos().toString());
+//		PlacementGuide.Action a = Printer.getPrinter().guide.getAction(hitResult.getBlockPos());
+//		for (Direction side : a.getSides().keySet()) {
+//			System.out.println("Side: " + side + ", " + a.getSides().get(side).toString());
+//		}
+//		System.out.println("Valid: " + a.getValidSide(world, hitResult.getBlockPos()));
+//		System.out.println("Look: " + a.getLookDirection());
+//	}
 }
