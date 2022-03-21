@@ -32,6 +32,9 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 	@Inject(at = @At("HEAD"), method = "tick")
 	public void tick(CallbackInfo ci) {
+		if (!(this.world.isPosLoaded(this.getBlockX(), this.getBlockZ())))
+			return;
+
 		if (!didCheckForUpdates) {
 			didCheckForUpdates = true;
 
@@ -39,10 +42,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		}
 
 		if (printer == null) {
-			if (client != null && client.player != null && client.world != null) {
-				printer = new Printer(client, client.player, client.world);
-			}
-
+			printer = Printer.init(client);
 			return;
 		}
 
