@@ -19,9 +19,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PlacementGuide extends PrinterUtils {
     @NotNull
@@ -61,6 +59,14 @@ public class PlacementGuide extends PrinterUtils {
     private @Nullable Action buildAction(BlockPos pos, ClassHook requiredType) {
         BlockState requiredState = worldSchematic.getBlockState(pos);
         BlockState currentState = world.getBlockState(pos);
+
+        if (requiredState.getBlock() instanceof FluidBlock) {
+            return null;
+        } else if (currentState.getBlock() instanceof FluidBlock) {
+            if (currentState.get(FluidBlock.LEVEL) == 0 && !LitematicaMixinMod.shouldReplaceFluids) {
+                return null;
+            }
+        }
 
         if (!requiredState.canPlaceAt(world, pos)) {
             return null;
@@ -419,15 +425,33 @@ public class PlacementGuide extends PrinterUtils {
             this(side, new Vec3d(0, 0, 0));
         }
 
+        /**
+         * {@link Action#Action(Direction, Vec3d)}
+         */
         public Action(Map<Direction, Vec3d> sides) {
             this.sides = sides;
         }
 
+        /**
+         *
+         * @param side The side pointing to the block that should be clicked
+         * @param modifier defines where should be clicked exactly. Vector's
+         *                 x component defines left and right offset, y
+         *                 defines height variation and z how far away from
+         *                 player. (0, 0, 0) means click happens in the middle
+         *                 of the side that is being clicked. (0.5, -0.5, 0)
+         *                 would mean right bottom corner when clicking a
+         *                 vertical side. Therefore, z should only be used when
+         *                 clicking horizontal surface.
+         */
         public Action(Direction side, Vec3d modifier) {
             this.sides = new HashMap<>();
             this.sides.put(side, modifier);
         }
 
+        /**
+         * {@link Action#Action(Direction, Vec3d)}
+         */
         @SafeVarargs
         public Action(Pair<Direction, Vec3d>... sides) {
             this.sides = new HashMap<>();
@@ -468,6 +492,8 @@ public class PlacementGuide extends PrinterUtils {
         public @Nullable Direction getValidSide(ClientWorld world, BlockPos pos) {
             Map<Direction, Vec3d> sides = getSides();
 
+            List<Direction> validSides = new ArrayList<>();
+
             for (Direction side : sides.keySet()) {
                 if (LitematicaMixinMod.shouldPrintInAir) {
                     return side;
@@ -479,13 +505,22 @@ public class PlacementGuide extends PrinterUtils {
                         continue;
                     }
 
-                    if (canBeClicked(world, pos.offset(side)) &&
+                    if (canBeClicked(world, pos.offset(side)) && // Handle unclickable grass for example
                             !world.getBlockState(pos.offset(side)).getMaterial().isReplaceable())
-                        return side;
+                        validSides.add(side);
                 }
             }
 
-            return null;
+            if (validSides.isEmpty()) return null;
+
+            // Try to pick a side that doesn't require shift
+            for (Direction validSide : validSides) {
+                if (!Implementation.isInteractable(world.getBlockState(pos.offset(validSide)).getBlock())) {
+                    return validSide;
+                }
+            }
+
+            return validSides.get(0);
         }
 
         public Action setSides(Direction.Axis... axis) {
@@ -549,22 +584,22 @@ public class PlacementGuide extends PrinterUtils {
             return this.setRequiresSupport(true);
         }
 
-        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift) {
+        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift, boolean didSendLook) {
             System.out.println("Queued click?: " + center.offset(side).toString() + ", side: " + side.getOpposite());
 
             if (LitematicaMixinMod.shouldPrintInAir) {
-                queue.queueClick(center, side.getOpposite(), Vec3d.ofCenter(center),
-                        useShift, getLookDirection() != null);
+                queue.queueClick(center, side.getOpposite(), getSides().get(side),
+                        useShift, didSendLook);
             } else {
                 queue.queueClick(center.offset(side), side.getOpposite(), getSides().get(side),
-                        useShift, getLookDirection() != null);
+                        useShift, didSendLook);
             }
         }
     }
 
     public static class ClickAction extends Action {
         @Override
-        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift) {
+        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift, boolean didSendLook) {
             System.out.println("Queued click?: " + center.toString() + ", side: " + side);
             queue.queueClick(center, side, getSides().get(side), false, false);
         }

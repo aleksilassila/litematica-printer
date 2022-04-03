@@ -17,7 +17,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -39,16 +38,12 @@ public class Printer extends PrinterUtils {
 
     int tick = 0;
 
-    private boolean shouldReplaceFluids;
-
-    public static @Nullable Printer init(MinecraftClient client) {
+    public static @Nullable Printer init(MinecraftClient client, ClientWorld world, WorldSchematic schematicWorld) {
         if (client == null || client.player == null || client.world == null) {
             return null;
         }
 
-        if (INSTANCE == null) {
-            INSTANCE = new Printer(client);
-        }
+        INSTANCE = new Printer(client);
 
         return INSTANCE;
     }
@@ -73,23 +68,23 @@ public class Printer extends PrinterUtils {
         INSTANCE = this;
     }
 
-    public void onTick() {
+    public void tick() {
         int tickRate = LitematicaMixinMod.PRINT_INTERVAL.getIntegerValue();
 
         tick = tick == 0x7fffffff ? 0 : tick + 1;
         if (tick % tickRate != 0) {
-            if (!queue.didSendLook) {
+//            if (!queue.didSendLook) {
                 queue.sendQueue();
-            }
+//            }
             return;
         }
 
         int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
 
         LitematicaMixinMod.shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
-        shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
+        LitematicaMixinMod.shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
 
-        queue.sendQueue();
+//        queue.sendQueue();
 
         // forEachBlockInRadius:
         for (int y = -range; y < range + 1; y++) {
@@ -107,23 +102,51 @@ public class Printer extends PrinterUtils {
 
                     Item[] requiredItems = action.getRequiredItems(requiredState.getBlock());
                     if (playerHasAccessToItems(pEntity, requiredItems)) {
-                        switchToItems(requiredItems);
-                        sendLook(action.getLookDirection());
 
+                        // Handle shift and chest placement
                         // Won't be required if clickAction
                         boolean useShift = true; // Fixme before ship
-                        if (requiredState.contains(ChestBlock.CHEST_TYPE) && requiredState.get(ChestBlock.CHEST_TYPE) == ChestType.SINGLE) {
-                            useShift = true;
+                        if (requiredState.contains(ChestBlock.CHEST_TYPE)) {
+                            BlockPos leftNeighbor = center.offset(requiredState.get(ChestBlock.FACING).rotateYClockwise());
+                            BlockState leftState = world.getBlockState(leftNeighbor);
+
+                            switch (requiredState.get(ChestBlock.CHEST_TYPE)) {
+                                case SINGLE:
+                                case RIGHT: {
+                                    useShift = true;
+                                    break;
+                                }
+                                case LEFT: {
+                                    if (leftState.contains(ChestBlock.CHEST_TYPE) && leftState.get(ChestBlock.CHEST_TYPE) == ChestType.SINGLE) {
+                                        useShift = false;
+
+                                        // Check if it is possible to place without shift
+                                        if (Implementation.isInteractable(world.getBlockState(center.offset(side)).getBlock())) {
+                                            continue;
+                                        }
+                                    } else {
+                                        continue;
+                                    }
+                                    break;
+                                }
+                            }
                         } else if (Implementation.isInteractable(world.getBlockState(center.offset(side)).getBlock())) {
                             useShift = true;
                         }
 
-                        action.queueAction(queue, center, side, useShift);
+                        Direction lookDir = action.getLookDirection();
+                        sendPlacementPreparation(requiredItems, lookDir);
+                        action.queueAction(queue, center, side, useShift, lookDir != null);
                         return;
                     }
                 }
             }
         }
+    }
+
+    private void sendPlacementPreparation(Item[] requiredItems, Direction lookDir) {
+        switchToItems(requiredItems);
+        sendLook(lookDir);
     }
 
     private void switchToItems(Item[] items) {

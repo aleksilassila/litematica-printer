@@ -130,7 +130,7 @@ public class Implementation {
     public static Class<?>[] interactableBlocks = {
             ChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
             AbstractButtonBlock.class, LeverBlock.class, DoorBlock.class, TrapdoorBlock.class,
-            BedBlock.class, RedstoneWireBlock.class,
+            BedBlock.class, RedstoneWireBlock.class, ScaffoldingBlock.class,
     };
 
 
