@@ -68,6 +68,17 @@ public class Printer extends PrinterUtils {
         INSTANCE = this;
     }
 
+    /*
+    Fixme legit mode:
+        - scaffoldings in legit mode
+    Fixme air mode:
+        - wallmounted levers (and buttons?)
+        - doors (hit modifier)
+        - trapdoors
+    Fixme other:
+        - signs
+     */
+
     public void tick() {
         int tickRate = LitematicaMixinMod.PRINT_INTERVAL.getIntegerValue();
 
@@ -83,8 +94,6 @@ public class Printer extends PrinterUtils {
 
         LitematicaMixinMod.shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
         LitematicaMixinMod.shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
-
-//        queue.sendQueue();
 
         // forEachBlockInRadius:
         for (int y = -range; y < range + 1; y++) {
@@ -107,6 +116,7 @@ public class Printer extends PrinterUtils {
                         // Won't be required if clickAction
                         boolean useShift = true; // Fixme before ship
                         if (requiredState.contains(ChestBlock.CHEST_TYPE)) {
+                            // Left neighbor from player's perspective
                             BlockPos leftNeighbor = center.offset(requiredState.get(ChestBlock.FACING).rotateYClockwise());
                             BlockState leftState = world.getBlockState(leftNeighbor);
 
