@@ -1,8 +1,6 @@
 package me.aleksilassila.litematica.printer.interfaces;
 
 import me.aleksilassila.litematica.printer.mixin.PlayerMoveC2SPacketAccessor;
-import me.aleksilassila.litematica.printer.printer.PlacementGuide;
-import me.aleksilassila.litematica.printer.printer.Printer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.block.*;
@@ -14,8 +12,6 @@ import net.minecraft.item.Items;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Direction;
-
-import java.lang.reflect.Field;
 
 /**
  * Dirty class that contains anything and everything that is
@@ -105,7 +101,7 @@ public class Implementation {
 //            return false;
 //        }
 
-        for (Class<?> clazz : interactableBlocks) {
+        for (Class<?> clazz : interactiveBlocks) {
             if (clazz.isInstance(block)) {
                 return true;
             }
@@ -127,7 +123,7 @@ public class Implementation {
         }
     }
 
-    public static Class<?>[] interactableBlocks = {
+    public static Class<?>[] interactiveBlocks = {
             ChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
             AbstractButtonBlock.class, LeverBlock.class, DoorBlock.class, TrapdoorBlock.class,
             BedBlock.class, RedstoneWireBlock.class, ScaffoldingBlock.class, HopperBlock.class,
@@ -136,6 +132,8 @@ public class Implementation {
             BeaconBlock.class, AnvilBlock.class, ComparatorBlock.class, RepeaterBlock.class,
             DropperBlock.class, DispenserBlock.class, ShulkerBoxBlock.class, LecternBlock.class,
             FlowerPotBlock.class, BarrelBlock.class, BellBlock.class, SmithingTableBlock.class,
+            LoomBlock.class, CartographyTableBlock.class, GrindstoneBlock.class,
+            StonecutterBlock.class
 
     };
 

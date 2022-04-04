@@ -77,6 +77,7 @@ public class Printer extends PrinterUtils {
         - trapdoors
     Fixme other:
         - signs
+        - shovels and hoes in creative
      */
 
     public void tick() {

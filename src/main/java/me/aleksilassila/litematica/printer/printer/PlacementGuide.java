@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.printer;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
+import me.aleksilassila.litematica.printer.mixin.FlowerPotBlockAccessor;
 import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.*;
@@ -253,9 +254,6 @@ public class PlacementGuide extends PrinterUtils {
                     }
                     break;
                 }
-                case FLOWER_POT: { // Fixme these
-                    return new Action().setItem(Items.FLOWER_POT);
-                }
                 case BIG_DRIPLEAF_STEM: {
                     return new Action().setItem(Items.BIG_DRIPLEAF);
                 }
@@ -382,6 +380,15 @@ public class PlacementGuide extends PrinterUtils {
                     for (Block soilBlock : soilBlocks) {
                         if (currentState.getBlock().equals(soilBlock))
                             return new ClickAction().setItems(Implementation.HOES);
+                    }
+
+                    break;
+                }
+                case FLOWER_POT: { // Fixme test
+                    Block content = ((FlowerPotBlockAccessor) requiredState).getContent();
+
+                    if (content != null && content != Blocks.AIR) {
+                        return new Action().setItem(content.asItem());
                     }
 
                     break;
