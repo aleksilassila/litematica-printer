@@ -70,7 +70,8 @@ public class Printer extends PrinterUtils {
 
     /*
     Fixme legit mode:
-        - scaffoldings in legit mode
+        - scaffoldings
+        - Redstone torches?
     Fixme air mode:
         - wallmounted levers (and buttons?)
         - doors (hit modifier)
@@ -115,7 +116,7 @@ public class Printer extends PrinterUtils {
 
                         // Handle shift and chest placement
                         // Won't be required if clickAction
-                        boolean useShift = true; // Fixme before ship
+                        boolean useShift = false;
                         if (requiredState.contains(ChestBlock.CHEST_TYPE)) {
                             // Left neighbor from player's perspective
                             BlockPos leftNeighbor = center.offset(requiredState.get(ChestBlock.FACING).rotateYClockwise());
@@ -132,7 +133,7 @@ public class Printer extends PrinterUtils {
                                         useShift = false;
 
                                         // Check if it is possible to place without shift
-                                        if (Implementation.isInteractable(world.getBlockState(center.offset(side)).getBlock())) {
+                                        if (Implementation.isInteractive(world.getBlockState(center.offset(side)).getBlock())) {
                                             continue;
                                         }
                                     } else {
@@ -141,7 +142,7 @@ public class Printer extends PrinterUtils {
                                     break;
                                 }
                             }
-                        } else if (Implementation.isInteractable(world.getBlockState(center.offset(side)).getBlock())) {
+                        } else if (Implementation.isInteractive(world.getBlockState(center.offset(side)).getBlock())) {
                             useShift = true;
                         }
 

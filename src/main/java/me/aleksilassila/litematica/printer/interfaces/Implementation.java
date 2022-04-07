@@ -91,16 +91,7 @@ public class Implementation {
         }
     }
 
-    public static boolean isInteractable(Block block) {
-        MappingResolver resolver = FabricLoader.getInstance().getMappingResolver();
-
-//        try {
-//            return block.getClass().getMethod(resolver.unmapClassName("intermediary", AbstractBlock.class.getName()))
-//                    .getDeclaringClass().equals(AbstractBlock.class);
-//        } catch (NoSuchMethodException ignored) {
-//            return false;
-//        }
-
+    public static boolean isInteractive(Block block) {
         for (Class<?> clazz : interactiveBlocks) {
             if (clazz.isInstance(block)) {
                 return true;

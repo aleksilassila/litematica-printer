@@ -36,11 +36,8 @@ public class PlacementGuide extends PrinterUtils {
         this.worldSchematic = worldSchematic;
     }
 
-    public Action getAction(BlockPos pos) {
+    public @Nullable Action getAction(BlockPos pos) {
         for (ClassHook hook : ClassHook.values()) {
-            // Fixme state
-//            if (hook.state != getState(pos)) continue;
-
             for (Class<?> clazz : hook.classes) {
                 if (clazz != null && clazz.isInstance(worldSchematic.getBlockState(pos).getBlock())) {
                     return buildAction(pos, hook);
@@ -508,7 +505,7 @@ public class PlacementGuide extends PrinterUtils {
                     BlockPos neighborPos = pos.offset(side);
                     BlockState neighborState = world.getBlockState(neighborPos);
 
-                    if (neighborState.getBlock() instanceof SlabBlock) {
+                    if (neighborState.contains(SlabBlock.TYPE) && neighborState.get(SlabBlock.TYPE) != SlabType.DOUBLE) {
                         continue;
                     }
 
@@ -522,7 +519,7 @@ public class PlacementGuide extends PrinterUtils {
 
             // Try to pick a side that doesn't require shift
             for (Direction validSide : validSides) {
-                if (!Implementation.isInteractable(world.getBlockState(pos.offset(validSide)).getBlock())) {
+                if (!Implementation.isInteractive(world.getBlockState(pos.offset(validSide)).getBlock())) {
                     return validSide;
                 }
             }

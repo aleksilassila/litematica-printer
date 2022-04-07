@@ -50,14 +50,14 @@ public abstract class MixinClientPlayerInteractionManager implements IClientPlay
 	public abstract ActionResult interactItem(PlayerEntity playerEntity_1,
                                               World world_1, Hand hand_1);
 
-//	@Inject(at = @At("HEAD"), method = "interactBlock")
-//	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-//		System.out.println("Player interactBlock: pos: (" + hitResult.getBlockPos().toShortString() + "), side: " + hitResult.getSide().getName() + ", vector: " + hitResult.getPos().toString());
-//		PlacementGuide.Action a = Printer.getPrinter().guide.getAction(hitResult.getBlockPos());
-//		for (Direction side : a.getSides().keySet()) {
-//			System.out.println("Side: " + side + ", " + a.getSides().get(side).toString());
-//		}
-//		System.out.println("Valid: " + a.getValidSide(world, hitResult.getBlockPos()));
-//		System.out.println("Look: " + a.getLookDirection());
-//	}
+	@Inject(at = @At("HEAD"), method = "interactBlock")
+	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+		System.out.println("Player interactBlock: pos: (" + hitResult.getBlockPos().toShortString() + "), side: " + hitResult.getSide().getName() + ", vector: " + hitResult.getPos().toString());
+		PlacementGuide.Action a = Printer.getPrinter().guide.getAction(hitResult.getBlockPos());
+		for (Direction side : a.getSides().keySet()) {
+			System.out.println("Side: " + side + ", " + a.getSides().get(side).toString());
+		}
+		System.out.println("Valid: " + a.getValidSide(world, hitResult.getBlockPos()));
+		System.out.println("Look: " + a.getLookDirection());
+	}
 }

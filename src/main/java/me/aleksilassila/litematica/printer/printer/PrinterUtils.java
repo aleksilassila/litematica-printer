@@ -82,24 +82,27 @@ public class PrinterUtils {
         return world.getBlockState(pos).getOutlineShape(world, pos);
     }
 
-    public static Map<Direction, Vec3d> getSlabSides(World world, BlockPos pos, SlabType half) {
-        if (half == SlabType.DOUBLE) half = SlabType.BOTTOM;
-        Direction halfDir = half == SlabType.TOP ? Direction.UP : Direction.DOWN;
+    public static Map<Direction, Vec3d> getSlabSides(World world, BlockPos pos, SlabType requiredHalf) {
+        if (requiredHalf == SlabType.DOUBLE) requiredHalf = SlabType.BOTTOM;
+        Direction requiredDir = requiredHalf == SlabType.TOP ? Direction.UP : Direction.DOWN;
 
-        Map<Direction, Vec3d> sides = new HashMap<>(){{
-            put(halfDir, new Vec3d(0, 0, 0));
-        }};
+        Map<Direction, Vec3d> sides = new HashMap<>();
+        sides.put(requiredDir, new Vec3d(0, 0, 0));
+
+        if (world.getBlockState(pos).contains(SlabBlock.TYPE)) {
+            sides.put(requiredDir.getOpposite(), Vec3d.of(requiredDir.getVector()).multiply(0.5));
+        }
 
         for (Direction side : horizontalDirections) {
             BlockState neighborCurrentState = world.getBlockState(pos.offset(side));
 
             if (neighborCurrentState.contains(SlabBlock.TYPE) && neighborCurrentState.get(SlabBlock.TYPE) != SlabType.DOUBLE) {
-                if (neighborCurrentState.get(SlabBlock.TYPE) != half) {
+                if (neighborCurrentState.get(SlabBlock.TYPE) != requiredHalf) {
                     continue;
                 }
             }
 
-            sides.put(side, Vec3d.of(halfDir.getVector()).multiply(0.25));
+            sides.put(side, Vec3d.of(requiredDir.getVector()).multiply(0.25));
         }
 
         return sides;
