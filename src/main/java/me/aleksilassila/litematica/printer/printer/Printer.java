@@ -73,12 +73,12 @@ public class Printer extends PrinterUtils {
         - scaffoldings
         - Redstone torches?
     Fixme air mode:
-        - wallmounted levers (and buttons?)
         - doors (hit modifier)
         - trapdoors
     Fixme other:
         - signs
         - shovels and hoes in creative
+        - complete doublechest with another doublechest to right
      */
 
     public void tick() {

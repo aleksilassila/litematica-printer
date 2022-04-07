@@ -499,7 +499,7 @@ public class PlacementGuide extends PrinterUtils {
             List<Direction> validSides = new ArrayList<>();
 
             for (Direction side : sides.keySet()) {
-                if (LitematicaMixinMod.shouldPrintInAir) {
+                if (LitematicaMixinMod.shouldPrintInAir && !this.requiresSupport) {
                     return side;
                 } else {
                     BlockPos neighborPos = pos.offset(side);
@@ -591,7 +591,7 @@ public class PlacementGuide extends PrinterUtils {
         public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift, boolean didSendLook) {
             System.out.println("Queued click?: " + center.offset(side).toString() + ", side: " + side.getOpposite());
 
-            if (LitematicaMixinMod.shouldPrintInAir) {
+            if (LitematicaMixinMod.shouldPrintInAir && !this.requiresSupport) {
                 queue.queueClick(center, side.getOpposite(), getSides().get(side),
                         useShift, didSendLook);
             } else {
