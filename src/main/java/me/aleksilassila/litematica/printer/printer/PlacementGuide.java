@@ -81,8 +81,13 @@ public class PlacementGuide extends PrinterUtils {
         if (state == State.MISSING_BLOCK) {
             switch (requiredType) {
                 case WALLTORCH:
+                case AMETHYST: {
+                    return new Action()
+                            .setSides(((Direction) getPropertyByName(requiredState, "FACING"))
+                                    .getOpposite())
+                            .setRequiresSupport();
+                }
                 case ROD:
-                case AMETHYST:
                 case SHULKER: {
                     return new Action().setSides(
                             ((Direction) getPropertyByName(requiredState, "FACING"))
@@ -239,17 +244,14 @@ public class PlacementGuide extends PrinterUtils {
                     sides.put(Direction.DOWN, hingeVec);
                     sides.put(facing, hingeVec);
 
-                    return new Action().setLookDirection(requiredState.get(DoorBlock.FACING)).setSides(sides);
+                    return new Action().setLookDirection(requiredState.get(DoorBlock.FACING)).setSides(sides).setRequiresSupport();
                 }
                 case WALLSKULL: {
                     return new Action().setSides(requiredState.get(WallSkullBlock.FACING).getOpposite());
                 }
-                case FARMLAND: { // FIXME creative does not actually have access either
-//                    if (!playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
-                    if (true) {
-                        return new Action().setItem(Items.DIRT);
-                    }
-                    break;
+                case FARMLAND:
+                case DIRT_PATH: {
+                    return new Action().setItem(Items.DIRT);
                 }
                 case BIG_DRIPLEAF_STEM: {
                     return new Action().setItem(Items.BIG_DRIPLEAF);
@@ -371,16 +373,6 @@ public class PlacementGuide extends PrinterUtils {
 
                     break;
                 }
-                case FARMLAND: {
-                    Block[] soilBlocks = new Block[]{Blocks.GRASS_BLOCK, Blocks.DIRT_PATH,
-                            Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT};
-                    for (Block soilBlock : soilBlocks) {
-                        if (currentState.getBlock().equals(soilBlock))
-                            return new ClickAction().setItems(Implementation.HOES);
-                    }
-
-                    break;
-                }
                 case FLOWER_POT: { // Fixme test
                     Block content = ((FlowerPotBlockAccessor) requiredState).getContent();
 
@@ -400,8 +392,33 @@ public class PlacementGuide extends PrinterUtils {
                     break;
                 }
             }
-        } else {
-            return null;
+        } else if (state == State.WRONG_BLOCK) {
+            switch (requiredType) {
+                case FARMLAND: {
+                    Block[] soilBlocks = new Block[]{Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.DIRT_PATH};
+
+                    for (Block soilBlock : soilBlocks) {
+                        if (currentState.getBlock().equals(soilBlock))
+                            return new ClickAction().setItems(Implementation.HOES);
+                    }
+
+                    break;
+                }
+                case DIRT_PATH: {
+                    Block[] soilBlocks = new Block[]{Blocks.GRASS_BLOCK, Blocks.DIRT,
+                            Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT, Blocks.MYCELIUM, Blocks.PODZOL};
+
+                    for (Block soilBlock : soilBlocks) {
+                        if (currentState.getBlock().equals(soilBlock))
+                            return new ClickAction().setItems(Implementation.SHOVELS);
+                    }
+
+                    break;
+                }
+                default: {
+                    return null;
+                }
+            }
         }
 
         return null;
@@ -626,7 +643,7 @@ public class PlacementGuide extends PrinterUtils {
     enum ClassHook {
         // Placements
         ROD(Implementation.NewBlocks.ROD.clazz),
-        WALLTORCH(WallTorchBlock.class),
+        WALLTORCH(WallTorchBlock.class, WallRedstoneTorchBlock.class),
         TORCH(TorchBlock.class),
         SLAB(SlabBlock.class),
         STAIR(StairsBlock.class),
@@ -647,7 +664,6 @@ public class PlacementGuide extends PrinterUtils {
         WALLSKULL(WallSkullBlock.class),
 
         // Only clicks
-        FARMLAND(FarmlandBlock.class),
         FLOWER_POT(FlowerPotBlock.class),
         BIG_DRIPLEAF_STEM(BigDripleafStemBlock.class),
         SNOW(SnowBlock.class),
@@ -663,6 +679,8 @@ public class PlacementGuide extends PrinterUtils {
         LEVER(LeverBlock.class),
 
         // Other
+        FARMLAND(FarmlandBlock.class),
+        DIRT_PATH(DirtPathBlock.class),
         SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, Implementation.NewBlocks.LICHEN.clazz, VineBlock.class),
         DEFAULT;
 

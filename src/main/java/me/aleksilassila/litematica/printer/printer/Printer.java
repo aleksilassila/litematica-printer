@@ -71,14 +71,9 @@ public class Printer extends PrinterUtils {
     /*
     Fixme legit mode:
         - scaffoldings
-        - Redstone torches?
-    Fixme air mode:
-        - doors (hit modifier)
-        - trapdoors
     Fixme other:
         - signs
-        - shovels and hoes in creative
-        - complete doublechest with another doublechest to right
+        - rotating blocks (signs, skulls)
      */
 
     public void tick() {
@@ -128,7 +123,7 @@ public class Printer extends PrinterUtils {
                                     useShift = true;
                                     break;
                                 }
-                                case LEFT: {
+                                case LEFT: { // Actually right
                                     if (leftState.contains(ChestBlock.CHEST_TYPE) && leftState.get(ChestBlock.CHEST_TYPE) == ChestType.SINGLE) {
                                         useShift = false;
 
@@ -165,7 +160,6 @@ public class Printer extends PrinterUtils {
         if (items == null) return;
 
         PlayerInventory inv = Implementation.getInventory(pEntity);
-//		InventoryUtils.;
 
         for (Item item : items) {
             if (inv.getMainHandStack().getItem() == item) return;
@@ -251,8 +245,6 @@ public class Printer extends PrinterUtils {
                     .add(Vec3d.of(side.getVector()).multiply(0.5))
                     .add(hitModifier.multiply(0.5));
 
-            boolean useShift = true; // fixme block tag for clickable blocks
-
             if (shift && !wasSneaking)
                 pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             else if (!shift && wasSneaking)
@@ -261,7 +253,7 @@ public class Printer extends PrinterUtils {
             ((IClientPlayerInteractionManager) printerInstance.client.interactionManager)
                     .rightClickBlock(target, side, hitVec);
 
-            System.out.println("Right clicked block " + (target.toString()) + ", " + side + ", modifier: " + hitVec);
+            System.out.println("Printed at " + (target.toString()) + ", " + side + ", modifier: " + hitVec);
 
             if (shift && !wasSneaking)
                 pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
