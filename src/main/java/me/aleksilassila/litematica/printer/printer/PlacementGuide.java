@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.printer;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.interfaces.Implementation;
+import me.aleksilassila.litematica.printer.mixin.FlowerPotBlockAccessor;
 import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.*;
@@ -19,9 +20,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PlacementGuide extends PrinterUtils {
     @NotNull
@@ -37,11 +36,8 @@ public class PlacementGuide extends PrinterUtils {
         this.worldSchematic = worldSchematic;
     }
 
-    public Action getAction(BlockPos pos) {
+    public @Nullable Action getAction(BlockPos pos) {
         for (ClassHook hook : ClassHook.values()) {
-            // Fixme state
-//            if (hook.state != getState(pos)) continue;
-
             for (Class<?> clazz : hook.classes) {
                 if (clazz != null && clazz.isInstance(worldSchematic.getBlockState(pos).getBlock())) {
                     return buildAction(pos, hook);
@@ -62,6 +58,14 @@ public class PlacementGuide extends PrinterUtils {
         BlockState requiredState = worldSchematic.getBlockState(pos);
         BlockState currentState = world.getBlockState(pos);
 
+        if (requiredState.getBlock() instanceof FluidBlock) {
+            return null;
+        } else if (currentState.getBlock() instanceof FluidBlock) {
+            if (currentState.get(FluidBlock.LEVEL) == 0 && !LitematicaMixinMod.shouldReplaceFluids) {
+                return null;
+            }
+        }
+
         if (!requiredState.canPlaceAt(world, pos)) {
             return null;
         }
@@ -77,8 +81,13 @@ public class PlacementGuide extends PrinterUtils {
         if (state == State.MISSING_BLOCK) {
             switch (requiredType) {
                 case WALLTORCH:
+                case AMETHYST: {
+                    return new Action()
+                            .setSides(((Direction) getPropertyByName(requiredState, "FACING"))
+                                    .getOpposite())
+                            .setRequiresSupport();
+                }
                 case ROD:
-                case AMETHYST:
                 case SHULKER: {
                     return new Action().setSides(
                             ((Direction) getPropertyByName(requiredState, "FACING"))
@@ -235,20 +244,14 @@ public class PlacementGuide extends PrinterUtils {
                     sides.put(Direction.DOWN, hingeVec);
                     sides.put(facing, hingeVec);
 
-                    return new Action().setLookDirection(requiredState.get(DoorBlock.FACING)).setSides(sides);
+                    return new Action().setLookDirection(requiredState.get(DoorBlock.FACING)).setSides(sides).setRequiresSupport();
                 }
                 case WALLSKULL: {
                     return new Action().setSides(requiredState.get(WallSkullBlock.FACING).getOpposite());
                 }
-                case FARMLAND: { // FIXME creative does not actually have access either
-//                    if (!playerHasAccessToItem(client.player, requiredState.getBlock().asItem())) {
-                    if (true) {
-                        return new Action().setItem(Items.DIRT);
-                    }
-                    break;
-                }
-                case FLOWER_POT: { // Fixme these
-                    return new Action().setItem(Items.FLOWER_POT);
+                case FARMLAND:
+                case DIRT_PATH: {
+                    return new Action().setItem(Items.DIRT);
                 }
                 case BIG_DRIPLEAF_STEM: {
                     return new Action().setItem(Items.BIG_DRIPLEAF);
@@ -370,12 +373,11 @@ public class PlacementGuide extends PrinterUtils {
 
                     break;
                 }
-                case FARMLAND: {
-                    Block[] soilBlocks = new Block[]{Blocks.GRASS_BLOCK, Blocks.DIRT_PATH,
-                            Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT};
-                    for (Block soilBlock : soilBlocks) {
-                        if (currentState.getBlock().equals(soilBlock))
-                            return new ClickAction().setItems(Implementation.HOES);
+                case FLOWER_POT: { // Fixme test
+                    Block content = ((FlowerPotBlockAccessor) requiredState).getContent();
+
+                    if (content != null && content != Blocks.AIR) {
+                        return new Action().setItem(content.asItem());
                     }
 
                     break;
@@ -390,8 +392,33 @@ public class PlacementGuide extends PrinterUtils {
                     break;
                 }
             }
-        } else {
-            return null;
+        } else if (state == State.WRONG_BLOCK) {
+            switch (requiredType) {
+                case FARMLAND: {
+                    Block[] soilBlocks = new Block[]{Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.DIRT_PATH};
+
+                    for (Block soilBlock : soilBlocks) {
+                        if (currentState.getBlock().equals(soilBlock))
+                            return new ClickAction().setItems(Implementation.HOES);
+                    }
+
+                    break;
+                }
+                case DIRT_PATH: {
+                    Block[] soilBlocks = new Block[]{Blocks.GRASS_BLOCK, Blocks.DIRT,
+                            Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT, Blocks.MYCELIUM, Blocks.PODZOL};
+
+                    for (Block soilBlock : soilBlocks) {
+                        if (currentState.getBlock().equals(soilBlock))
+                            return new ClickAction().setItems(Implementation.SHOVELS);
+                    }
+
+                    break;
+                }
+                default: {
+                    return null;
+                }
+            }
         }
 
         return null;
@@ -419,15 +446,33 @@ public class PlacementGuide extends PrinterUtils {
             this(side, new Vec3d(0, 0, 0));
         }
 
+        /**
+         * {@link Action#Action(Direction, Vec3d)}
+         */
         public Action(Map<Direction, Vec3d> sides) {
             this.sides = sides;
         }
 
+        /**
+         *
+         * @param side The side pointing to the block that should be clicked
+         * @param modifier defines where should be clicked exactly. Vector's
+         *                 x component defines left and right offset, y
+         *                 defines height variation and z how far away from
+         *                 player. (0, 0, 0) means click happens in the middle
+         *                 of the side that is being clicked. (0.5, -0.5, 0)
+         *                 would mean right bottom corner when clicking a
+         *                 vertical side. Therefore, z should only be used when
+         *                 clicking horizontal surface.
+         */
         public Action(Direction side, Vec3d modifier) {
             this.sides = new HashMap<>();
             this.sides.put(side, modifier);
         }
 
+        /**
+         * {@link Action#Action(Direction, Vec3d)}
+         */
         @SafeVarargs
         public Action(Pair<Direction, Vec3d>... sides) {
             this.sides = new HashMap<>();
@@ -468,24 +513,35 @@ public class PlacementGuide extends PrinterUtils {
         public @Nullable Direction getValidSide(ClientWorld world, BlockPos pos) {
             Map<Direction, Vec3d> sides = getSides();
 
+            List<Direction> validSides = new ArrayList<>();
+
             for (Direction side : sides.keySet()) {
-                if (LitematicaMixinMod.shouldPrintInAir) {
+                if (LitematicaMixinMod.shouldPrintInAir && !this.requiresSupport) {
                     return side;
                 } else {
                     BlockPos neighborPos = pos.offset(side);
                     BlockState neighborState = world.getBlockState(neighborPos);
 
-                    if (neighborState.getBlock() instanceof SlabBlock) {
+                    if (neighborState.contains(SlabBlock.TYPE) && neighborState.get(SlabBlock.TYPE) != SlabType.DOUBLE) {
                         continue;
                     }
 
-                    if (canBeClicked(world, pos.offset(side)) &&
+                    if (canBeClicked(world, pos.offset(side)) && // Handle unclickable grass for example
                             !world.getBlockState(pos.offset(side)).getMaterial().isReplaceable())
-                        return side;
+                        validSides.add(side);
                 }
             }
 
-            return null;
+            if (validSides.isEmpty()) return null;
+
+            // Try to pick a side that doesn't require shift
+            for (Direction validSide : validSides) {
+                if (!Implementation.isInteractive(world.getBlockState(pos.offset(validSide)).getBlock())) {
+                    return validSide;
+                }
+            }
+
+            return validSides.get(0);
         }
 
         public Action setSides(Direction.Axis... axis) {
@@ -549,22 +605,22 @@ public class PlacementGuide extends PrinterUtils {
             return this.setRequiresSupport(true);
         }
 
-        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift) {
+        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift, boolean didSendLook) {
             System.out.println("Queued click?: " + center.offset(side).toString() + ", side: " + side.getOpposite());
 
-            if (LitematicaMixinMod.shouldPrintInAir) {
-                queue.queueClick(center, side.getOpposite(), Vec3d.ofCenter(center),
-                        useShift, getLookDirection() != null);
+            if (LitematicaMixinMod.shouldPrintInAir && !this.requiresSupport) {
+                queue.queueClick(center, side.getOpposite(), getSides().get(side),
+                        useShift, didSendLook);
             } else {
                 queue.queueClick(center.offset(side), side.getOpposite(), getSides().get(side),
-                        useShift, getLookDirection() != null);
+                        useShift, didSendLook);
             }
         }
     }
 
     public static class ClickAction extends Action {
         @Override
-        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift) {
+        public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift, boolean didSendLook) {
             System.out.println("Queued click?: " + center.toString() + ", side: " + side);
             queue.queueClick(center, side, getSides().get(side), false, false);
         }
@@ -587,7 +643,7 @@ public class PlacementGuide extends PrinterUtils {
     enum ClassHook {
         // Placements
         ROD(Implementation.NewBlocks.ROD.clazz),
-        WALLTORCH(WallTorchBlock.class),
+        WALLTORCH(WallTorchBlock.class, WallRedstoneTorchBlock.class),
         TORCH(TorchBlock.class),
         SLAB(SlabBlock.class),
         STAIR(StairsBlock.class),
@@ -608,7 +664,6 @@ public class PlacementGuide extends PrinterUtils {
         WALLSKULL(WallSkullBlock.class),
 
         // Only clicks
-        FARMLAND(FarmlandBlock.class),
         FLOWER_POT(FlowerPotBlock.class),
         BIG_DRIPLEAF_STEM(BigDripleafStemBlock.class),
         SNOW(SnowBlock.class),
@@ -624,6 +679,8 @@ public class PlacementGuide extends PrinterUtils {
         LEVER(LeverBlock.class),
 
         // Other
+        FARMLAND(FarmlandBlock.class),
+        DIRT_PATH(DirtPathBlock.class),
         SKIP(SkullBlock.class, GrindstoneBlock.class, SignBlock.class, Implementation.NewBlocks.LICHEN.clazz, VineBlock.class),
         DEFAULT;
 

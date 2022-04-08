@@ -25,6 +25,7 @@ public class LitematicaMixinMod implements ModInitializer {
     public static final ConfigBoolean REPLACE_FLUIDS = new ConfigBoolean("replaceFluids", false, "Whether or not fluid source blocks should be replaced by the printer.");
 	public static final ConfigBoolean STRIP_LOGS = new ConfigBoolean("stripLogs", false, "Whether or not the printer should use normal logs if stripped\nversions are not available and then strip them with an axe.");
 	public static boolean shouldPrintInAir = PRINT_IN_AIR.getBooleanValue();
+	public static boolean shouldReplaceFluids = REPLACE_FLUIDS.getBooleanValue();
 
 	public static ImmutableList<IConfigBase> getConfigList() {
 		List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);

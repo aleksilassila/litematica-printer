@@ -12,7 +12,9 @@
 	"MixinClientPlayerEntity",
 	"MixinClientPlayerInteractionManager",
     "ClientPlayNetworkHandlerMixin",
-    "PlayerMoveC2SPacketAccessor"
+    "PlayerMoveC2SPacketAccessor",
+    "WorldLoadListenerMixin",
+    "FlowerPotBlockAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

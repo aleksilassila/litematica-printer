@@ -17,9 +17,20 @@ Finally, move the printer's .jar from [releases](https://github.com/aleksilassil
 
 How To Use
 ----------
-Using the printer is straightforward: You can toggle the feature by pressing `M + O` by default. To configure variables such as
+Using the printer is straightforward: You can toggle the feature by pressing `CAPS_LOCK` by default. To configure variables such as
 printing speed and range, open Litematica's settings by pressing `M + C` and navigate to "Generic" tab. Printer's configuration can be
-found at the bottom of the page. You can also rebind the printing toggle under "Hotkeys" tab.
+found at the bottom of the page. You can also rebind the printing toggle under "Hotkeys" tab. Holding down `V` by default will also
+print regardless if the printer is toggled on or off.
+
+### List of blacklisted blocks
+These blocks have not been implemented yet for various reasons and the printer will skip them instead of placing them wrong. If any
+other blocks are placed incorrectly, try to lower the printing speed. If certain block is still placed incorrectly, you can create
+[an issue](https://github.com/aleksilassila/litematica-printer/issues).
+ - Grindstones
+ - Skulls placed on the ground
+ - Signs
+ - Glow lichen and vines
+ - Entities, including item frames and armor stands
 
 ----------
 
