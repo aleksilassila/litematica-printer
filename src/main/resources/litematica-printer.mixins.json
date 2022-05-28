@@ -13,7 +13,6 @@
 	"MixinClientPlayerInteractionManager",
     "ClientPlayNetworkHandlerMixin",
     "PlayerMoveC2SPacketAccessor",
-    "WorldLoadListenerMixin",
     "FlowerPotBlockAccessor"
   ],
   "injectors": {
