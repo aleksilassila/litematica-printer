@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.mixin;
 
 import com.mojang.authlib.GameProfile;
+import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.printer.Printer;
 import me.aleksilassila.litematica.printer.printer.UpdateChecker;
@@ -29,16 +30,18 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 	@Inject(at = @At("TAIL"), method = "tick")
 	public void tick(CallbackInfo ci) {
-//		if (!(this.world.isPosLoaded(this.getBlockX(), this.getBlockZ())))
-//			return;
-
 		if (!didCheckForUpdates) {
 			didCheckForUpdates = true;
 
 			checkForUpdates();
 		}
+		
+		if (Printer.getPrinter() == null) {
+			Printer.init(client);
+			return;
+		}
 
-		if (Printer.getPrinter() == null || !(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
+		if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
 			return;
 
 		Printer.getPrinter().tick();

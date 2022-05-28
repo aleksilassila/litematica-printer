@@ -28,24 +28,18 @@ public class Printer extends PrinterUtils {
     private static Printer INSTANCE;
     @NotNull
     private final MinecraftClient client;
-    @NotNull
-    private final ClientPlayerEntity pEntity;
-    @NotNull
-    private final ClientWorld world;
-    private WorldSchematic worldSchematic;
     public final PlacementGuide guide;
     public final Queue queue;
 
     int tick = 0;
 
-    public static @Nullable Printer init(MinecraftClient client, ClientWorld world, WorldSchematic schematicWorld) {
+    public static void init(MinecraftClient client) {
         if (client == null || client.player == null || client.world == null) {
-            return null;
+            return;
         }
 
         INSTANCE = new Printer(client);
 
-        return INSTANCE;
     }
 
     public static @Nullable Printer getPrinter() {
@@ -58,11 +52,8 @@ public class Printer extends PrinterUtils {
 
     private Printer(MinecraftClient client) {
         this.client = client;
-        this.pEntity = client.player;
-        this.world = client.world;
-        this.worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-        this.guide = new PlacementGuide(client, client.world, this.worldSchematic);
+        this.guide = new PlacementGuide(client);
         this.queue = new Queue(this);
 
         INSTANCE = this;
@@ -77,12 +68,21 @@ public class Printer extends PrinterUtils {
      */
 
     public void tick() {
+        WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
+        ClientPlayerEntity player = client.player;
+        ClientWorld world = client.world;
+
+        if (worldSchematic == null || player == null || world == null) {
+            return;
+        }
+
         int tickRate = LitematicaMixinMod.PRINT_INTERVAL.getIntegerValue();
+//        System.out.println(worldSchematic.getBlockState(pEntity.getBlockPos().north(1)).getBlock().getName() + ", " + world.getBlockState(pEntity.getBlockPos().north(1)).getBlock().getName());
 
         tick = tick == 0x7fffffff ? 0 : tick + 1;
         if (tick % tickRate != 0) {
 //            if (!queue.didSendLook) {
-                queue.sendQueue();
+                queue.sendQueue(player);
 //            }
             return;
         }
@@ -96,9 +96,9 @@ public class Printer extends PrinterUtils {
         for (int y = -range; y < range + 1; y++) {
             for (int x = -range; x < range + 1; x++) {
                 for (int z = -range; z < range + 1; z++) {
-                    BlockPos center = pEntity.getBlockPos().north(x).west(z).up(y);
+                    BlockPos center = player.getBlockPos().north(x).west(z).up(y);
                     BlockState requiredState = worldSchematic.getBlockState(center);
-                    PlacementGuide.Action action = guide.getAction(center);
+                    PlacementGuide.Action action = guide.getAction(world, worldSchematic, center);
 
                     if (!DataManager.getRenderLayerRange().isPositionWithinRange(center)) continue;
                     if (action == null) continue;
@@ -107,7 +107,7 @@ public class Printer extends PrinterUtils {
                     if (side == null) continue;
 
                     Item[] requiredItems = action.getRequiredItems(requiredState.getBlock());
-                    if (playerHasAccessToItems(pEntity, requiredItems)) {
+                    if (playerHasAccessToItems(player, requiredItems)) {
 
                         // Handle shift and chest placement
                         // Won't be required if clickAction
@@ -142,7 +142,7 @@ public class Printer extends PrinterUtils {
                         }
 
                         Direction lookDir = action.getLookDirection();
-                        sendPlacementPreparation(requiredItems, lookDir);
+                        sendPlacementPreparation(player, requiredItems, lookDir);
                         action.queueAction(queue, center, side, useShift, lookDir != null);
                         return;
                     }
@@ -151,19 +151,19 @@ public class Printer extends PrinterUtils {
         }
     }
 
-    private void sendPlacementPreparation(Item[] requiredItems, Direction lookDir) {
-        switchToItems(requiredItems);
-        sendLook(lookDir);
+    private void sendPlacementPreparation(ClientPlayerEntity player, Item[] requiredItems, Direction lookDir) {
+        switchToItems(player, requiredItems);
+        sendLook(player, lookDir);
     }
 
-    private void switchToItems(Item[] items) {
+    private void switchToItems(ClientPlayerEntity player, Item[] items) {
         if (items == null) return;
 
-        PlayerInventory inv = Implementation.getInventory(pEntity);
+        PlayerInventory inv = Implementation.getInventory(player);
 
         for (Item item : items) {
             if (inv.getMainHandStack().getItem() == item) return;
-            if (Implementation.getAbilities(pEntity).creativeMode) {
+            if (Implementation.getAbilities(player).creativeMode) {
                 InventoryUtils.setPickedItemToHand(new ItemStack(item), client);
                 client.interactionManager.clickCreativeStack(client.player.getStackInHand(Hand.MAIN_HAND), 36 + inv.selectedSlot);
                 return;
@@ -175,21 +175,21 @@ public class Printer extends PrinterUtils {
                 }
 
                 if (slot != -1) {
-                    swapHandWithSlot(slot);
+                    swapHandWithSlot(player, slot);
                     return;
                 }
             }
         }
     }
 
-    private void swapHandWithSlot(int slot) {
-        ItemStack stack = Implementation.getInventory(pEntity).getStack(slot);
+    private void swapHandWithSlot(ClientPlayerEntity player, int slot) {
+        ItemStack stack = Implementation.getInventory(player).getStack(slot);
         InventoryUtils.setPickedItemToHand(stack, client);
     }
 
-    public void sendLook(Direction direction) {
+    public void sendLook(ClientPlayerEntity player, Direction direction) {
         if (direction != null) {
-            Implementation.sendLookPacket(client.player, direction);
+            Implementation.sendLookPacket(player, direction);
         }
 
         queue.lookDir = direction;
@@ -205,11 +205,9 @@ public class Printer extends PrinterUtils {
         public Direction lookDir = null;
 
         final Printer printerInstance;
-        final ClientPlayerEntity pEntity;
 
         public Queue(Printer printerInstance) {
             this.printerInstance = printerInstance;
-            this.pEntity = printerInstance.pEntity;
         }
 
         public void queueClick(@NotNull BlockPos target, @NotNull Direction side, @NotNull Vec3d hitModifier) {
@@ -229,10 +227,10 @@ public class Printer extends PrinterUtils {
             this.shift = shift;
         }
 
-        public void sendQueue() {
+        public void sendQueue(ClientPlayerEntity player) {
             if (target == null || side == null || hitModifier == null) return;
 
-            boolean wasSneaking = pEntity.isSneaking();
+            boolean wasSneaking = player.isSneaking();
 
             Direction direction = side.getAxis() == Direction.Axis.Y ?
                     ((lookDir == null || !lookDir.getAxis().isHorizontal())
@@ -246,9 +244,9 @@ public class Printer extends PrinterUtils {
                     .add(hitModifier.multiply(0.5));
 
             if (shift && !wasSneaking)
-                pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             else if (!shift && wasSneaking)
-                pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
             ((IClientPlayerInteractionManager) printerInstance.client.interactionManager)
                     .rightClickBlock(target, side, hitVec);
@@ -256,9 +254,9 @@ public class Printer extends PrinterUtils {
             System.out.println("Printed at " + (target.toString()) + ", " + side + ", modifier: " + hitVec);
 
             if (shift && !wasSneaking)
-                pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             else if (!shift && wasSneaking)
-                pEntity.networkHandler.sendPacket(new ClientCommandC2SPacket(pEntity, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
 
             clearQueue();
         }

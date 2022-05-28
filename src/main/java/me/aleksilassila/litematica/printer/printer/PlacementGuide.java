@@ -17,6 +17,7 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,27 +26,21 @@ import java.util.*;
 public class PlacementGuide extends PrinterUtils {
     @NotNull
     protected final MinecraftClient client;
-    @NotNull
-    protected final ClientWorld world;
-    @NotNull
-    protected final WorldSchematic worldSchematic;
 
-    public PlacementGuide(@NotNull MinecraftClient client, @NotNull ClientWorld world, @NotNull WorldSchematic worldSchematic) {
+    public PlacementGuide(@NotNull MinecraftClient client) {
         this.client = client;
-        this.world = world;
-        this.worldSchematic = worldSchematic;
     }
 
-    public @Nullable Action getAction(BlockPos pos) {
+    public @Nullable Action getAction(World world, WorldSchematic worldSchematic, BlockPos pos) {
         for (ClassHook hook : ClassHook.values()) {
             for (Class<?> clazz : hook.classes) {
                 if (clazz != null && clazz.isInstance(worldSchematic.getBlockState(pos).getBlock())) {
-                    return buildAction(pos, hook);
+                    return buildAction(world, worldSchematic, pos, hook);
                 }
             }
         }
 
-        return buildAction(pos, ClassHook.DEFAULT);
+        return buildAction(world, worldSchematic, pos, ClassHook.DEFAULT);
     }
 
 //    public static Placement getPlacement(BlockState requiredState, MinecraftClient client) {
@@ -54,7 +49,7 @@ public class PlacementGuide extends PrinterUtils {
 //    }
 
     @SuppressWarnings("EnhancedSwitchMigration")
-    private @Nullable Action buildAction(BlockPos pos, ClassHook requiredType) {
+    private @Nullable Action buildAction(World world, WorldSchematic worldSchematic, BlockPos pos, ClassHook requiredType) {
         BlockState requiredState = worldSchematic.getBlockState(pos);
         BlockState currentState = world.getBlockState(pos);
 
