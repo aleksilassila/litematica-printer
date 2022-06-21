@@ -21,7 +21,7 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Overwrite
     public void sendPacket(Packet<?> packet) {
-        if (Printer.getPrinter() == null) {
+        if (Printer.getPrinter() == null || client.player == null) {
             this.connection.send(packet);
             return;
         }

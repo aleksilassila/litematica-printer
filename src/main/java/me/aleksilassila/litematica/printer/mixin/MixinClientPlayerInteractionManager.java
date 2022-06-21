@@ -29,20 +29,17 @@ public abstract class MixinClientPlayerInteractionManager implements IClientPlay
     @Override
 	public void rightClickBlock(BlockPos pos, Direction side, Vec3d hitVec)
 	{
-		interactBlock(client.player, client.world, Hand.MAIN_HAND,
+		interactBlock(client.player, Hand.MAIN_HAND,
 			new BlockHitResult(hitVec, side, pos, false));
-		interactItem(client.player, client.world, Hand.MAIN_HAND);
+		interactItem(client.player, Hand.MAIN_HAND);
 //		System.out.println("Printer interactBlock: pos: (" + pos.toShortString() + "), side: " + side.getName() + ", vector: " + hitVec.toString());
 	}
 
 	@Shadow
-	public abstract ActionResult interactBlock(
-            ClientPlayerEntity clientPlayerEntity_1, ClientWorld clientWorld_1,
-            Hand hand_1, BlockHitResult blockHitResult_1);
+	public abstract ActionResult interactBlock(ClientPlayerEntity clientPlayerEntity_1, Hand hand_1, BlockHitResult blockHitResult_1);
 
 	@Shadow
-	public abstract ActionResult interactItem(PlayerEntity playerEntity_1,
-                                              World world_1, Hand hand_1);
+	public abstract ActionResult interactItem(PlayerEntity playerEntity_1, Hand hand_1);
 
 //	@Inject(at = @At("HEAD"), method = "interactBlock")
 //	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
