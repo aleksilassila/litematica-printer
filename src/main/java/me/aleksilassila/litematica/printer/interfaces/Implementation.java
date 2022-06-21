@@ -100,7 +100,7 @@ public class Implementation {
     }
 
     public enum NewBlocks {
-        LICHEN(AbstractLichenBlock.class),
+        LICHEN(GlowLichenBlock.class),
         ROD(RodBlock.class),
         CANDLES(CandleBlock.class),
         AMETHYST(AmethystClusterBlock.class);
