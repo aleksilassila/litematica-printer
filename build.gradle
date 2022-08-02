@@ -13,8 +13,8 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-    //maven { url 'https://masa.dy.fi/maven' }
-    //maven { url = "https://www.cursemaven.com" }
+    maven { url 'https://masa.dy.fi/maven' }
+    maven { url = "https://www.cursemaven.com" }
 }
 
 dependencies {
@@ -24,10 +24,8 @@ dependencies {
 
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-//	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.malilib_version}"
-//	modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
-	modImplementation files("prebuilt/malilib-fabric-1.19-0.12.1.jar")
-	modImplementation files("prebuilt/litematica-fabric-1.19-0.11.3.jar")
+	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.malilib_version}"
+	modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
 }
 
 processResources {
