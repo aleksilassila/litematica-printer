@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
-	boolean didCheckForUpdates = false;
+	static boolean didCheckForUpdates = false;
 
 
     @Shadow
