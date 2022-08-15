@@ -16,7 +16,8 @@ import java.util.List;
 public class LitematicaMixinMod implements ModInitializer {
 
 	// Config settings
-	public static final ConfigInteger PRINT_INTERVAL = new ConfigInteger( "printInterval", 4,   2, 20, "Print interval in game ticks. Lower values mean faster printing speed.\nIf the printer creates \"ghost blocks\", raise this value.");
+	public static final ConfigInteger PRINT_INTERVAL = new ConfigInteger( "printInterval", 10,   10, 60, "Print interval in game ticks. Lower values mean faster printing speed.\nIf the printer creates \"ghost blocks\", raise this value.");
+	public static final ConfigInteger PRINT_INTERVAL_NR = new ConfigInteger( "printIntervalNR", 2,   2, 60, "Print interval in game ticks for non-rotated blocks. Lower values mean faster printing speed.\nIf the printer creates \"ghost blocks\", raise this value.");
     public static final ConfigInteger PRINTING_RANGE = new ConfigInteger("printingRange", 2,     1,   6,   "Printing block place range\nLower values are recommended for servers.");
 //    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether or not the printer should place water\n source blocks or make blocks waterlogged.");
     public static final ConfigBoolean PRINT_IN_AIR = new ConfigBoolean("printInAir",    true, "Whether or not the printer should place blocks without anything to build on.\nBe aware that some anti-cheat plugins might notice this.");
@@ -30,6 +31,7 @@ public class LitematicaMixinMod implements ModInitializer {
 		List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
 		list.add(PRINT_MODE);
 		list.add(PRINT_INTERVAL);
+		list.add(PRINT_INTERVAL_NR);
 		list.add(PRINTING_RANGE);
 		list.add(PRINT_IN_AIR);
 		list.add(REPLACE_FLUIDS);

@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
-	private static boolean didCheckForUpdates = false;
+	boolean didCheckForUpdates = false;
 
 
     @Shadow
@@ -29,7 +29,8 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		super(world, profile, publicKey);
 	}
 
-	@Inject(at = @At("TAIL"), method = "tick")
+	@Inject(method = "tick", at = @At(value = "TAIL"))
+	/* (at = @At("INVOKE"), method = "tick") */
 	public void tick(CallbackInfo ci) {
 		if (!didCheckForUpdates) {
 			didCheckForUpdates = true;
@@ -42,10 +43,20 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 			return;
 		}
 
-		if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
-			return;
 
-		Printer.getPrinter().tick();
+		if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed())){
+			return;
+			}
+
+		for (int i = 0; i < 10; i++) {
+			Printer.getPrinter().tick();
+		}
+
+		for (int i = 0; i < 10; i++) {
+			Printer.getPrinter().tickNR();
+		}
+
+
 	}
 
 	public void checkForUpdates() {

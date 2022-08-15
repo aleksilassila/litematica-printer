@@ -13,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -22,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
 
 public class PlacementGuide extends PrinterUtils {
     @NotNull
@@ -43,10 +43,6 @@ public class PlacementGuide extends PrinterUtils {
         return buildAction(world, worldSchematic, pos, ClassHook.DEFAULT);
     }
 
-//    public static Placement getPlacement(BlockState requiredState, MinecraftClient client) {
-//        Placement placement = _getPlacement(requiredState, client);
-//        return placement.setItem(placement.item == null ? requiredState.getBlock().asItem() : placement.item);
-//    }
 
     @SuppressWarnings("EnhancedSwitchMigration")
     private @Nullable Action buildAction(World world, WorldSchematic worldSchematic, BlockPos pos, ClassHook requiredType) {
@@ -425,7 +421,6 @@ public class PlacementGuide extends PrinterUtils {
         @Nullable
         protected Item[] clickItems; // null == any
 
-        protected boolean crouch = false;
         protected boolean requiresSupport = false;
 
         // If true, click target block, not neighbor
@@ -437,54 +432,6 @@ public class PlacementGuide extends PrinterUtils {
             }
         }
 
-        public Action(Direction side) {
-            this(side, new Vec3d(0, 0, 0));
-        }
-
-        /**
-         * {@link Action#Action(Direction, Vec3d)}
-         */
-        public Action(Map<Direction, Vec3d> sides) {
-            this.sides = sides;
-        }
-
-        /**
-         *
-         * @param side The side pointing to the block that should be clicked
-         * @param modifier defines where should be clicked exactly. Vector's
-         *                 x component defines left and right offset, y
-         *                 defines height variation and z how far away from
-         *                 player. (0, 0, 0) means click happens in the middle
-         *                 of the side that is being clicked. (0.5, -0.5, 0)
-         *                 would mean right bottom corner when clicking a
-         *                 vertical side. Therefore, z should only be used when
-         *                 clicking horizontal surface.
-         */
-        public Action(Direction side, Vec3d modifier) {
-            this.sides = new HashMap<>();
-            this.sides.put(side, modifier);
-        }
-
-        /**
-         * {@link Action#Action(Direction, Vec3d)}
-         */
-        @SafeVarargs
-        public Action(Pair<Direction, Vec3d>... sides) {
-            this.sides = new HashMap<>();
-            for (Pair<Direction, Vec3d> side : sides) {
-                this.sides.put(side.getLeft(), side.getRight());
-            }
-        }
-
-        public Action(Direction.Axis axis) {
-            this.sides = new HashMap<>();
-
-            for (Direction d : Direction.values()) {
-                if (d.getAxis() == axis) {
-                    sides.put(d, new Vec3d(0, 0, 0));
-                }
-            }
-        }
 
         public @Nullable Direction getLookDirection() {
             return lookDirection;
