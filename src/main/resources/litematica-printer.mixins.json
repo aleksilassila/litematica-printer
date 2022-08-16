@@ -13,7 +13,8 @@
 	"MixinClientPlayerInteractionManager",
     "ClientPlayNetworkHandlerMixin",
     "PlayerMoveC2SPacketAccessor",
-    "FlowerPotBlockAccessor"
+    "FlowerPotBlockAccessor",
+    "AxeItemAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
