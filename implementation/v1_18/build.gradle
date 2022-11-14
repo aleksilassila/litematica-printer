@@ -1,8 +1,7 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '1.0-SNAPSHOT'
 	id 'maven-publish'
 }
-
 
 sourceCompatibility = JavaVersion.VERSION_1_8 // For that 1.16 compatibility
 targetCompatibility = JavaVersion.VERSION_17
@@ -23,6 +22,7 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.malilib_version}"
 	modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
