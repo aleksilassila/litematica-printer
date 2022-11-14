@@ -1,0 +1,10 @@
+plugins {
+    id("java")
+}
+
+//group = "net.fabricmc"
+//version = "2.5"
+
+repositories {
+    mavenCentral()
+}

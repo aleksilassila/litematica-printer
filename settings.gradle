@@ -8,3 +8,12 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+include 'common'
+include 'implementation'
+include 'implementation:v1_19'
+findProject(':implementation:v1_19')?.name = 'v1_19'
+include 'implementation:v1_18'
+findProject(':implementation:v1_18')?.name = 'v1_18'
+include 'implementation:v1_17'
+findProject(':implementation:v1_17')?.name = 'v1_17'
+
