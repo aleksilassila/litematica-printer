@@ -82,7 +82,7 @@ public class Printer extends PrinterUtils {
         tick = tick == 0x7fffffff ? 0 : tick + 1;
         if (tick % tickRate != 0) {
 //            if (!queue.didSendLook) {
-                queue.sendQueue(player);
+            queue.sendQueue(player);
 //            }
             return;
         }

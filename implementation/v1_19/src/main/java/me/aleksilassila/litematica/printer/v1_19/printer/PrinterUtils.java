@@ -21,36 +21,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PrinterUtils {
-	public static Direction[] horizontalDirections = new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+    public static Direction[] horizontalDirections = new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 
-	public static boolean playerHasAccessToItem(ClientPlayerEntity playerEntity, Item item) {
-		return playerHasAccessToItems(playerEntity, new Item[]{item});
-	}
-
-	public static boolean playerHasAccessToItems(ClientPlayerEntity playerEntity, Item[] items) {
-		if (items == null || items.length == 0) return true;
-		if (Implementation.getAbilities(playerEntity).creativeMode) return true;
-		else {
-			Inventory inv = Implementation.getInventory(playerEntity);
-
-			for (Item item : items) {
-				for (int i = 0; i < inv.size(); i++) {
-					if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
-						return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-    protected static boolean isDoubleSlab(BlockState state) {
-    	return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) == SlabType.DOUBLE;
+    public static boolean playerHasAccessToItem(ClientPlayerEntity playerEntity, Item item) {
+        return playerHasAccessToItems(playerEntity, new Item[]{item});
     }
 
-	protected static boolean isHalfSlab(BlockState state) {
-    	return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) != SlabType.DOUBLE;
-	}
+    public static boolean playerHasAccessToItems(ClientPlayerEntity playerEntity, Item[] items) {
+        if (items == null || items.length == 0) return true;
+        if (Implementation.getAbilities(playerEntity).creativeMode) return true;
+        else {
+            Inventory inv = Implementation.getInventory(playerEntity);
+
+            for (Item item : items) {
+                for (int i = 0; i < inv.size(); i++) {
+                    if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected static boolean isDoubleSlab(BlockState state) {
+        return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) == SlabType.DOUBLE;
+    }
+
+    protected static boolean isHalfSlab(BlockState state) {
+        return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) != SlabType.DOUBLE;
+    }
 
     public static Direction getHalf(BlockHalf half) {
         return half == BlockHalf.TOP ? Direction.UP : Direction.DOWN;

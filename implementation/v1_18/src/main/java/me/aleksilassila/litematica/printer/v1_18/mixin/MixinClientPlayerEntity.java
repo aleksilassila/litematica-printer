@@ -1,7 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_18.mixin;
 
 import com.mojang.authlib.GameProfile;
-import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import me.aleksilassila.litematica.printer.v1_18.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_18.printer.Printer;
 import me.aleksilassila.litematica.printer.v1_18.printer.UpdateChecker;
@@ -19,35 +18,35 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
-	private static boolean didCheckForUpdates = false;
+    private static boolean didCheckForUpdates = false;
 
     public MixinClientPlayerEntity(ClientWorld world, GameProfile profile) {
         super(world, profile);
-	}
+    }
 
     @Shadow
-	protected MinecraftClient client;
+    protected MinecraftClient client;
 
-	@Inject(at = @At("TAIL"), method = "tick")
-	public void tick(CallbackInfo ci) {
-		if (!didCheckForUpdates) {
-			didCheckForUpdates = true;
+    @Inject(at = @At("TAIL"), method = "tick")
+    public void tick(CallbackInfo ci) {
+        if (!didCheckForUpdates) {
+            didCheckForUpdates = true;
 
-			checkForUpdates();
-		}
-		
-		if (Printer.getPrinter() == null) {
-			Printer.init(client);
-			return;
-		}
+            checkForUpdates();
+        }
 
-		if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
-			return;
+        if (Printer.getPrinter() == null) {
+            Printer.init(client);
+            return;
+        }
 
-		Printer.getPrinter().tick();
-	}
+        if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
+            return;
 
-	public void checkForUpdates() {
+        Printer.getPrinter().tick();
+    }
+
+    public void checkForUpdates() {
         new Thread(() -> {
             String version = UpdateChecker.version;
             String newVersion = UpdateChecker.getPrinterVersion();
@@ -58,5 +57,5 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
                         null);
             }
         }).start();
-	}
+    }
 }

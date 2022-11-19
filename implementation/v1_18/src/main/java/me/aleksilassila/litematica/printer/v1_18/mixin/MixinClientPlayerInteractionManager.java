@@ -1,8 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_18.mixin;
 
 import me.aleksilassila.litematica.printer.v1_18.interfaces.IClientPlayerInteractionManager;
-import me.aleksilassila.litematica.printer.v1_18.printer.PlacementGuide;
-import me.aleksilassila.litematica.printer.v1_18.printer.Printer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
@@ -17,31 +15,27 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MixinClientPlayerInteractionManager implements IClientPlayerInteractionManager {
-	@Shadow
-	private MinecraftClient client;
+    @Shadow
+    private MinecraftClient client;
 
     @Override
-	public void rightClickBlock(BlockPos pos, Direction side, Vec3d hitVec)
-	{
-		interactBlock(client.player, client.world, Hand.MAIN_HAND,
-			new BlockHitResult(hitVec, side, pos, false));
-		interactItem(client.player, client.world, Hand.MAIN_HAND);
+    public void rightClickBlock(BlockPos pos, Direction side, Vec3d hitVec) {
+        interactBlock(client.player, client.world, Hand.MAIN_HAND,
+                new BlockHitResult(hitVec, side, pos, false));
+        interactItem(client.player, client.world, Hand.MAIN_HAND);
 //		System.out.println("Printer interactBlock: pos: (" + pos.toShortString() + "), side: " + side.getName() + ", vector: " + hitVec.toString());
-	}
+    }
 
-	@Shadow
-	public abstract ActionResult interactBlock(
+    @Shadow
+    public abstract ActionResult interactBlock(
             ClientPlayerEntity clientPlayerEntity_1, ClientWorld clientWorld_1,
             Hand hand_1, BlockHitResult blockHitResult_1);
 
-	@Shadow
-	public abstract ActionResult interactItem(PlayerEntity playerEntity_1,
+    @Shadow
+    public abstract ActionResult interactItem(PlayerEntity playerEntity_1,
                                               World world_1, Hand hand_1);
 
 //	@Inject(at = @At("HEAD"), method = "interactBlock")

@@ -16,23 +16,22 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MixinClientPlayerInteractionManager implements IClientPlayerInteractionManager {
-	@Shadow
-	private MinecraftClient client;
+    @Shadow
+    private MinecraftClient client;
 
     @Override
-	public void rightClickBlock(BlockPos pos, Direction side, Vec3d hitVec)
-	{
-		interactBlock(client.player, Hand.MAIN_HAND,
-			new BlockHitResult(hitVec, side, pos, false));
-		interactItem(client.player, Hand.MAIN_HAND);
+    public void rightClickBlock(BlockPos pos, Direction side, Vec3d hitVec) {
+        interactBlock(client.player, Hand.MAIN_HAND,
+                new BlockHitResult(hitVec, side, pos, false));
+        interactItem(client.player, Hand.MAIN_HAND);
 //		System.out.println("Printer interactBlock: pos: (" + pos.toShortString() + "), side: " + side.getName() + ", vector: " + hitVec.toString());
-	}
+    }
 
-	@Shadow
-	public abstract ActionResult interactBlock(ClientPlayerEntity clientPlayerEntity_1, Hand hand_1, BlockHitResult blockHitResult_1);
+    @Shadow
+    public abstract ActionResult interactBlock(ClientPlayerEntity clientPlayerEntity_1, Hand hand_1, BlockHitResult blockHitResult_1);
 
-	@Shadow
-	public abstract ActionResult interactItem(PlayerEntity playerEntity_1, Hand hand_1);
+    @Shadow
+    public abstract ActionResult interactItem(PlayerEntity playerEntity_1, Hand hand_1);
 
 //	@Inject(at = @At("HEAD"), method = "interactBlock")
 //	public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {

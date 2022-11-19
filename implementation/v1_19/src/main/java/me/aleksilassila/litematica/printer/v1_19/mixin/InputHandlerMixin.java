@@ -11,13 +11,13 @@ import java.util.List;
 
 @Mixin(value = InputHandler.class, remap = false)
 public class InputHandlerMixin {
-	
-	@Redirect(method = "addHotkeys", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Hotkeys;HOTKEY_LIST:Ljava/util/List;"))
+
+    @Redirect(method = "addHotkeys", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Hotkeys;HOTKEY_LIST:Ljava/util/List;"))
     private List<ConfigHotkey> moreHotkeys() {
         return LitematicaMixinMod.getHotkeyList();
     }
-	
-	@Redirect(method = "addKeysToMap", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Hotkeys;HOTKEY_LIST:Ljava/util/List;"))
+
+    @Redirect(method = "addKeysToMap", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Hotkeys;HOTKEY_LIST:Ljava/util/List;"))
     private List<ConfigHotkey> moreeHotkeys() {
         return LitematicaMixinMod.getHotkeyList();
     }

@@ -13,7 +13,7 @@ import java.util.List;
 
 @Mixin(value = Configs.class, remap = false)
 public class ConfigsMixin {
-	@Redirect(method = "loadFromFile", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Configs$Generic;OPTIONS:Lcom/google/common/collect/ImmutableList;"))
+    @Redirect(method = "loadFromFile", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Configs$Generic;OPTIONS:Lcom/google/common/collect/ImmutableList;"))
     private static ImmutableList<IConfigBase> moreOptions() {
         return LitematicaMixinMod.getConfigList();
     }
@@ -22,7 +22,7 @@ public class ConfigsMixin {
     private static ImmutableList<IConfigBase> moreeOptions() {
         return LitematicaMixinMod.getConfigList();
     }
-    
+
     @Redirect(method = "loadFromFile", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Hotkeys;HOTKEY_LIST:Ljava/util/List;"))
     private static List<ConfigHotkey> moreHotkeys() {
         return LitematicaMixinMod.getHotkeyList();

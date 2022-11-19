@@ -102,15 +102,15 @@ public class PlacementGuide extends PrinterUtils {
                     sides.put(half, new Vec3d(0, 0, 0));
 
                     return new Action()
-                        .setSides(sides)
-                        .setLookDirection(requiredState.get(StairsBlock.FACING));
+                            .setSides(sides)
+                            .setLookDirection(requiredState.get(StairsBlock.FACING));
                 }
                 case TRAPDOOR: {
                     Direction half = getHalf(requiredState.get(TrapdoorBlock.HALF));
 
-                    Map<Direction, Vec3d> sides = new HashMap<>(){{
+                    Map<Direction, Vec3d> sides = new HashMap<>() {{
                         put(requiredState.get(StairsBlock.FACING).getOpposite(),
-                            Vec3d.of(half.getVector()).multiply(0.25));
+                                Vec3d.of(half.getVector()).multiply(0.25));
                         put(half, new Vec3d(0, 0, 0));
                     }};
 
@@ -170,20 +170,20 @@ public class PlacementGuide extends PrinterUtils {
 
                     return new Action().setSides(side).setLookDirection(look).setRequiresSupport();
                 }
-    //            case GRINDSTONE -> { // Tese are broken
-    //                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
-    //                    case FLOOR -> Direction.DOWN;
-    //                    case CEILING -> Direction.UP;
-    //                    default -> (Direction) getPropertyByName(requiredState, "FACING");
-    //                };
-    //
-    //                Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
-    //                        null : (Direction) getPropertyByName(requiredState, "FACING");
-    //
-    //                return new Placement(Direction.DOWN, // FIXME test
-    //                        Vec3d.of(side.getVector()).multiply(0.5),
-    //                        look);
-    //            }
+                //            case GRINDSTONE -> { // Tese are broken
+                //                Direction side = switch ((WallMountLocation) getPropertyByName(requiredState, "FACE")) {
+                //                    case FLOOR -> Direction.DOWN;
+                //                    case CEILING -> Direction.UP;
+                //                    default -> (Direction) getPropertyByName(requiredState, "FACING");
+                //                };
+                //
+                //                Direction look = getPropertyByName(requiredState, "FACE") == WallMountLocation.WALL ?
+                //                        null : (Direction) getPropertyByName(requiredState, "FACING");
+                //
+                //                return new Placement(Direction.DOWN, // FIXME test
+                //                        Vec3d.of(side.getVector()).multiply(0.5),
+                //                        look);
+                //            }
                 case GATE:
                 case OBSERVER:
                 case CAMPFIRE: {
@@ -287,8 +287,8 @@ public class PlacementGuide extends PrinterUtils {
                 case SNOW: {
                     int layers = currentState.get(SnowBlock.LAYERS);
                     if (layers < requiredState.get(SnowBlock.LAYERS)) {
-                        Map<Direction, Vec3d> sides = new HashMap<>(){{
-                            put(Direction.UP, new Vec3d(0,  (layers / 8d) - 1, 0));
+                        Map<Direction, Vec3d> sides = new HashMap<>() {{
+                            put(Direction.UP, new Vec3d(0, (layers / 8d) - 1, 0));
                         }};
                         return new ClickAction().setItem(Items.SNOW).setSides(sides);
                     }
@@ -449,8 +449,7 @@ public class PlacementGuide extends PrinterUtils {
         }
 
         /**
-         *
-         * @param side The side pointing to the block that should be clicked
+         * @param side     The side pointing to the block that should be clicked
          * @param modifier defines where should be clicked exactly. Vector's
          *                 x component defines left and right offset, y
          *                 defines height variation and z how far away from
@@ -586,7 +585,7 @@ public class PlacementGuide extends PrinterUtils {
             return this.setItems(item);
         }
 
-        public Action setItems(Item ...items) {
+        public Action setItems(Item... items) {
             this.clickItems = items;
             return this;
         }
@@ -681,7 +680,7 @@ public class PlacementGuide extends PrinterUtils {
 
         private final Class<?>[] classes;
 
-        ClassHook(Class<?> ...classes) {
+        ClassHook(Class<?>... classes) {
             this.classes = classes;
         }
     }
