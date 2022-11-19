@@ -22,7 +22,7 @@ dependencies {
 
 	modImplementation("net.fabricmc:fabric-loader:${loader_version}")
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-	modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
+	modImplementation("fi.dy.masa.malilib:malilib-fabric-${minecraft_version}:${malilib_version}")
 	modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
 }
 
@@ -48,7 +48,7 @@ val setupServer = tasks.create("syncImplementations") {
 
 			sourceFile.walk()
 				.filter { it.isFile }
-				.forEach { copyFile(it, "v1_19", "v1_18"); copyFile(it, "v1_19", "v1_17"); }
+				.forEach { copyFile(it, "v1_17", "v1_18"); copyFile(it, "v1_17", "v1_19"); }
 		}
 	}
 }
