@@ -1,6 +1,13 @@
 package me.aleksilassila.litematica.printer.v1_19.printer;
 
 import fi.dy.masa.litematica.data.DataManager;
+import fi.dy.masa.litematica.schematic.placement.SchematicPlacement;
+import fi.dy.masa.litematica.schematic.placement.SchematicPlacementManager;
+import fi.dy.masa.litematica.schematic.projects.SchematicProject;
+import fi.dy.masa.litematica.schematic.projects.SchematicProjectsManager;
+import fi.dy.masa.litematica.selection.AreaSelection;
+import fi.dy.masa.litematica.selection.Box;
+import fi.dy.masa.litematica.selection.SelectionManager;
 import fi.dy.masa.litematica.util.InventoryUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
@@ -67,6 +74,7 @@ public class Printer extends PrinterUtils {
         - rotating blocks (signs, skulls)
      */
 
+
     public void tick() {
         WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
         ClientPlayerEntity player = client.player;
@@ -89,9 +97,6 @@ public class Printer extends PrinterUtils {
 
         int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
 
-        LitematicaMixinMod.shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
-        LitematicaMixinMod.shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
-
         // forEachBlockInRadius:
         for (int y = -range; y < range + 1; y++) {
             for (int x = -range; x < range + 1; x++) {
@@ -100,13 +105,32 @@ public class Printer extends PrinterUtils {
                     BlockState requiredState = worldSchematic.getBlockState(center);
                     PlacementGuide.Action action = guide.getAction(world, worldSchematic, center);
 
-                    if (!DataManager.getRenderLayerRange().isPositionWithinRange(center)) continue;
                     if (action == null) continue;
+                    if (action.selection) {
+                        // 获取选区范围
+                        SelectionManager sm = DataManager.getSelectionManager();
+                        AreaSelection currentSelection = sm.getCurrentSelection();
+                        if (currentSelection == null) continue;
+                        boolean f = true;
+                        for (Box currentBox : currentSelection.getAllSubRegionBoxes()) {
+                            if (currentBox == null) continue;
+                            if (!PrinterUtils.isPositionWithinRange(center, currentBox.getPos1(), currentBox.getPos2())) {
+                                f = false;
+                                break;
+                            }
+                        }
+                        if (!f) continue;
+
+                    } else {
+                        if (!DataManager.getRenderLayerRange().isPositionWithinRange(center)) continue;
+                    }
 
                     Direction side = action.getValidSide(world, center);
                     if (side == null) continue;
 
                     Item[] requiredItems = action.getRequiredItems(requiredState.getBlock());
+
+
                     if (playerHasAccessToItems(player, requiredItems)) {
 
                         // Handle shift and chest placement

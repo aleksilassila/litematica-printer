@@ -19,6 +19,7 @@ public class ClientPlayNetworkHandlerMixin {
     @Shadow
     private MinecraftClient client;
 
+
     @Overwrite
     public void sendPacket(Packet<?> packet) {
         if (Printer.getPrinter() == null || client.player == null) {

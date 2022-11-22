@@ -23,6 +23,30 @@ import java.util.Map;
 public class PrinterUtils {
     public static Direction[] horizontalDirections = new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 
+
+    public static boolean isPositionWithinRange(BlockPos targetPos, BlockPos pos1, BlockPos pos2) {
+        if (pos1 != null && pos2 != null) {
+            int x_min = Math.min(pos1.getX(), pos2.getX());
+            int x_max = Math.max(pos1.getX(), pos2.getX());
+            int y_min = Math.min(pos1.getY(), pos2.getY());
+            int y_max = Math.max(pos1.getY(), pos2.getY());
+            int z_min = Math.min(pos1.getZ(), pos2.getZ());
+            int z_max = Math.max(pos1.getZ(), pos2.getZ());
+            // System.out.println("pos: " + targetPos);
+            // System.out.println("pos1: " + pos1);
+            // System.out.println("pos2: " + pos2);
+            // System.out.println("x: " + x_min + ", " + x_max);
+            // System.out.println("y: " + y_min + ", " + y_max);
+            // System.out.println("z: " + z_min + ", " + z_max);
+            // 是否在 center 选区范围内
+            return (targetPos.getX() >= x_min && targetPos.getX() <= x_max)
+                    && (targetPos.getY() >= y_min && targetPos.getY() <= y_max)
+                    && (targetPos.getZ() >= z_min && targetPos.getZ() <= z_max);
+
+        }
+        return false;
+    }
+
     public static boolean playerHasAccessToItem(ClientPlayerEntity playerEntity, Item item) {
         return playerHasAccessToItems(playerEntity, new Item[]{item});
     }

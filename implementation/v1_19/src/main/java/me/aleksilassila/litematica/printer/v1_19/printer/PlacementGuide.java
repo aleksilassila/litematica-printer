@@ -53,16 +53,35 @@ public class PlacementGuide extends PrinterUtils {
         BlockState requiredState = worldSchematic.getBlockState(pos);
         BlockState currentState = world.getBlockState(pos);
 
+
+        if (LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue()) {
+            if (currentState.getBlock() instanceof FluidBlock) {
+                // 水源判断
+                if (currentState.get(FluidBlock.LEVEL) == 0) {
+                    // 如果是原理图模式, 过滤原理图空气, 避免循环切换物品空气
+                    if (!LitematicaMixinMod.REPLACE_FLUIDS_UseSelectionRange.getBooleanValue() && requiredState.isAir()) {
+                        return null;
+                    } else if (!requiredState.canPlaceAt(world, pos)) {
+                        return null;
+                    }
+                    Action action = new Action();
+                    // 如果使用投影区域选择范围, 默认使用沙子进行填充
+                    if (LitematicaMixinMod.REPLACE_FLUIDS_UseSelectionRange.getBooleanValue()) {
+                        action.setItem(Items.SAND); // 使用沙子
+                        action.selection = true;
+                    }
+                    return action;
+                }
+            }
+            return null;    // 开启时不进行投影
+        }
+
         if (requiredState.getBlock() instanceof FluidBlock) {
             return null;
         } else if (currentState.getBlock() instanceof FluidBlock) {
-            if (currentState.get(FluidBlock.LEVEL) == 0 && !LitematicaMixinMod.shouldReplaceFluids) {
+            if (currentState.get(FluidBlock.LEVEL) == 0) {
                 return null;
             }
-        }
-
-        if (!requiredState.canPlaceAt(world, pos)) {
-            return null;
         }
 
         State state = State.get(requiredState, currentState);
@@ -427,6 +446,7 @@ public class PlacementGuide extends PrinterUtils {
 
         protected boolean crouch = false;
         protected boolean requiresSupport = false;
+        protected boolean selection = false;
 
         // If true, click target block, not neighbor
 
@@ -510,7 +530,7 @@ public class PlacementGuide extends PrinterUtils {
             List<Direction> validSides = new ArrayList<>();
 
             for (Direction side : sides.keySet()) {
-                if (LitematicaMixinMod.shouldPrintInAir && !this.requiresSupport) {
+                if (LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue() && !this.requiresSupport) {
                     return side;
                 } else {
                     BlockPos neighborPos = pos.offset(side);
@@ -602,7 +622,7 @@ public class PlacementGuide extends PrinterUtils {
         public void queueAction(Printer.Queue queue, BlockPos center, Direction side, boolean useShift, boolean didSendLook) {
             System.out.println("Queued click?: " + center.offset(side).toString() + ", side: " + side.getOpposite());
 
-            if (LitematicaMixinMod.shouldPrintInAir && !this.requiresSupport) {
+            if (LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue() && !this.requiresSupport) {
                 queue.queueClick(center, side.getOpposite(), getSides().get(side),
                         useShift, didSendLook);
             } else {

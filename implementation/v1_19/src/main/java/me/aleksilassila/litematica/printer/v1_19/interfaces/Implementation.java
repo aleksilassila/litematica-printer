@@ -18,31 +18,74 @@ import net.minecraft.util.math.Direction;
  * be the only file that has to be changed in every printer branch.
  */
 public class Implementation {
-    public static final Item[] HOES = {Items.DIAMOND_HOE, Items.IRON_HOE, Items.GOLDEN_HOE,
-            Items.NETHERITE_HOE, Items.STONE_HOE, Items.WOODEN_HOE};
 
-    public static final Item[] SHOVELS = {Items.DIAMOND_SHOVEL, Items.IRON_SHOVEL, Items.GOLDEN_SHOVEL,
-            Items.NETHERITE_SHOVEL, Items.STONE_SHOVEL, Items.WOODEN_SHOVEL};
+    /**
+     * 锄头
+     */
+    public static final Item[] HOES = {
+            Items.DIAMOND_HOE,
+            Items.IRON_HOE,
+            Items.GOLDEN_HOE,
+            Items.NETHERITE_HOE,
+            Items.STONE_HOE,
+            Items.WOODEN_HOE
+    };
 
-    public static final Item[] AXES = {Items.DIAMOND_AXE, Items.IRON_AXE, Items.GOLDEN_AXE,
-            Items.NETHERITE_AXE, Items.STONE_AXE, Items.WOODEN_AXE};
+    /**
+     * 铲子
+     */
+    public static final Item[] SHOVELS = {
+            Items.DIAMOND_SHOVEL,
+            Items.IRON_SHOVEL,
+            Items.GOLDEN_SHOVEL,
+            Items.NETHERITE_SHOVEL,
+            Items.STONE_SHOVEL,
+            Items.WOODEN_SHOVEL
+    };
 
+    /**
+     * 斧头
+     */
+    public static final Item[] AXES = {
+            Items.DIAMOND_AXE,
+            Items.IRON_AXE,
+            Items.GOLDEN_AXE,
+            Items.NETHERITE_AXE,
+            Items.STONE_AXE,
+            Items.WOODEN_AXE
+    };
+
+    /**
+     * 获取库存
+     */
     public static PlayerInventory getInventory(ClientPlayerEntity playerEntity) {
         return playerEntity.getInventory();
     }
 
+    /**
+     * 获取能力
+     */
     public static PlayerAbilities getAbilities(ClientPlayerEntity playerEntity) {
         return playerEntity.getAbilities();
     }
 
+    /**
+     * 获取Y轴旋转 (航向)
+     */
     public static float getYaw(ClientPlayerEntity playerEntity) {
         return playerEntity.getYaw();
     }
 
+    /**
+     * 获取X轴旋转 (俯仰)
+     */
     public static float getPitch(ClientPlayerEntity playerEntity) {
         return playerEntity.getPitch();
     }
 
+    /**
+     * 发送 Look 数据包
+     */
     public static void sendLookPacket(ClientPlayerEntity playerEntity, Direction playerShouldBeFacing) {
         playerEntity.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                 Implementation.getRequiredYaw(playerEntity, playerShouldBeFacing),
