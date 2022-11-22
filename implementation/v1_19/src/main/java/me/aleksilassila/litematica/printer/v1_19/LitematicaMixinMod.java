@@ -5,19 +5,22 @@ import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.config.Hotkeys;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.config.options.ConfigDouble;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.hotkeys.KeyCallbackToggleBooleanConfigWithMessage;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
+import me.aleksilassila.litematica.printer.v1_19.printer.Printer2;
 import net.fabricmc.api.ModInitializer;
 
 import java.util.List;
 
 public class LitematicaMixinMod implements ModInitializer {
 
+    public static Printer2 printer;
     // Config settings
     public static final ConfigInteger PRINT_INTERVAL = new ConfigInteger("printInterval", 4, 2, 20, "Print interval in game ticks. Lower values mean faster printing speed.\nIf the printer creates \"ghost blocks\", raise this value.");
-    public static final ConfigInteger PRINTING_RANGE = new ConfigInteger("printingRange", 2, 1, 6, "Printing block place range\nLower values are recommended for servers.");
+    public static final ConfigDouble PRINTING_RANGE = new ConfigDouble("printingRange", 2, 1, 6, "Printing block place range\nLower values are recommended for servers.");
     //    public static final ConfigBoolean PRINT_WATER    = new ConfigBoolean("printWater",    false, "Whether the printer should place water\n source blocks or make blocks waterlogged.");
     public static final ConfigBoolean PRINT_IN_AIR = new ConfigBoolean("printInAir", true, "Whether or not the printer should place blocks without anything to build on.\nBe aware that some anti-cheat plugins might notice this.");
     public static final ConfigBoolean PRINT_MODE = new ConfigBoolean("printingMode", false, "Autobuild / print loaded selection.\nBe aware that some servers and anticheat plugins do not allow printing.");

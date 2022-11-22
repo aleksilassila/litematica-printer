@@ -6,7 +6,7 @@ import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.interfaces.IClientPlayerInteractionManager;
-import me.aleksilassila.litematica.printer.v1_19.interfaces.Implementation;
+import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.enums.ChestType;
@@ -15,9 +15,12 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -87,7 +90,7 @@ public class Printer extends PrinterUtils {
             return;
         }
 
-        int range = LitematicaMixinMod.PRINTING_RANGE.getIntegerValue();
+        int range = (int) LitematicaMixinMod.PRINTING_RANGE.getDoubleValue();
 
         LitematicaMixinMod.shouldPrintInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
         LitematicaMixinMod.shouldReplaceFluids = LitematicaMixinMod.REPLACE_FLUIDS.getBooleanValue();
@@ -140,6 +143,24 @@ public class Printer extends PrinterUtils {
                         } else if (Implementation.isInteractive(world.getBlockState(center.offset(side)).getBlock())) {
                             useShift = true;
                         }
+
+//                        for (Direction dir : Direction.values()) {
+//                            BlockPos blockPos = center;
+//                            Vec3d pos = Vec3d.ofCenter(blockPos)
+//                                    .add(Vec3d.of(dir.getVector()).multiply(0.5));
+//
+//                            BlockHitResult bhr = new BlockHitResult(pos, dir, blockPos, false);
+//                            ItemUsageContext ictx = new ItemUsageContext(client.player, client.player.getActiveHand(), bhr);
+//                            ItemPlacementContext ctx = new ItemPlacementContext(ictx);
+//                            BlockState blockState = requiredState.getBlock().getPlacementState(ctx);
+//
+//                            if (blockState.equals(requiredState)) {
+//                                System.out.println("GOT CORRECT STATE: " + blockState);
+//                                break;
+//                            } else {
+//                                System.out.println("WRONG STATE: " + blockState + ", REQUIRED: " + requiredState);
+//                            }
+//                        }
 
                         Direction lookDir = action.getLookDirection();
                         sendPlacementPreparation(player, requiredItems, lookDir);
@@ -271,3 +292,4 @@ public class Printer extends PrinterUtils {
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.interfaces;
+package me.aleksilassila.litematica.printer.v1_19.implementations;
 
 import me.aleksilassila.litematica.printer.v1_19.mixin.PlayerMoveC2SPacketAccessor;
 import net.minecraft.block.*;
@@ -59,7 +59,11 @@ public class Implementation {
     }
 
     public static Packet<?> getFixedLookPacket(ClientPlayerEntity playerEntity, Packet<?> packet, Direction direction) {
-        if (direction == null) return packet;
+        if (direction == null) {
+            System.out.println("DIRECTION IS NULL");
+            return packet;
+        }
+        ;
 
         float yaw = Implementation.getRequiredYaw(playerEntity, direction);
         float pitch = Implementation.getRequiredPitch(playerEntity, direction);

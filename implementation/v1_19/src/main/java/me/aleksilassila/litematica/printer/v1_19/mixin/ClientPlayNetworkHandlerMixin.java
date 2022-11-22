@@ -1,7 +1,8 @@
 package me.aleksilassila.litematica.printer.v1_19.mixin;
 
-import me.aleksilassila.litematica.printer.v1_19.interfaces.Implementation;
-import me.aleksilassila.litematica.printer.v1_19.printer.Printer;
+import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
+import me.aleksilassila.litematica.printer.v1_19.printer.Printer2;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
@@ -21,21 +22,29 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Overwrite
     public void sendPacket(Packet<?> packet) {
-        if (Printer.getPrinter() == null || client.player == null) {
+        Printer2 printer = LitematicaMixinMod.printer;
+
+        if (printer == null || client.player == null) {
             this.connection.send(packet);
             return;
         }
 
-        Direction direction = Printer.getPrinter().queue.lookDir;
+        Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
 
-        if (direction != null && Implementation.isLookAndMovePacket(packet)) {
-            Packet<?> fixedPacket = Implementation.getFixedLookPacket(client.player, packet, direction);
+        if (lockedLookDirection != null) {
+            if (Implementation.isLookAndMovePacket(packet)) {
+                Packet<?> fixedPacket = Implementation.getFixedLookPacket(client.player, packet, lockedLookDirection);
 
-            if (fixedPacket != null) {
-                this.connection.send(fixedPacket);
+                if (fixedPacket != null) {
+                    System.out.println("ONE GOT THROUGH");
+//                    this.connection.send(fixedPacket);
+                }
+                return;
+            } else if (Implementation.isLookOnlyPacket(packet)) {
+                return;
             }
-        } else if (direction == null || !Implementation.isLookOnlyPacket(packet)) {
-            this.connection.send(packet);
         }
+
+        this.connection.send(packet);
     }
 }

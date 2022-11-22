@@ -1,6 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_19.printer;
 
-import me.aleksilassila.litematica.printer.v1_19.interfaces.Implementation;
+import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.BlockHalf;
@@ -44,6 +44,23 @@ public class PrinterUtils {
         return false;
     }
 
+    public static int getItemSlot(ClientPlayerEntity playerEntity, Item... items) {
+        if (items.length == 0) return -1;
+        if (Implementation.getAbilities(playerEntity).creativeMode) return 0;
+        else {
+            Inventory inv = Implementation.getInventory(playerEntity);
+
+            for (Item item : items) {
+                for (int i = 0; i < inv.size(); i++) {
+                    if (inv.getStack(i).getItem() == item && inv.getStack(i).getCount() > 0)
+                        return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     protected static boolean isDoubleSlab(BlockState state) {
         return state.contains(SlabBlock.TYPE) && state.get(SlabBlock.TYPE) == SlabType.DOUBLE;
     }
@@ -74,11 +91,11 @@ public class PrinterUtils {
         return null;
     }
 
-    public static boolean canBeClicked(ClientWorld world, BlockPos pos) {
+    public static boolean canBeClicked(World world, BlockPos pos) {
         return getOutlineShape(world, pos) != VoxelShapes.empty();
     }
 
-    public static VoxelShape getOutlineShape(ClientWorld world, BlockPos pos) {
+    public static VoxelShape getOutlineShape(World world, BlockPos pos) {
         return world.getBlockState(pos).getOutlineShape(world, pos);
     }
 

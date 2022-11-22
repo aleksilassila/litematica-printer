@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.v1_19.mixin;
 import com.mojang.authlib.GameProfile;
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.printer.Printer;
+import me.aleksilassila.litematica.printer.v1_19.printer.Printer2;
 import me.aleksilassila.litematica.printer.v1_19.printer.UpdateChecker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -21,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     private static boolean didCheckForUpdates = false;
 
-
     @Shadow
     protected MinecraftClient client;
 
@@ -37,15 +37,21 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             checkForUpdates();
         }
 
-        if (Printer.getPrinter() == null) {
-            Printer.init(client);
-            return;
+        if (LitematicaMixinMod.printer == null) {
+            LitematicaMixinMod.printer = new Printer2(client, client.player);
         }
 
         if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
             return;
 
-        Printer.getPrinter().tick();
+        LitematicaMixinMod.printer.onGameTick();
+//
+//        if (Printer.getPrinter() == null) {
+//            Printer.init(client);
+//            return;
+//        }
+
+//        Printer.getPrinter().tick();
     }
 
     public void checkForUpdates() {

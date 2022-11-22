@@ -2,7 +2,7 @@ package me.aleksilassila.litematica.printer.v1_19.printer;
 
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19.interfaces.Implementation;
+import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import me.aleksilassila.litematica.printer.v1_19.mixin.FlowerPotBlockAccessor;
 import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
 import net.minecraft.block.*;
@@ -552,13 +552,6 @@ public class PlacementGuide extends PrinterUtils {
             this.sides = sides;
             return this;
         }
-
-//        public Action setInvalidNeighbors(Direction... neighbors) {
-//            List<Direction> dirs = Arrays.asList(Direction.values());
-//            dirs.removeAll(Arrays.asList(neighbors));
-//            this.neighbors = dirs.toArray(Direction[]::new);
-//            return this;
-//        }
 
         public Action setLookDirection(Direction lookDirection) {
             this.lookDirection = lookDirection;
