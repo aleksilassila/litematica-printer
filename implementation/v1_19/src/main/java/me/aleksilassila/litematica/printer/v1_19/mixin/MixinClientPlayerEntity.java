@@ -8,9 +8,11 @@ import me.aleksilassila.litematica.printer.v1_19.printer.UpdateChecker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.text.Text;
+import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,10 +43,8 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             LitematicaMixinMod.printer = new Printer2(client, client.player);
         }
 
-        if (!(LitematicaMixinMod.PRINT_MODE.getBooleanValue() || LitematicaMixinMod.PRINT.getKeybind().isPressed()))
-            return;
-
         LitematicaMixinMod.printer.onGameTick();
+        LitematicaMixinMod.printer.packetHandler.onGameTick();
 //
 //        if (Printer.getPrinter() == null) {
 //            Printer.init(client);

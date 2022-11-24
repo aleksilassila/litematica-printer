@@ -4,10 +4,5 @@ import me.aleksilassila.litematica.printer.v1_19.printer.guide.AbstractInteracti
 import me.aleksilassila.litematica.printer.v1_19.printer.guide.InteractionGuide;
 
 public class InteractionGuidesImpl extends AbstractInteractionGuides {
-    @Override
-    public InteractionGuide[] getGuides() {
-        return new InteractionGuide[]{
 
-        };
-    }
 }

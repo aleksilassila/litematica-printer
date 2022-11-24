@@ -8,12 +8,15 @@
   "client": [
     "ConfigsMixin",
     "GuiConfigsMixin",
-	"InputHandlerMixin",
-	"MixinClientPlayerEntity",
-	"MixinClientPlayerInteractionManager",
+    "InputHandlerMixin",
+    "MixinClientPlayerEntity",
+    "MixinClientPlayerInteractionManager",
     "ClientPlayNetworkHandlerMixin",
     "PlayerMoveC2SPacketAccessor",
-    "FlowerPotBlockAccessor"
+    "FlowerPotBlockAccessor",
+    "ClientConnectionMixin",
+    "ItemPlacementAccessor",
+    "PlayerMoveC2SPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

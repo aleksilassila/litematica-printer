@@ -10,6 +10,8 @@ import net.minecraft.item.Items;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Dirty class that contains anything and everything that is
@@ -58,12 +60,9 @@ public class Implementation {
         return packet instanceof PlayerMoveC2SPacket.Full;
     }
 
+    @Nullable
     public static Packet<?> getFixedLookPacket(ClientPlayerEntity playerEntity, Packet<?> packet, Direction direction) {
-        if (direction == null) {
-            System.out.println("DIRECTION IS NULL");
-            return packet;
-        }
-        ;
+        if (direction == null || playerEntity == null || packet == null) return null;
 
         float yaw = Implementation.getRequiredYaw(playerEntity, direction);
         float pitch = Implementation.getRequiredPitch(playerEntity, direction);

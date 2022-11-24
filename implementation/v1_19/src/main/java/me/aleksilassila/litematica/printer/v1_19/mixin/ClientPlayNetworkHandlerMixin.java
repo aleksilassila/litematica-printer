@@ -20,31 +20,30 @@ public class ClientPlayNetworkHandlerMixin {
     @Shadow
     private MinecraftClient client;
 
-    @Overwrite
-    public void sendPacket(Packet<?> packet) {
-        Printer2 printer = LitematicaMixinMod.printer;
-
-        if (printer == null || client.player == null) {
-            this.connection.send(packet);
-            return;
-        }
-
-        Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
-
-        if (lockedLookDirection != null) {
-            if (Implementation.isLookAndMovePacket(packet)) {
-                Packet<?> fixedPacket = Implementation.getFixedLookPacket(client.player, packet, lockedLookDirection);
-
-                if (fixedPacket != null) {
-                    System.out.println("ONE GOT THROUGH");
+//    @Overwrite
+//    public void sendPacket(Packet<?> packet) {
+//        Printer2 printer = LitematicaMixinMod.printer;
+//
+//        if (printer == null || client.player == null) {
+//            this.connection.send(packet);
+//            return;
+//        }
+//
+//        Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
+//
+//        if (lockedLookDirection != null) {
+//            if (Implementation.isLookAndMovePacket(packet)) {
+//                Packet<?> fixedPacket = Implementation.getFixedLookPacket(client.player, packet, lockedLookDirection);
+//
+//                if (fixedPacket != null) {
 //                    this.connection.send(fixedPacket);
-                }
-                return;
-            } else if (Implementation.isLookOnlyPacket(packet)) {
-                return;
-            }
-        }
-
-        this.connection.send(packet);
-    }
+//                }
+//                return;
+//            } else if (Implementation.isLookOnlyPacket(packet)) {
+//                return;
+//            }
+//        }
+//
+//        this.connection.send(packet);
+//    }
 }

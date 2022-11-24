@@ -34,13 +34,13 @@ public class PacketHandler {
 
         AbstractAction nextAction = actionQueue.poll();
         if (nextAction != null) {
-//            if (nextAction.lockedLookDirection() != null)
-//                lockedLookDirection = nextAction.lockedLookDirection();
+            if (nextAction.lockedLookDirection() != null)
+                lockedLookDirection = nextAction.lockedLookDirection();
 
-            System.out.println("Sending action " + nextAction.getClass().getSimpleName());
+            System.out.println("Sending action " + nextAction);
             nextAction.send(client, player);
         } else {
-//            lockedLookDirection = null;
+            lockedLookDirection = null;
         }
     }
 
@@ -51,10 +51,10 @@ public class PacketHandler {
     public void addActions(AbstractAction... actions) {
         if (!acceptsActions()) return;
 
-        for (AbstractAction action : actions) {
-            if (action.lockedLookDirection() != null)
-                lockedLookDirection = action.lockedLookDirection();
-        }
+//        for (AbstractAction action : actions) {
+//            if (action.lockedLookDirection() != null)
+//                lockedLookDirection = action.lockedLookDirection();
+//        }
         actionQueue.addAll(List.of(actions));
     }
 }

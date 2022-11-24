@@ -4,14 +4,15 @@ import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import me.aleksilassila.litematica.printer.v1_19.implementations.InteractionGuidesImpl;
 import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
 import me.aleksilassila.litematica.printer.v1_19.printer.guide.AbstractInteractionGuides;
 import me.aleksilassila.litematica.printer.v1_19.printer.guide.InteractionGuide;
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.AnvilBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -26,7 +27,7 @@ public class Printer2 extends PrinterUtils {
     @NotNull
     private final MinecraftClient client;
     @NotNull
-    private final ClientPlayerEntity player;
+    public final ClientPlayerEntity player;
 
     public final PacketHandler packetHandler;
 
@@ -44,28 +45,30 @@ public class Printer2 extends PrinterUtils {
 
         if (worldSchematic == null) return;
 
-        ArrayList<BlockPos> positions = getReachablePositions();
-        for (BlockPos position : positions) {
-            SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
-            InteractionGuide guide = interactionGuides.getInteractionGuide(state);
+        if (!LitematicaMixinMod.PRINT_MODE.getBooleanValue() && !LitematicaMixinMod.PRINT.getKeybind().isPressed())
+            return;
 
-            if (guide != null) {
-                if (!guide.canExecute(player, state)) continue;
+        PlayerAbilities abilities = Implementation.getAbilities(player);
+        if (!abilities.allowModifyWorld)
+            return;
 
-                List<AbstractAction> actions = guide.getActions(player, state);
+        if (packetHandler.acceptsActions()) {
+            ArrayList<BlockPos> positions = getReachablePositions();
+            findBlock:
+            for (BlockPos position : positions) {
+                SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
+                InteractionGuide[] guides = interactionGuides.getInteractionGuides(state);
 
-                if (actions == null) {
-                    System.out.println("Skipping actions for " + state.targetState.getBlock().getName().getString());
-                    continue;
+                for (InteractionGuide guide : guides) {
+                    if (guide.canExecute(player, state)) {
+                        System.out.println("Executing " + guide + " for " + state);
+                        List<AbstractAction> actions = guide.execute(player, state);
+                        packetHandler.addActions(actions.toArray(AbstractAction[]::new));
+                        break findBlock;
+                    }
                 }
-                System.out.println("Adding actions for " + state.targetState.getBlock().getClass().getSimpleName());
-
-                packetHandler.addActions(actions.toArray(AbstractAction[]::new));
-                break;
             }
         }
-
-        packetHandler.onGameTick();
     }
 
     private ArrayList<BlockPos> getReachablePositions() {
