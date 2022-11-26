@@ -21,6 +21,10 @@ public class PrinterPlacementContext extends ItemPlacementContext {
         this.hitResult = hitResult;
     }
 
+    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem) {
+        this(player, hitResult, requiredItem, null, false);
+    }
+
     @Override
     public String toString() {
         return "PrinterPlacementContext{" +

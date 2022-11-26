@@ -7,11 +7,9 @@ import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import me.aleksilassila.litematica.printer.v1_19.implementations.InteractionGuidesImpl;
 import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
-import me.aleksilassila.litematica.printer.v1_19.printer.guide.AbstractInteractionGuides;
 import me.aleksilassila.litematica.printer.v1_19.printer.guide.InteractionGuide;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -31,7 +29,7 @@ public class Printer2 extends PrinterUtils {
 
     public final PacketHandler packetHandler;
 
-    private final AbstractInteractionGuides interactionGuides = new InteractionGuidesImpl();
+    private final InteractionGuideHooker interactionGuides = new InteractionGuidesImpl();
 
     public Printer2(@NotNull MinecraftClient client, @NotNull ClientPlayerEntity player) {
         this.client = client;

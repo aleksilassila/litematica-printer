@@ -18,6 +18,10 @@ abstract public class InteractionGuide extends PrinterUtils {
     protected int getStackSlot(ClientPlayerEntity player, SchematicBlockState state) {
         List<ItemStack> requiredItems = getRequiredItems(state);
 
+        if (Implementation.getAbilities(player).creativeMode) {
+            return Implementation.getInventory(player).selectedSlot;
+        }
+
         for (ItemStack requiredItem : requiredItems) {
             int slot = Implementation.getInventory(player).getSlotWithStack(requiredItem);
             if (slot > -1) return slot;

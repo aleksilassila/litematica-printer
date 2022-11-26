@@ -8,6 +8,7 @@ import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
 import me.aleksilassila.litematica.printer.v1_19.printer.action.InteractAction;
 import me.aleksilassila.litematica.printer.v1_19.printer.action.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_19.printer.action.ReleaseShiftAction;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
@@ -26,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PlacementGuide extends InteractionGuide {
-    protected List<Direction> getPossibleSides(SchematicBlockState state) {
+    protected List<Direction> getPossibleSides(SchematicBlockState state, BlockState currentState, BlockState targetState) {
         return Arrays.asList(Direction.values());
     }
 
@@ -42,7 +43,7 @@ public class PlacementGuide extends InteractionGuide {
         return false;
     }
 
-    protected Vec3d getHitModifier(SchematicBlockState state, Direction facingDirection) {
+    protected Vec3d getHitModifier(SchematicBlockState state, Direction validSide) {
         return new Vec3d(0, 0, 0);
     }
 
@@ -52,10 +53,10 @@ public class PlacementGuide extends InteractionGuide {
     }
 
     @Nullable
-    protected Direction getValidSide(SchematicBlockState state) {
+    private Direction getValidSide(SchematicBlockState state) {
         boolean printInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 
-        List<Direction> sides = getPossibleSides(state);
+        List<Direction> sides = getPossibleSides(state, state.currentState, state.targetState);
 
         if (sides.isEmpty()) {
             return null;
@@ -89,20 +90,21 @@ public class PlacementGuide extends InteractionGuide {
         return validSides.isEmpty() ? null : validSides.get(0);
     }
 
-    protected boolean getRequiresShift(SchematicBlockState state) {
+    private boolean getRequiresShift(SchematicBlockState state) {
         if (getRequiresExplicitShift(state)) return true;
 //        if (interactionDir == null) return false;
         Direction clickSide = getValidSide(state);
+        if (clickSide == null) return false;
         return Implementation.isInteractive(state.getNeighbor(clickSide).currentState.getBlock());
     }
 
     @Nullable
-    private Vec3d getHitVector(SchematicBlockState state, Direction facingDirection) {
+    private Vec3d getHitVector(SchematicBlockState state, Direction validSide) {
         Direction side = getValidSide(state);
         if (side == null) return null;
         return Vec3d.ofCenter(state.blockPos)
                 .add(Vec3d.of(side.getVector()).multiply(0.5))
-                .add(getHitModifier(state, facingDirection));
+                .add(getHitModifier(state, validSide));
     }
 
     @Override
@@ -134,7 +136,7 @@ public class PlacementGuide extends InteractionGuide {
     @Nullable
     public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player, SchematicBlockState state) {
         Direction validSide = getValidSide(state);
-        Vec3d hitVec = getHitVector(state, player.getHorizontalFacing());
+        Vec3d hitVec = getHitVector(state, validSide);
 
         if (validSide == null || hitVec == null) return null;
 
