@@ -11,8 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SlabGuide extends PlacementGuide {
+    public SlabGuide(SchematicBlockState state) {
+        super(state);
+    }
+
     @Override
-    protected List<Direction> getPossibleSides(SchematicBlockState state, BlockState currentState, BlockState targetState) {
+    protected List<Direction> getPossibleSides() {
         return Arrays.stream(Direction.values()).filter(d -> d != (getRequiredHalf(state).getOpposite())).toList();
 //        if (state.currentState.contains(SlabBlock.TYPE)) {
 //        } else {
@@ -21,7 +25,7 @@ public class SlabGuide extends PlacementGuide {
     }
 
     @Override
-    protected Vec3d getHitModifier(SchematicBlockState state, Direction validSide) {
+    protected Vec3d getHitModifier(Direction validSide) {
         Direction requiredHalf = getRequiredHalf(state);
         if (validSide.getHorizontal() != -1) {
             return new Vec3d(0, requiredHalf.getOffsetY() * 0.25, 0);

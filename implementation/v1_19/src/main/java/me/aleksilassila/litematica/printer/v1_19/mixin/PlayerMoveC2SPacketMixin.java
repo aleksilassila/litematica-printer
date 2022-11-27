@@ -27,16 +27,32 @@ public class PlayerMoveC2SPacketMixin {
 //    }
 
     @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 0)
-    private static float modifyLookDir(float yaw) {
+    private static float modifyLookYaw(float yaw) {
         Printer2 printer = LitematicaMixinMod.printer;
         if (printer == null) return yaw;
         Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
 
-        if (lockedLookDirection != null) {
+        if (lockedLookDirection != null && lockedLookDirection.getAxis().isHorizontal()) {
+            System.out.println("RETURNING " + lockedLookDirection);
             return lockedLookDirection.asRotation();
         }
 
         return yaw;
+    }
+
+    @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 1)
+    private static float modifyLookPitch(float pitch) {
+        Printer2 printer = LitematicaMixinMod.printer;
+        if (printer == null) return pitch;
+        Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
+
+        if (lockedLookDirection == Direction.UP) {
+            return -90;
+        } else if (lockedLookDirection == Direction.DOWN) {
+            return 90;
+        }
+
+        return pitch;
     }
 
 //    @Redirect(method = "<init>(DDDFFZZZ)V", at = @At(value = "FIELD", target = "Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;yaw:F", opcode = Opcodes.PUTFIELD))

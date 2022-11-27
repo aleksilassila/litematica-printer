@@ -47,22 +47,15 @@ public abstract class MixinClientPlayerInteractionManager implements IClientPlay
     @Shadow
     public abstract ActionResult interactItem(PlayerEntity playerEntity_1, Hand hand_1);
 
-//    @Inject(at = @At("HEAD"), method = "interactBlock")
-//    public void interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-//        String out = "Interaction:" +
-//                "\n - Hand: " + hand.toString() +
-//                "\n - HitResult: " +
-//                "\n   - Pos: " + hitResult.getBlockPos().toShortString() +
-//                "\n   - Side: " + hitResult.getSide().getName() +
-//                "\n   - Vector: " + hitResult.getPos().toString() +
-//                "\n   - IsInside: " + hitResult.isInsideBlock();
-//        System.out.println(out);
-////		PlacementGuide.Action a = Printer.getPrinter().guide.getAction(hitResult.getBlockPos());
-////		if (a == null) return;
-////		for (Direction side : a.getSides().keySet()) {
-////			System.out.println("Side: " + side + ", " + a.getSides().get(side).toString());
-////		}
-////		System.out.println("Valid: " + a.getValidSide(world, hitResult.getBlockPos()));
-////		System.out.println("Look: " + a.getLookDirection());
-//    }
+    @Inject(at = @At("HEAD"), method = "interactBlock")
+    public void interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+        String out = "Interaction:" +
+                "\n - Hand: " + hand.toString() +
+                "\n - HitResult: " +
+                "\n   - Pos: " + hitResult.getBlockPos().toShortString() +
+                "\n   - Side: " + hitResult.getSide().getName() +
+                "\n   - Vector: " + hitResult.getPos().toString() +
+                "\n   - IsInside: " + hitResult.isInsideBlock();
+        System.out.println(out);
+    }
 }

@@ -19,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -27,36 +28,51 @@ import java.util.Collections;
 import java.util.List;
 
 public class PlacementGuide extends InteractionGuide {
-    protected List<Direction> getPossibleSides(SchematicBlockState state, BlockState currentState, BlockState targetState) {
+    public PlacementGuide(SchematicBlockState state) {
+        super(state);
+    }
+
+    protected List<Direction> getPossibleSides() {
         return Arrays.asList(Direction.values());
     }
 
-    protected Direction getLookDirection(SchematicBlockState state) {
+    protected Direction getLookDirection() {
         return null;
     }
 
-    protected boolean getRequiresSupport(SchematicBlockState state) {
+    protected boolean getRequiresSupport() {
         return false;
     }
 
-    protected boolean getRequiresExplicitShift(SchematicBlockState state) {
+    protected boolean getRequiresExplicitShift() {
         return false;
     }
 
-    protected Vec3d getHitModifier(SchematicBlockState state, Direction validSide) {
+    protected Vec3d getHitModifier(Direction validSide) {
         return new Vec3d(0, 0, 0);
     }
 
-    @Override
-    protected List<ItemStack> getRequiredItems(SchematicBlockState state) {
-        return Collections.singletonList(state.targetState.getBlock().asItem().getDefaultStack());
+    protected ItemStack getBlockItem() {
+        return state.targetState.getBlock().getPickStack(state.world, state.blockPos, state.targetState);
     }
 
-    @Nullable
-    private Direction getValidSide(SchematicBlockState state) {
+    @Override
+    protected @NotNull List<ItemStack> getRequiredItems() {
+        return Collections.singletonList(getBlockItem());
+    }
+
+    @Override
+    protected int getStackSlot(ClientPlayerEntity player) {
+        List<ItemStack> requiredItems = getRequiredItems();
+        if (requiredItems.isEmpty() || requiredItems.get(0) == ItemStack.EMPTY) return -1;
+
+        return super.getStackSlot(player);
+    }
+
+    private @Nullable Direction getValidSide(SchematicBlockState state) {
         boolean printInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 
-        List<Direction> sides = getPossibleSides(state, state.currentState, state.targetState);
+        List<Direction> sides = getPossibleSides();
 
         if (sides.isEmpty()) {
             return null;
@@ -64,7 +80,7 @@ public class PlacementGuide extends InteractionGuide {
 
         List<Direction> validSides = new ArrayList<>();
         for (Direction side : sides) {
-            if (printInAir && !getRequiresSupport(state)) {
+            if (printInAir && !getRequiresSupport()) {
                 return side;
             } else {
                 SchematicBlockState neighborState = state.getNeighbor(side);
@@ -91,7 +107,7 @@ public class PlacementGuide extends InteractionGuide {
     }
 
     private boolean getRequiresShift(SchematicBlockState state) {
-        if (getRequiresExplicitShift(state)) return true;
+        if (getRequiresExplicitShift()) return true;
 //        if (interactionDir == null) return false;
         Direction clickSide = getValidSide(state);
         if (clickSide == null) return false;
@@ -104,24 +120,28 @@ public class PlacementGuide extends InteractionGuide {
         if (side == null) return null;
         return Vec3d.ofCenter(state.blockPos)
                 .add(Vec3d.of(side.getVector()).multiply(0.5))
-                .add(getHitModifier(state, validSide));
+                .add(getHitModifier(validSide));
     }
 
     @Override
-    public boolean canExecute(ClientPlayerEntity player, SchematicBlockState state) {
-        if (!super.canExecute(player, state)) return false;
-        ItemPlacementContext ctx = getPlacementContext(player, state);
+    public boolean canExecute(ClientPlayerEntity player) {
+        if (!super.canExecute(player)) return false;
+        ItemPlacementContext ctx = getPlacementContext(player);
         if (ctx == null || !ctx.canPlace()) return false;
 //        if (!state.currentState.getMaterial().isReplaceable()) return false;
         if (state.currentState.contains(FluidBlock.LEVEL) && state.currentState.get(FluidBlock.LEVEL) == 0)
+            return false;
+
+        BlockState resultState = targetState.getBlock().getPlacementState(ctx);
+        if (resultState == null || !resultState.canPlaceAt(state.world, state.blockPos))
             return false;
 
         return true;
     }
 
     @Override
-    public List<AbstractAction> execute(ClientPlayerEntity player, SchematicBlockState state) {
-        PrinterPlacementContext ctx = getPlacementContext(player, state);
+    public List<AbstractAction> execute(ClientPlayerEntity player) {
+        PrinterPlacementContext ctx = getPlacementContext(player);
 
         if (ctx == null) return null;
 
@@ -134,13 +154,13 @@ public class PlacementGuide extends InteractionGuide {
     }
 
     @Nullable
-    public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player, SchematicBlockState state) {
+    public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
         Direction validSide = getValidSide(state);
         Vec3d hitVec = getHitVector(state, validSide);
 
         if (validSide == null || hitVec == null) return null;
 
-        Direction lookDirection = getLookDirection(state);
+        Direction lookDirection = getLookDirection();
         boolean requiresShift = getRequiresShift(state);
         Item requiredItem = state.targetState.getBlock().asItem();
 

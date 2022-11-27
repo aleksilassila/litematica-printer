@@ -1,6 +1,5 @@
 package me.aleksilassila.litematica.printer.v1_19.printer;
 
-import me.aleksilassila.litematica.printer.v1_19.mixin.ItemPlacementAccessor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -8,12 +7,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 
+import javax.annotation.Nullable;
+
 public class PrinterPlacementContext extends ItemPlacementContext {
-    public final Direction lookDirection;
+    public final @Nullable Direction lookDirection;
     public final boolean requiresSneaking;
     public final BlockHitResult hitResult;
 
-    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem, Direction lookDirection, boolean requiresSneaking) {
+    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem, @Nullable Direction lookDirection, boolean requiresSneaking) {
         super(player, Hand.MAIN_HAND, requiredItem, hitResult);
 
         this.lookDirection = lookDirection;
@@ -21,8 +22,23 @@ public class PrinterPlacementContext extends ItemPlacementContext {
         this.hitResult = hitResult;
     }
 
-    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem) {
-        this(player, hitResult, requiredItem, null, false);
+    @Override
+    public Direction getPlayerLookDirection() {
+        return lookDirection == null ? super.getPlayerLookDirection() : lookDirection;
+    }
+
+    @Override
+    public Direction getVerticalPlayerLookDirection() {
+        if (lookDirection != null && lookDirection.getOpposite() == super.getVerticalPlayerLookDirection())
+            return lookDirection;
+        return super.getVerticalPlayerLookDirection();
+    }
+
+    @Override
+    public Direction getPlayerFacing() {
+        if (lookDirection == null || !lookDirection.getAxis().isHorizontal()) return super.getPlayerFacing();
+
+        return lookDirection;
     }
 
     @Override

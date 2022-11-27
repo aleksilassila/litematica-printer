@@ -29,7 +29,7 @@ public class Printer2 extends PrinterUtils {
 
     public final PacketHandler packetHandler;
 
-    private final InteractionGuideHooker interactionGuides = new InteractionGuidesImpl();
+    private final Guides interactionGuides = new InteractionGuidesImpl();
 
     public Printer2(@NotNull MinecraftClient client, @NotNull ClientPlayerEntity player) {
         this.client = client;
@@ -58,9 +58,10 @@ public class Printer2 extends PrinterUtils {
                 InteractionGuide[] guides = interactionGuides.getInteractionGuides(state);
 
                 for (InteractionGuide guide : guides) {
-                    if (guide.canExecute(player, state)) {
+                    if (guide.canExecute(player)) {
                         System.out.println("Executing " + guide + " for " + state);
-                        List<AbstractAction> actions = guide.execute(player, state);
+                        interactionGuides.getInteractionGuides(state);
+                        List<AbstractAction> actions = guide.execute(player);
                         packetHandler.addActions(actions.toArray(AbstractAction[]::new));
                         break findBlock;
                     }

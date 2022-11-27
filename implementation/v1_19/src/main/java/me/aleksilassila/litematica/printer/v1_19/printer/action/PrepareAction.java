@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PickFromInventoryC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
 
@@ -58,20 +59,22 @@ public class PrepareAction extends AbstractAction {
                     client.interactionManager.pickFromInventory(i);
                 }
             }
-
-            //            if (Implementation.getAbilities(player).creativeMode) {
-////                player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(Implementation.getInventory(player).selectedSlot, context.getStack()));
-//                Implementation.getInventory(player);
-//
-//            } else {
-//                int slot = getItemSlot(player, context.getStack().getItem());
-//                if (slot >= 0)
-//                    player.networkHandler.sendPacket(new PickFromInventoryC2SPacket(slot));
-//            }
         }
 
         if (context.lookDirection != null) {
-            Implementation.sendLookPacket(player, context.lookDirection);
+//            Implementation.sendLookPacket(player, context.lookDirection);
+            float yaw = player.getYaw();
+            float pitch = player.getPitch();
+
+            if (context.lookDirection.getAxis().isHorizontal()) {
+                yaw = context.lookDirection.asRotation();
+            } else {
+                pitch = context.lookDirection == Direction.UP ? -90 : 90;
+            }
+            
+            PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw, pitch, player.isOnGround());
+
+            player.networkHandler.sendPacket(packet);
         }
 
         if (context.requiresSneaking) {

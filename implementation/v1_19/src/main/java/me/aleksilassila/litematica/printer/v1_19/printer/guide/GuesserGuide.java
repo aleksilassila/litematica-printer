@@ -12,65 +12,54 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 public class GuesserGuide extends PlacementGuide {
-    static PrinterPlacementContext contextCache = null;
-    static BlockPos contextCachePos = null;
+    private PrinterPlacementContext contextCache = null;
 
-    PrinterPlacementContext getContextCache(SchematicBlockState state) {
-        if (state.blockPos != contextCachePos) {
-            contextCache = null;
-            contextCachePos = null;
-        }
-        return contextCache;
-    }
-
-    void setContextCache(SchematicBlockState state, PrinterPlacementContext context) {
-        contextCache = context;
-        contextCachePos = state.blockPos;
+    public GuesserGuide(SchematicBlockState state) {
+        super(state);
     }
 
     @Nullable
     @Override
-    public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player, SchematicBlockState state) {
-        PrinterPlacementContext cached = getContextCache(state);
-        if (cached != null) return cached;
+    public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
+        if (contextCache != null) return contextCache;
 
         Direction[] directionsToTry = Direction.values();
-        System.out.println(state.targetState.getBlock());
+        Vec3d[] hitVecsToTry = new Vec3d[]{
+                new Vec3d(-0.25, -0.25, -0.25),
+                new Vec3d(-0.75, -0.25, -0.25),
+                new Vec3d(-0.25, -0.75, -0.25),
+                new Vec3d(-0.25, -0.25, -0.75),
+                new Vec3d(-0.75, -0.75, -0.25),
+                new Vec3d(-0.25, -0.75, -0.75),
+                new Vec3d(-0.75, -0.25, -0.75),
+                new Vec3d(-0.75, -0.75, -0.75),
+        };
 
-        for (Direction direction : directionsToTry) {
-            BlockPos neighborPos = state.blockPos.offset(direction);
-            BlockState neighborState = state.world.getBlockState(neighborPos);
+        for (Direction lookDirection : directionsToTry) {
+            for (Direction side : directionsToTry) {
+                BlockPos neighborPos = state.blockPos.offset(side);
+                BlockState neighborState = state.world.getBlockState(neighborPos);
 
-            if (!canBeClicked(state.world, neighborPos) || // Handle unclickable grass for example
-                    neighborState.getMaterial().isReplaceable())
-                continue;
+                if (!canBeClicked(state.world, neighborPos) || // Handle unclickable grass for example
+                        neighborState.getMaterial().isReplaceable())
+                    continue;
 
-            Vec3d hitVec = Vec3d.ofCenter(state.blockPos)
-                    .add(Vec3d.of(direction.getVector()).multiply(0.5));
+                Vec3d hitVec = Vec3d.ofCenter(state.blockPos)
+                        .add(Vec3d.of(side.getVector()).multiply(0.5));
 
-            Vec3d[] hitVecsToTry = new Vec3d[]{
-                    new Vec3d(0.25, 0.25, 0.25),
-                    new Vec3d(0.75, 0.25, 0.25),
-                    new Vec3d(0.25, 0.75, 0.25),
-                    new Vec3d(0.25, 0.25, 0.75),
-                    new Vec3d(0.75, 0.75, 0.25),
-                    new Vec3d(0.25, 0.75, 0.75),
-                    new Vec3d(0.75, 0.25, 0.75),
-                    new Vec3d(0.75, 0.75, 0.75),
-            };
+                for (Vec3d hitVecToTry : hitVecsToTry) {
+                    Vec3d multiplier = Vec3d.of(side.getVector());
+                    multiplier = new Vec3d(multiplier.x == 0 ? 1 : 0, multiplier.y == 0 ? 1 : 0, multiplier.z == 0 ? 1 : 0);
 
-            for (Vec3d hitVecToTry : hitVecsToTry) {
-                Vec3d multiplier = Vec3d.of(direction.getVector());
-                multiplier = new Vec3d(multiplier.x == 0 ? 1 : 0, multiplier.y == 0 ? 1 : 0, multiplier.z == 0 ? 1 : 0);
+                    boolean requiresShift = Implementation.isInteractive(neighborState.getBlock());
+                    BlockHitResult hitResult = new BlockHitResult(hitVec.add(hitVecToTry.multiply(multiplier)), side.getOpposite(), neighborPos, false);
+                    PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, getBlockItem(), lookDirection, requiresShift);
+                    BlockState result = state.targetState.getBlock().getPlacementState(context);
 
-                boolean requiresShift = Implementation.isInteractive(neighborState.getBlock());
-                BlockHitResult hitResult = new BlockHitResult(hitVec.add(hitVecToTry.multiply(multiplier)), direction.getOpposite(), neighborPos, false);
-                PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, state.targetState.getBlock().asItem().getDefaultStack(), null, requiresShift);
-                BlockState result = state.targetState.getBlock().getPlacementState(context);
-
-                if (result == state.targetState) {
-                    setContextCache(state, context);
-                    return context;
+                    if (result == state.targetState) {
+                        contextCache = context;
+                        return context;
+                    }
                 }
             }
         }

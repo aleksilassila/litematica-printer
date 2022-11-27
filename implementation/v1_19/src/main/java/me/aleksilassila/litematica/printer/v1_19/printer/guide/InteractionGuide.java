@@ -7,16 +7,28 @@ import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 abstract public class InteractionGuide extends PrinterUtils {
-    protected boolean playerHasRightItem(ClientPlayerEntity player, SchematicBlockState state) {
-        return getStackSlot(player, state) != -1;
+    protected final SchematicBlockState state;
+    protected final BlockState currentState;
+    protected final BlockState targetState;
+
+    public InteractionGuide(SchematicBlockState state) {
+        this.state = state;
+
+        this.currentState = state.currentState;
+        this.targetState = state.targetState;
     }
 
-    protected int getStackSlot(ClientPlayerEntity player, SchematicBlockState state) {
-        List<ItemStack> requiredItems = getRequiredItems(state);
+    protected boolean playerHasRightItem(ClientPlayerEntity player) {
+        return getStackSlot(player) != -1;
+    }
+
+    protected int getStackSlot(ClientPlayerEntity player) {
+        List<ItemStack> requiredItems = getRequiredItems();
 
         if (Implementation.getAbilities(player).creativeMode) {
             return Implementation.getInventory(player).selectedSlot;
@@ -30,8 +42,8 @@ abstract public class InteractionGuide extends PrinterUtils {
         return -1;
     }
 
-    public boolean canExecute(ClientPlayerEntity player, SchematicBlockState state) {
-        if (!playerHasRightItem(player, state)) return false;
+    public boolean canExecute(ClientPlayerEntity player) {
+        if (!playerHasRightItem(player)) return false;
 
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
@@ -39,9 +51,9 @@ abstract public class InteractionGuide extends PrinterUtils {
         return !targetState.equals(currentState);
     }
 
-    abstract public List<AbstractAction> execute(ClientPlayerEntity player, SchematicBlockState state);
+    abstract public List<AbstractAction> execute(ClientPlayerEntity player);
 
-    protected List<ItemStack> getRequiredItems(SchematicBlockState state) {
+    protected @NotNull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(ItemStack.EMPTY);
     }
 }
