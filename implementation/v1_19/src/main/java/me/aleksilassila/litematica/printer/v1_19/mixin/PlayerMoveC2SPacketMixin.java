@@ -50,9 +50,9 @@ public class PlayerMoveC2SPacketMixin {
             return -90;
         } else if (lockedLookDirection == Direction.DOWN) {
             return 90;
+        } else {
+            return 0;
         }
-
-        return pitch;
     }
 
 //    @Redirect(method = "<init>(DDDFFZZZ)V", at = @At(value = "FIELD", target = "Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;yaw:F", opcode = Opcodes.PUTFIELD))

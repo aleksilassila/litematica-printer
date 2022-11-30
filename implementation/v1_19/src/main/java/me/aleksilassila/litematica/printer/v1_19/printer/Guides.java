@@ -17,10 +17,14 @@ public class Guides {
     }
 
     static {
-        registerGuide(AnvilGuide.class, AnvilBlock.class);
+        registerGuide(SkipGuide.class, SignBlock.class, SkullBlock.class);
         registerGuide(SlabGuide.class, SlabBlock.class);
         registerGuide(WallTorchGuide.class, WallTorchBlock.class, WallRedstoneTorchBlock.class);
         registerGuide(GuesserGuide.class);
+        registerGuide(CycleClickGuide.class,
+                DoorBlock.class, FenceGateBlock.class, TrapdoorBlock.class,
+                LeverBlock.class,
+                RepeaterBlock.class, ComparatorBlock.class, NoteBlock.class);
     }
 
     public ArrayList<Pair<Class<? extends InteractionGuide>, Class<? extends Block>[]>> getGuides() {

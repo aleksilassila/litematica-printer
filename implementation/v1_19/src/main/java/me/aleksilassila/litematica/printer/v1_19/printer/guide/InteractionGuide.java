@@ -53,7 +53,5 @@ abstract public class InteractionGuide extends PrinterUtils {
 
     abstract public List<AbstractAction> execute(ClientPlayerEntity player);
 
-    protected @NotNull List<ItemStack> getRequiredItems() {
-        return Collections.singletonList(ItemStack.EMPTY);
-    }
+    abstract protected @NotNull List<ItemStack> getRequiredItems();
 }
