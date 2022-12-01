@@ -18,13 +18,18 @@ public class Guides {
         registerGuide(SkipGuide.class, SignBlock.class, SkullBlock.class);
         registerGuide(SlabGuide.class, SlabBlock.class);
         registerGuide(WallTorchGuide.class, WallTorchBlock.class, WallRedstoneTorchBlock.class);
+        registerGuide(MultiPropertyGuesserGuide.class,
+                RepeaterBlock.class, ComparatorBlock.class, RedstoneWireBlock.class, RedstoneTorchBlock.class,
+                BambooBlock.class, CactusBlock.class, SaplingBlock.class, ScaffoldingBlock.class, PointedDripstoneBlock.class,
+                HorizontalConnectingBlock.class, DoorBlock.class, TrapdoorBlock.class, FenceGateBlock.class, ChestBlock.class,
+                SnowBlock.class, SeaPickleBlock.class, CandleBlock.class);
         registerGuide(GuesserGuide.class);
 
         registerGuide(CycleClickGuide.class,
                 DoorBlock.class, FenceGateBlock.class, TrapdoorBlock.class,
                 LeverBlock.class,
                 RepeaterBlock.class, ComparatorBlock.class, NoteBlock.class);
-        registerGuide(IncreaseGuide.class, SnowBlock.class, SeaPickleBlock.class, CandleBlock.class);
+        registerGuide(BlockReplaceGuide.class, SnowBlock.class, SeaPickleBlock.class, CandleBlock.class);
     }
 
     public ArrayList<Pair<Class<? extends AbstractGuide>, Class<? extends Block>[]>> getGuides() {

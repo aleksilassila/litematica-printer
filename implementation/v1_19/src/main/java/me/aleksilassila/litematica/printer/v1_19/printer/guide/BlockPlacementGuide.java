@@ -114,13 +114,9 @@ public class BlockPlacementGuide extends AbstractPlacementGuide {
 
         Direction lookDirection = getLookDirection();
         boolean requiresShift = getRequiresShift(state);
-        Item requiredItem = state.targetState.getBlock().asItem();
-
-        if (!playerHasAccessToItem(player, requiredItem)) return null;
 
         BlockHitResult blockHitResult = new BlockHitResult(hitVec, validSide.getOpposite(), state.blockPos.offset(validSide), false);
-        ItemStack itemStack = new ItemStack(requiredItem);
 
-        return new PrinterPlacementContext(player, blockHitResult, itemStack, lookDirection, requiresShift);
+        return new PrinterPlacementContext(player, blockHitResult, getBlockItem(), lookDirection, requiresShift);
     }
 }

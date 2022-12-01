@@ -68,13 +68,13 @@ public class GuesserGuide extends BlockPlacementGuide {
     };
     protected static Vec3d[] hitVecsToTry = new Vec3d[]{
             new Vec3d(-0.25, -0.25, -0.25),
-            new Vec3d(-0.75, -0.25, -0.25),
-            new Vec3d(-0.25, -0.75, -0.25),
-            new Vec3d(-0.25, -0.25, -0.75),
-            new Vec3d(-0.75, -0.75, -0.25),
-            new Vec3d(-0.25, -0.75, -0.75),
-            new Vec3d(-0.75, -0.25, -0.75),
-            new Vec3d(-0.75, -0.75, -0.75),
+            new Vec3d(+0.25, -0.25, -0.25),
+            new Vec3d(-0.25, +0.25, -0.25),
+            new Vec3d(-0.25, -0.25, +0.25),
+            new Vec3d(+0.25, +0.25, -0.25),
+            new Vec3d(-0.25, +0.25, +0.25),
+            new Vec3d(+0.25, -0.25, +0.25),
+            new Vec3d(+0.25, +0.25, +0.25),
     };
 
     public GuesserGuide(SchematicBlockState state) {

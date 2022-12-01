@@ -2,22 +2,18 @@ package me.aleksilassila.litematica.printer.v1_19.printer.guide;
 
 import me.aleksilassila.litematica.printer.v1_19.printer.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.printer.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
-import me.aleksilassila.litematica.printer.v1_19.printer.action.PrepareAction;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.IntProperty;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
-public class IncreaseGuide extends AbstractPlacementGuide {
+public class BlockReplaceGuide extends AbstractPlacementGuide {
     private static final HashMap<IntProperty, Item> increasingProperties = new HashMap<>();
 
     static {
@@ -35,7 +31,7 @@ public class IncreaseGuide extends AbstractPlacementGuide {
 //            increasingProperties.put(LeveledCauldronBlock.LEVEL, Items.GLASS_BOTTLE);
     }
 
-    public IncreaseGuide(SchematicBlockState state) {
+    public BlockReplaceGuide(SchematicBlockState state) {
         super(state);
 
         for (IntProperty property : increasingProperties.keySet()) {
@@ -55,7 +51,8 @@ public class IncreaseGuide extends AbstractPlacementGuide {
 
     @Override
     public @Nullable PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
-        return null;
+        BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
+        return new PrinterPlacementContext(player, hitResult, getBlockItem(), null, false);
     }
 
     @Override
