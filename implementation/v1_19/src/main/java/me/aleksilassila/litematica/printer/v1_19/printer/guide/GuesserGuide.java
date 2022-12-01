@@ -6,46 +6,57 @@ import me.aleksilassila.litematica.printer.v1_19.printer.SchematicBlockState;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 /**
  * This is the placement guide that most blocks will use.
  * It will try to predict the correct player state for producing the right blockState.
  */
-public class GuesserGuide extends PlacementGuide {
+public class GuesserGuide extends BlockPlacementGuide {
     private PrinterPlacementContext contextCache = null;
 
-    protected static Property<?>[] ignoredProperties = new Property[]{
-            RepeaterBlock.DELAY,
-            ComparatorBlock.MODE,
-            RedstoneWireBlock.POWER,
-            RedstoneWireBlock.WIRE_CONNECTION_EAST,
-            RedstoneWireBlock.WIRE_CONNECTION_NORTH,
-            RedstoneWireBlock.WIRE_CONNECTION_SOUTH,
-            RedstoneWireBlock.WIRE_CONNECTION_WEST,
-            TrapdoorBlock.POWERED,
-            TrapdoorBlock.OPEN,
-            DoorBlock.POWERED,
-            DoorBlock.OPEN,
-            FenceGateBlock.POWERED,
-            FenceGateBlock.OPEN,
-            PointedDripstoneBlock.THICKNESS,
-            HorizontalConnectingBlock.EAST,
-            HorizontalConnectingBlock.NORTH,
-            HorizontalConnectingBlock.SOUTH,
-            HorizontalConnectingBlock.WEST,
-            ScaffoldingBlock.DISTANCE,
-            CactusBlock.AGE,
-            BambooBlock.AGE,
-            BambooBlock.LEAVES,
-            BambooBlock.STAGE,
-            SaplingBlock.STAGE
-    };
+    protected static ArrayList<Pair<Property<?>, Class<? extends Block>>> ignoredProperties = new ArrayList<>();
+
+    static {
+        registerIgnoredProperty(RepeaterBlock.DELAY);
+        registerIgnoredProperty(ComparatorBlock.MODE);
+        registerIgnoredProperty(RedstoneWireBlock.POWER);
+        registerIgnoredProperty(RedstoneWireBlock.WIRE_CONNECTION_EAST);
+        registerIgnoredProperty(RedstoneWireBlock.WIRE_CONNECTION_NORTH);
+        registerIgnoredProperty(RedstoneWireBlock.WIRE_CONNECTION_SOUTH);
+        registerIgnoredProperty(RedstoneWireBlock.WIRE_CONNECTION_WEST);
+        registerIgnoredProperty(Properties.POWERED);
+        registerIgnoredProperty(Properties.OPEN);
+        registerIgnoredProperty(PointedDripstoneBlock.THICKNESS);
+        registerIgnoredProperty(ScaffoldingBlock.DISTANCE);
+        registerIgnoredProperty(CactusBlock.AGE);
+        registerIgnoredProperty(BambooBlock.AGE);
+        registerIgnoredProperty(BambooBlock.LEAVES);
+        registerIgnoredProperty(BambooBlock.STAGE);
+        registerIgnoredProperty(SaplingBlock.STAGE);
+
+        registerIgnoredProperty(HorizontalConnectingBlock.NORTH, HorizontalConnectingBlock.class);
+        registerIgnoredProperty(HorizontalConnectingBlock.EAST, HorizontalConnectingBlock.class);
+        registerIgnoredProperty(HorizontalConnectingBlock.SOUTH, HorizontalConnectingBlock.class);
+        registerIgnoredProperty(HorizontalConnectingBlock.WEST, HorizontalConnectingBlock.class);
+    }
+
+    protected static void registerIgnoredProperty(Property<?> property, Class<? extends Block> block) {
+        ignoredProperties.add(new Pair<>(property, block));
+    }
+
+    protected static void registerIgnoredProperty(Property<?> property) {
+        ignoredProperties.add(new Pair<>(property, null));
+    }
 
     protected static Direction[] directionsToTry = new Direction[]{
             Direction.NORTH,
@@ -73,7 +84,7 @@ public class GuesserGuide extends PlacementGuide {
     @Nullable
     @Override
     public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
-        if (contextCache != null) return contextCache;
+        //if (contextCache != null) return contextCache;
 
         for (Direction lookDirection : directionsToTry) {
             for (Direction side : directionsToTry) {
@@ -96,7 +107,7 @@ public class GuesserGuide extends PlacementGuide {
                     PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, getBlockItem(), lookDirection, requiresShift);
                     BlockState result = targetState.getBlock().getPlacementState(context);
 
-                    if (result != null && (statesMatch(result, targetState) || correctChestPlacement(targetState, result))) {
+                    if (result != null && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
                         contextCache = context;
                         return context;
                     }
@@ -105,27 +116,6 @@ public class GuesserGuide extends PlacementGuide {
         }
 
         return null;
-    }
-
-    private boolean statesMatch(BlockState state1, BlockState state2) {
-        if (state1.getBlock() != state2.getBlock()) return false;
-
-        loop:
-        for (Property<?> property : state1.getProperties()) {
-            for (Property<?> ignoredProperty : ignoredProperties) {
-                if (property == ignoredProperty) continue loop;
-            }
-
-            try {
-                if (state1.get(property) != state2.get(property)) {
-                    return false;
-                }
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private boolean correctChestPlacement(BlockState targetState, BlockState result) {

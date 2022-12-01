@@ -7,7 +7,7 @@ import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import me.aleksilassila.litematica.printer.v1_19.implementations.InteractionGuidesImpl;
 import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
-import me.aleksilassila.litematica.printer.v1_19.printer.guide.InteractionGuide;
+import me.aleksilassila.litematica.printer.v1_19.printer.guide.AbstractGuide;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -55,9 +55,9 @@ public class Printer2 extends PrinterUtils {
             findBlock:
             for (BlockPos position : positions) {
                 SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
-                InteractionGuide[] guides = interactionGuides.getInteractionGuides(state);
+                AbstractGuide[] guides = interactionGuides.getInteractionGuides(state);
 
-                for (InteractionGuide guide : guides) {
+                for (AbstractGuide guide : guides) {
                     if (guide.canExecute(player)) {
                         System.out.println("Executing " + guide + " for " + state);
                         interactionGuides.getInteractionGuides(state);

@@ -4,31 +4,22 @@ import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.implementations.Implementation;
 import me.aleksilassila.litematica.printer.v1_19.printer.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.printer.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
-import me.aleksilassila.litematica.printer.v1_19.printer.action.InteractAction;
-import me.aleksilassila.litematica.printer.v1_19.printer.action.PrepareAction;
-import me.aleksilassila.litematica.printer.v1_19.printer.action.ReleaseShiftAction;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FluidBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-public class PlacementGuide extends InteractionGuide {
-    public PlacementGuide(SchematicBlockState state) {
+public class BlockPlacementGuide extends AbstractPlacementGuide {
+    public BlockPlacementGuide(SchematicBlockState state) {
         super(state);
     }
 
@@ -50,15 +41,6 @@ public class PlacementGuide extends InteractionGuide {
 
     protected Vec3d getHitModifier(Direction validSide) {
         return new Vec3d(0, 0, 0);
-    }
-
-    protected ItemStack getBlockItem() {
-        return state.targetState.getBlock().getPickStack(state.world, state.blockPos, state.targetState);
-    }
-
-    @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
-        return Collections.singletonList(getBlockItem());
     }
 
     @Override
@@ -106,7 +88,7 @@ public class PlacementGuide extends InteractionGuide {
         return validSides.isEmpty() ? null : validSides.get(0);
     }
 
-    private boolean getRequiresShift(SchematicBlockState state) {
+    protected boolean getRequiresShift(SchematicBlockState state) {
         if (getRequiresExplicitShift()) return true;
 //        if (interactionDir == null) return false;
         Direction clickSide = getValidSide(state);
@@ -121,36 +103,6 @@ public class PlacementGuide extends InteractionGuide {
         return Vec3d.ofCenter(state.blockPos)
                 .add(Vec3d.of(side.getVector()).multiply(0.5))
                 .add(getHitModifier(validSide));
-    }
-
-    @Override
-    public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
-        ItemPlacementContext ctx = getPlacementContext(player);
-        if (ctx == null || !ctx.canPlace()) return false;
-//        if (!state.currentState.getMaterial().isReplaceable()) return false;
-        if (state.currentState.contains(FluidBlock.LEVEL) && state.currentState.get(FluidBlock.LEVEL) == 0)
-            return false;
-
-        BlockState resultState = targetState.getBlock().getPlacementState(ctx);
-        if (resultState == null || !resultState.canPlaceAt(state.world, state.blockPos))
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public List<AbstractAction> execute(ClientPlayerEntity player) {
-        PrinterPlacementContext ctx = getPlacementContext(player);
-
-        if (ctx == null) return null;
-
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new PrepareAction(ctx));
-        actions.add(new InteractAction(ctx));
-        if (getRequiresShift(state)) actions.add(new ReleaseShiftAction());
-
-        return actions;
     }
 
     @Nullable

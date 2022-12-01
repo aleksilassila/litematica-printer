@@ -8,7 +8,7 @@ import net.minecraft.util.math.Direction;
 import java.util.Collections;
 import java.util.List;
 
-public class WallTorchGuide extends PlacementGuide {
+public class WallTorchGuide extends BlockPlacementGuide {
     public WallTorchGuide(SchematicBlockState state) {
         super(state);
     }

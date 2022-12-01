@@ -15,7 +15,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CycleClickGuide extends ClickGuide {
+public class CycleClickGuide extends AbstractClickGuide {
     public CycleClickGuide(SchematicBlockState state) {
         super(state);
     }

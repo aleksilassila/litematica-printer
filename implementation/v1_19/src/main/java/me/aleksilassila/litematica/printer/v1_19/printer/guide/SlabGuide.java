@@ -10,7 +10,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.Arrays;
 import java.util.List;
 
-public class SlabGuide extends PlacementGuide {
+public class SlabGuide extends BlockPlacementGuide {
     public SlabGuide(SchematicBlockState state) {
         super(state);
     }
