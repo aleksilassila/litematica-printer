@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SkipGuide extends AbstractGuide {
+public class SkipGuide extends Guide {
     public SkipGuide(SchematicBlockState state) {
         super(state);
     }

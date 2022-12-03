@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class LogStrippingGuide extends AbstractClickGuide {
+public class LogStrippingGuide extends InteractionGuide {
     static final Item[] AXE_ITEMS = new Item[]{
             Items.NETHERITE_AXE,
             Items.DIAMOND_AXE,
@@ -24,7 +24,7 @@ public class LogStrippingGuide extends AbstractClickGuide {
             Items.WOODEN_AXE
     };
 
-    static final Map<Block, Block> STRIPPED_BLOCKS = AxeItemAccessor.getStrippedBlocks();
+    public static final Map<Block, Block> STRIPPED_BLOCKS = AxeItemAccessor.getStrippedBlocks();
 
     public LogStrippingGuide(SchematicBlockState state) {
         super(state);

@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class BlockPlacementGuide extends AbstractPlacementGuide {
+public class BlockPlacementGuide extends PlacementGuide {
     public BlockPlacementGuide(SchematicBlockState state) {
         super(state);
     }

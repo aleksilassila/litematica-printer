@@ -1,11 +1,11 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.*;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 
-public class MultiPropertyGuesserGuide extends GuesserGuide {
+public class PropertySpecificGuesserGuide extends GuesserGuide {
     protected static Property<?>[] ignoredProperties = new Property[]{
             RepeaterBlock.DELAY,
             ComparatorBlock.MODE,
@@ -37,7 +37,7 @@ public class MultiPropertyGuesserGuide extends GuesserGuide {
             LeavesBlock.PERSISTENT,
     };
 
-    public MultiPropertyGuesserGuide(SchematicBlockState state) {
+    public PropertySpecificGuesserGuide(SchematicBlockState state) {
         super(state);
     }
 

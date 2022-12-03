@@ -13,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-abstract public class AbstractGuide {
+abstract public class Guide {
     protected final SchematicBlockState state;
     protected final BlockState currentState;
     protected final BlockState targetState;
 
-    public AbstractGuide(SchematicBlockState state) {
+    public Guide(SchematicBlockState state) {
         this.state = state;
 
         this.currentState = state.currentState;

@@ -1,7 +1,8 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
+import me.aleksilassila.litematica.printer.v1_19.guides.interaction.LogStrippingGuide;
 import net.minecraft.block.Block;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -14,8 +15,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class LogStrippingPlacementGuide extends BlockPlacementGuide {
-    public LogStrippingPlacementGuide(SchematicBlockState state) {
+public class LogGuide extends BlockPlacementGuide {
+    public LogGuide(SchematicBlockState state) {
         super(state);
     }
 

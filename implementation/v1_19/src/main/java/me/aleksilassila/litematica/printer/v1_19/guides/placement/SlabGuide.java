@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.BlockState;
@@ -18,10 +18,6 @@ public class SlabGuide extends BlockPlacementGuide {
     @Override
     protected List<Direction> getPossibleSides() {
         return Arrays.stream(Direction.values()).filter(d -> d != (getRequiredHalf(state).getOpposite())).toList();
-//        if (state.currentState.contains(SlabBlock.TYPE)) {
-//        } else {
-//            return Arrays.asList(Direction.values());
-//        }
     }
 
     @Override

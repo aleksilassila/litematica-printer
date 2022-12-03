@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.Block;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FarmlandGuide extends BlockPlacementGuide {
-    static final Block[] TILLABLE_BLOCKS = new Block[]{
+    public static final Block[] TILLABLE_BLOCKS = new Block[]{
             Blocks.DIRT,
             Blocks.GRASS_BLOCK,
             Blocks.COARSE_DIRT,
@@ -26,13 +26,4 @@ public class FarmlandGuide extends BlockPlacementGuide {
     protected @NotNull List<ItemStack> getRequiredItems() {
         return Arrays.stream(TILLABLE_BLOCKS).map(b -> getBlockItem(b.getDefaultState())).toList();
     }
-
-//    @Override
-//    protected boolean statesEqual(BlockState resultState, BlockState targetState) {
-//        if (targetState.getBlock() instanceof FarmlandBlock) {
-//            return Arrays.stream(TILLABLE_BLOCKS).anyMatch(b -> b == resultState.getBlock());
-//        }
-//
-//        return super.statesEqual(resultState, targetState);
-//    }
 }
