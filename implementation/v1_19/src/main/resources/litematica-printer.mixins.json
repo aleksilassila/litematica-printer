@@ -7,15 +7,10 @@
   ],
   "client": [
     "ConfigsMixin",
+    "FlowerPotBlockAccessor",
     "GuiConfigsMixin",
     "InputHandlerMixin",
     "MixinClientPlayerEntity",
-    "MixinClientPlayerInteractionManager",
-    "ClientPlayNetworkHandlerMixin",
-    "PlayerMoveC2SPacketAccessor",
-    "FlowerPotBlockAccessor",
-    "ClientConnectionMixin",
-    "ItemPlacementAccessor",
     "PlayerMoveC2SPacketMixin"
   ],
   "injectors": {

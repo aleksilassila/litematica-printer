@@ -2,17 +2,14 @@ package me.aleksilassila.litematica.printer.v1_19.mixin;
 
 import com.mojang.authlib.GameProfile;
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19.printer.Printer;
-import me.aleksilassila.litematica.printer.v1_19.printer.Printer2;
-import me.aleksilassila.litematica.printer.v1_19.printer.UpdateChecker;
+import me.aleksilassila.litematica.printer.v1_19.Printer;
+import me.aleksilassila.litematica.printer.v1_19.UpdateChecker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.text.Text;
-import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,7 +39,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
         if (LitematicaMixinMod.printer == null || LitematicaMixinMod.printer.player != clientPlayer) {
             System.out.println("Initializing printer, player: " + clientPlayer + ", client: " + client);
-            LitematicaMixinMod.printer = new Printer2(client, clientPlayer);
+            LitematicaMixinMod.printer = new Printer(client, clientPlayer);
         }
 
         LitematicaMixinMod.printer.onGameTick();
