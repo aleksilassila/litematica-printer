@@ -5,6 +5,7 @@ import me.aleksilassila.litematica.printer.v1_19.printer.SchematicBlockState;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
@@ -12,6 +13,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 public class BlockReplaceGuide extends AbstractPlacementGuide {
     private static final HashMap<IntProperty, Item> increasingProperties = new HashMap<>();
@@ -51,8 +53,11 @@ public class BlockReplaceGuide extends AbstractPlacementGuide {
 
     @Override
     public @Nullable PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
+        Optional<ItemStack> requiredItem = getRequiredItem(player);
+        if (requiredItem.isEmpty()) return null;
+
         BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
-        return new PrinterPlacementContext(player, hitResult, getBlockItem(), null, false);
+        return new PrinterPlacementContext(player, hitResult, requiredItem.get(), getSlotWithItem(player, requiredItem.get()));
     }
 
     @Override

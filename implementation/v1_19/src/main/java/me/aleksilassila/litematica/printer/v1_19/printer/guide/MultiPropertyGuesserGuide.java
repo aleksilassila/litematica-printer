@@ -18,6 +18,7 @@ public class MultiPropertyGuesserGuide extends GuesserGuide {
             Properties.OPEN,
             PointedDripstoneBlock.THICKNESS,
             ScaffoldingBlock.DISTANCE,
+            ScaffoldingBlock.BOTTOM,
             CactusBlock.AGE,
             BambooBlock.AGE,
             BambooBlock.LEAVES,
@@ -30,6 +31,10 @@ public class MultiPropertyGuesserGuide extends GuesserGuide {
             SnowBlock.LAYERS,
             SeaPickleBlock.PICKLES,
             CandleBlock.CANDLES,
+            EndPortalFrameBlock.EYE,
+            Properties.LIT,
+            LeavesBlock.DISTANCE,
+            LeavesBlock.PERSISTENT,
     };
 
     public MultiPropertyGuesserGuide(SchematicBlockState state) {
@@ -37,7 +42,7 @@ public class MultiPropertyGuesserGuide extends GuesserGuide {
     }
 
     @Override
-    protected boolean statesEqual(BlockState state1, BlockState state2) {
-        return statesEqualIgnoreProperties(state1, state2, ignoredProperties);
+    protected boolean statesEqual(BlockState resultState, BlockState targetState) {
+        return statesEqualIgnoreProperties(resultState, targetState, ignoredProperties);
     }
 }

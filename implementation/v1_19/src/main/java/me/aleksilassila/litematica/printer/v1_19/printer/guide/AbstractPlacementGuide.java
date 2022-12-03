@@ -19,18 +19,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Guide that clicks its neighbors to create a placement in target position.
+ */
 abstract public class AbstractPlacementGuide extends AbstractGuide {
     public AbstractPlacementGuide(SchematicBlockState state) {
         super(state);
     }
 
-    protected ItemStack getBlockItem() {
-        return state.targetState.getBlock().getPickStack(state.world, state.blockPos, state.targetState);
+    protected ItemStack getBlockItem(BlockState state) {
+        return state.getBlock().getPickStack(this.state.world, this.state.blockPos, state);
     }
 
     @Override
     protected @NotNull List<ItemStack> getRequiredItems() {
-        return Collections.singletonList(getBlockItem());
+        return Collections.singletonList(getBlockItem(state.targetState));
     }
 
     abstract protected boolean getRequiresShift(SchematicBlockState state);
@@ -41,8 +44,11 @@ abstract public class AbstractPlacementGuide extends AbstractGuide {
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
         if (!super.canExecute(player)) return false;
-        if (getBlockItem().isOf(Items.AIR)) return false;
-        
+
+        List<ItemStack> requiredItems = getRequiredItems();
+        if (requiredItems.isEmpty() || requiredItems.stream().allMatch(i -> i.isOf(Items.AIR)))
+            return false;
+
         ItemPlacementContext ctx = getPlacementContext(player);
         if (ctx == null || !ctx.canPlace()) return false;
 //        if (!state.currentState.getMaterial().isReplaceable()) return false;

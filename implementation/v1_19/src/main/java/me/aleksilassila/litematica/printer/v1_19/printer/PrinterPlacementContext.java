@@ -13,13 +13,19 @@ public class PrinterPlacementContext extends ItemPlacementContext {
     public final @Nullable Direction lookDirection;
     public final boolean requiresSneaking;
     public final BlockHitResult hitResult;
+    public final int requiredItemSlot;
 
-    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem, @Nullable Direction lookDirection, boolean requiresSneaking) {
+    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem, int requiredItemSlot) {
+        this(player, hitResult, requiredItem, requiredItemSlot, null, false);
+    }
+
+    public PrinterPlacementContext(PlayerEntity player, BlockHitResult hitResult, ItemStack requiredItem, int requiredItemSlot, @Nullable Direction lookDirection, boolean requiresSneaking) {
         super(player, Hand.MAIN_HAND, requiredItem, hitResult);
 
         this.lookDirection = lookDirection;
         this.requiresSneaking = requiresSneaking;
         this.hitResult = hitResult;
+        this.requiredItemSlot = requiredItemSlot;
     }
 
     @Override

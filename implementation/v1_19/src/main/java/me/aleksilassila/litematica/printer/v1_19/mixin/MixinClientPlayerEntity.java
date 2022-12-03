@@ -33,14 +33,16 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
     @Inject(at = @At("TAIL"), method = "tick")
     public void tick(CallbackInfo ci) {
+        ClientPlayerEntity clientPlayer = (ClientPlayerEntity) (Object) this;
         if (!didCheckForUpdates) {
             didCheckForUpdates = true;
 
             checkForUpdates();
         }
 
-        if (LitematicaMixinMod.printer == null) {
-            LitematicaMixinMod.printer = new Printer2(client, client.player);
+        if (LitematicaMixinMod.printer == null || LitematicaMixinMod.printer.player != clientPlayer) {
+            System.out.println("Initializing printer, player: " + clientPlayer + ", client: " + client);
+            LitematicaMixinMod.printer = new Printer2(client, clientPlayer);
         }
 
         LitematicaMixinMod.printer.onGameTick();

@@ -15,21 +15,31 @@ public class Guides {
     }
 
     static {
-        registerGuide(SkipGuide.class, SignBlock.class, SkullBlock.class);
+        registerGuide(SkipGuide.class, AbstractSignBlock.class, SkullBlock.class);
+
         registerGuide(SlabGuide.class, SlabBlock.class);
         registerGuide(WallTorchGuide.class, WallTorchBlock.class, WallRedstoneTorchBlock.class);
+        registerGuide(FarmlandGuide.class, FarmlandBlock.class);
+        registerGuide(FarmlandClickGuide.class, FarmlandBlock.class);
+        registerGuide(RailGuesserGuide.class, RailBlock.class);
+
         registerGuide(MultiPropertyGuesserGuide.class,
                 RepeaterBlock.class, ComparatorBlock.class, RedstoneWireBlock.class, RedstoneTorchBlock.class,
                 BambooBlock.class, CactusBlock.class, SaplingBlock.class, ScaffoldingBlock.class, PointedDripstoneBlock.class,
                 HorizontalConnectingBlock.class, DoorBlock.class, TrapdoorBlock.class, FenceGateBlock.class, ChestBlock.class,
-                SnowBlock.class, SeaPickleBlock.class, CandleBlock.class);
+                SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, LeverBlock.class, EndPortalFrameBlock.class,
+                CandleBlock.class, RedstoneTorchBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class);
         registerGuide(GuesserGuide.class);
 
+        registerGuide(ExtinguishCampfiresGuide.class, CampfireBlock.class);
+        registerGuide(EnderEyeClickGuide.class, EndPortalFrameBlock.class);
         registerGuide(CycleClickGuide.class,
                 DoorBlock.class, FenceGateBlock.class, TrapdoorBlock.class,
                 LeverBlock.class,
                 RepeaterBlock.class, ComparatorBlock.class, NoteBlock.class);
         registerGuide(BlockReplaceGuide.class, SnowBlock.class, SeaPickleBlock.class, CandleBlock.class);
+        registerGuide(LogStrippingPlacementGuide.class);
+        registerGuide(LogStrippingGuide.class);
     }
 
     public ArrayList<Pair<Class<? extends AbstractGuide>, Class<? extends Block>[]>> getGuides() {

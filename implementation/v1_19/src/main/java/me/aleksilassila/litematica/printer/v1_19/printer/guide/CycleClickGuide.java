@@ -11,26 +11,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CycleClickGuide extends AbstractClickGuide {
     public CycleClickGuide(SchematicBlockState state) {
         super(state);
-    }
-
-    @Override
-    public List<AbstractAction> execute(ClientPlayerEntity player) {
-        BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
-        PrinterPlacementContext ctx = new PrinterPlacementContext(player, hitResult, ItemStack.EMPTY, null, false);
-
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new ReleaseShiftAction());
-        actions.add(new PrepareAction(ctx));
-        actions.add(new InteractAction(ctx));
-
-        return actions;
     }
 
     @Override
@@ -40,5 +29,10 @@ public class CycleClickGuide extends AbstractClickGuide {
         if (targetState.getBlock() != currentState.getBlock()) return false;
 
         return true;
+    }
+
+    @Override
+    protected @NotNull List<ItemStack> getRequiredItems() {
+        return Collections.singletonList(ItemStack.EMPTY);
     }
 }

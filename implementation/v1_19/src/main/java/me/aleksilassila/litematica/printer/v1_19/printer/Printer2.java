@@ -11,6 +11,7 @@ import me.aleksilassila.litematica.printer.v1_19.printer.guide.AbstractGuide;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -55,12 +56,17 @@ public class Printer2 extends PrinterUtils {
             findBlock:
             for (BlockPos position : positions) {
                 SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
+                if (state.targetState.equals(state.currentState)) continue;
+
                 AbstractGuide[] guides = interactionGuides.getInteractionGuides(state);
 
+                boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
+
                 for (AbstractGuide guide : guides) {
+                    if (guide.shouldSkip()) continue findBlock;
                     if (guide.canExecute(player)) {
                         System.out.println("Executing " + guide + " for " + state);
-                        interactionGuides.getInteractionGuides(state);
+                        // interactionGuides.getInteractionGuides(state);
                         List<AbstractAction> actions = guide.execute(player);
                         packetHandler.addActions(actions.toArray(AbstractAction[]::new));
                         break findBlock;

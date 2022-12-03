@@ -44,19 +44,20 @@ public class PrepareAction extends AbstractAction {
     @Override
     public void send(MinecraftClient client, ClientPlayerEntity player) {
         ItemStack itemStack = context.getStack();
+        int slot = context.requiredItemSlot;
+
         if (itemStack != null) {
             PlayerInventory inventory = Implementation.getInventory(player);
-            int i = inventory.getSlotWithStack(itemStack);
 
             // This thing is straight from MinecraftClient#doItemPick()
             if (Implementation.getAbilities(player).creativeMode) {
                 inventory.addPickBlock(itemStack);
                 client.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND), 36 + inventory.selectedSlot);
-            } else if (i != -1) {
-                if (PlayerInventory.isValidHotbarIndex(i)) {
-                    inventory.selectedSlot = i;
+            } else if (slot != -1) {
+                if (PlayerInventory.isValidHotbarIndex(slot)) {
+                    inventory.selectedSlot = slot;
                 } else {
-                    client.interactionManager.pickFromInventory(i);
+                    client.interactionManager.pickFromInventory(slot);
                 }
             }
         }
@@ -71,7 +72,7 @@ public class PrepareAction extends AbstractAction {
             } else {
                 pitch = context.lookDirection == Direction.UP ? -90 : 90;
             }
-            
+
             PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw, pitch, player.isOnGround());
 
             player.networkHandler.sendPacket(packet);

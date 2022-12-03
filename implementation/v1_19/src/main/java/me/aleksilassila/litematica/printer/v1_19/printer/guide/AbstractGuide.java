@@ -7,7 +7,9 @@ import me.aleksilassila.litematica.printer.v1_19.printer.action.AbstractAction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -30,19 +32,27 @@ abstract public class AbstractGuide extends PrinterUtils {
         return getStackSlot(player) != -1;
     }
 
-    protected int getStackSlot(ClientPlayerEntity player) {
-        List<ItemStack> requiredItems = getRequiredItems();
+    protected int getSlotWithItem(ClientPlayerEntity player, ItemStack itemStack) {
+        PlayerInventory inventory = Implementation.getInventory(player);
 
+        for (int i = 0; i < inventory.main.size(); ++i) {
+            if (!inventory.main.get(i).isEmpty() && inventory.main.get(i).isItemEqual(itemStack)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    protected int getStackSlot(ClientPlayerEntity player) {
         if (Implementation.getAbilities(player).creativeMode) {
             return Implementation.getInventory(player).selectedSlot;
         }
 
-        for (ItemStack requiredItem : requiredItems) {
-            int slot = Implementation.getInventory(player).getSlotWithStack(requiredItem);
-            if (slot > -1) return slot;
-        }
+        Optional<ItemStack> requiredItem = getRequiredItem(player);
+        if (requiredItem.isEmpty()) return -1;
 
-        return -1;
+        return getSlotWithItem(player, requiredItem.get());
     }
 
     public boolean canExecute(ClientPlayerEntity player) {
@@ -57,6 +67,24 @@ abstract public class AbstractGuide extends PrinterUtils {
     abstract public List<AbstractAction> execute(ClientPlayerEntity player);
 
     abstract protected @NotNull List<ItemStack> getRequiredItems();
+
+    /**
+     * Returns the first required item that player has access to,
+     * or empty if the items are inaccessible.
+     */
+    protected Optional<ItemStack> getRequiredItem(ClientPlayerEntity player) {
+        List<ItemStack> requiredItems = getRequiredItems();
+
+        for (ItemStack requiredItem : requiredItems) {
+            if (Implementation.getAbilities(player).creativeMode) return Optional.of(requiredItem);
+
+            int slot = getSlotWithItem(player, requiredItem);
+            if (slot > -1 && !requiredItem.isOf(Items.AIR))
+                return Optional.of(requiredItem);
+        }
+
+        return Optional.empty();
+    }
 
     protected boolean statesEqualIgnoreProperties(BlockState state1, BlockState state2, Property<?>... propertiesToIgnore) {
         if (state1.getBlock() != state2.getBlock()) return false;
@@ -79,7 +107,14 @@ abstract public class AbstractGuide extends PrinterUtils {
         return true;
     }
 
+    /**
+     * Returns true if
+     */
     protected boolean statesEqual(BlockState state1, BlockState state2) {
         return statesEqualIgnoreProperties(state1, state2);
+    }
+
+    public boolean shouldSkip() {
+        return false;
     }
 }
