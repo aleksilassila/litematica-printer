@@ -1,5 +1,5 @@
 {
- "required": true,
+  "required": true,
   "minVersion": "0.8",
   "package": "me.aleksilassila.litematica.printer.v1_18.mixin",
   "compatibilityLevel": "JAVA_16",
@@ -7,13 +7,10 @@
   ],
   "client": [
     "ConfigsMixin",
+    "FlowerPotBlockAccessor",
     "GuiConfigsMixin",
-	"InputHandlerMixin",
-	"MixinClientPlayerEntity",
-	"MixinClientPlayerInteractionManager",
-    "ClientPlayNetworkHandlerMixin",
-    "PlayerMoveC2SPacketAccessor",
-    "FlowerPotBlockAccessor"
+    "InputHandlerMixin",
+    "PlayerMoveC2SPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
