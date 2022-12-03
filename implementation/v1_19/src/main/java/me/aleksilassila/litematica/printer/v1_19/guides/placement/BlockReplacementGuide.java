@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class BlockReplaceGuide extends AbstractPlacementGuide {
+public class BlockReplacementGuide extends PlacementGuide {
     private static final HashMap<IntProperty, Item> increasingProperties = new HashMap<>();
 
     static {
@@ -35,7 +35,7 @@ public class BlockReplaceGuide extends AbstractPlacementGuide {
 //            increasingProperties.put(LeveledCauldronBlock.LEVEL, Items.GLASS_BOTTLE);
     }
 
-    public BlockReplaceGuide(SchematicBlockState state) {
+    public BlockReplacementGuide(SchematicBlockState state) {
         super(state);
 
         for (IntProperty property : increasingProperties.keySet()) {

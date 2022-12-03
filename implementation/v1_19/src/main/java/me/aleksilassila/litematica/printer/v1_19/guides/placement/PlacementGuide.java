@@ -1,10 +1,11 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
 import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_19.actions.ReleaseShiftAction;
+import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
 import me.aleksilassila.litematica.printer.v1_19.implementation.actions.InteractActionImpl;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -25,8 +26,8 @@ import java.util.List;
 /**
  * Guide that clicks its neighbors to create a placement in target position.
  */
-abstract public class AbstractPlacementGuide extends AbstractGuide {
-    public AbstractPlacementGuide(SchematicBlockState state) {
+abstract public class PlacementGuide extends Guide {
+    public PlacementGuide(SchematicBlockState state) {
         super(state);
     }
 

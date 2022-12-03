@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.BlockState;
@@ -8,7 +8,7 @@ import net.minecraft.state.property.Properties;
 
 import java.util.Arrays;
 
-public class RailGuesserGuide extends MultiPropertyGuesserGuide {
+public class RailGuesserGuide extends PropertySpecificGuesserGuide {
     static final RailShape[] STRAIGHT_RAIL_SHAPES = new RailShape[]{
             RailShape.NORTH_SOUTH,
             RailShape.EAST_WEST

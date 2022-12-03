@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-public class EnderEyeClickGuide extends AbstractClickGuide {
-    public EnderEyeClickGuide(SchematicBlockState state) {
+public class EnderEyeGuide extends InteractionGuide {
+    public EnderEyeGuide(SchematicBlockState state) {
         super(state);
     }
 

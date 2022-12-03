@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.CampfireBlock;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
-public class ExtinguishCampfiresGuide extends AbstractClickGuide {
+public class CampfireExtinguishGuide extends InteractionGuide {
     static final Item[] SHOVEL_ITEMS = new Item[]{
             Items.NETHERITE_SHOVEL,
             Items.DIAMOND_SHOVEL,
@@ -21,7 +21,7 @@ public class ExtinguishCampfiresGuide extends AbstractClickGuide {
             Items.WOODEN_SHOVEL
     };
 
-    public ExtinguishCampfiresGuide(SchematicBlockState state) {
+    public CampfireExtinguishGuide(SchematicBlockState state) {
         super(state);
     }
 

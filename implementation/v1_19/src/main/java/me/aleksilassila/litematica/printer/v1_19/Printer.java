@@ -4,8 +4,8 @@ import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
-import me.aleksilassila.litematica.printer.v1_19.guides.AbstractGuide;
-import me.aleksilassila.litematica.printer.v1_19.implementation.GuidesImpl;
+import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
+import me.aleksilassila.litematica.printer.v1_19.guides.Guides;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -26,7 +26,7 @@ public class Printer {
 
     public final PacketHandler packetHandler;
 
-    private final Guides interactionGuides = new GuidesImpl();
+    private final Guides interactionGuides = new Guides();
 
     public Printer(@NotNull MinecraftClient client, @NotNull ClientPlayerEntity player) {
         this.player = player;
@@ -53,11 +53,11 @@ public class Printer {
                 SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
                 if (state.targetState.equals(state.currentState)) continue;
 
-                AbstractGuide[] guides = interactionGuides.getInteractionGuides(state);
+                Guide[] guides = interactionGuides.getInteractionGuides(state);
 
                 boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
 
-                for (AbstractGuide guide : guides) {
+                for (Guide guide : guides) {
                     if (guide.shouldSkip()) continue findBlock;
                     if (guide.canExecute(player)) {
                         System.out.println("Executing " + guide + " for " + state);

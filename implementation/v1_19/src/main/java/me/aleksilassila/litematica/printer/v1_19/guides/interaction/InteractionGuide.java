@@ -1,10 +1,11 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
 import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_19.actions.ReleaseShiftAction;
+import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
 import me.aleksilassila.litematica.printer.v1_19.implementation.actions.InteractActionImpl;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -20,8 +21,8 @@ import java.util.List;
  * Guide that clicks the current block to change its state.
  */
 
-public abstract class AbstractClickGuide extends AbstractGuide {
-    public AbstractClickGuide(SchematicBlockState state) {
+public abstract class InteractionGuide extends Guide {
+    public InteractionGuide(SchematicBlockState state) {
         super(state);
     }
 
