@@ -45,7 +45,7 @@ val setupServer = tasks.create("syncImplementations") {
             this.project.projectDir.absolutePath + "/src/main/java/me/aleksilassila/litematica/printer/v1_19"
         val sourceDir = file(sourceStart)
         for (sourceFile in sourceDir.listFiles()) {
-            if (sourceFile.name.equals("implementations")) continue
+            if (sourceFile.name.equals("implementation")) continue
 
             sourceFile.walk()
                 .filter { it.isFile }

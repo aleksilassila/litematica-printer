@@ -1,41 +1,27 @@
 package me.aleksilassila.litematica.printer.v1_19.actions;
 
+import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 
-public class InteractAction extends AbstractAction {
-//    public final BlockPos blockPos;
-//    public final Direction side;
-//    public final Vec3d hitVec;
-
+abstract public class InteractAction extends AbstractAction {
     public final PrinterPlacementContext context;
-
-//    public InteractAction(BlockPos blockPos, Direction side, Vec3d hitVec) {
-//        this.blockPos = blockPos;
-//        this.side = side;
-//        this.hitVec = hitVec;
-//    }
 
     public InteractAction(PrinterPlacementContext context) {
         this.context = context;
     }
 
+    protected abstract void interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult);
+
     @Override
     public void send(MinecraftClient client, ClientPlayerEntity player) {
-//        ((IClientPlayerInteractionManager) client.interactionManager)
-//                .rightClickBlock(context);
+        interact(client, player, Hand.MAIN_HAND, context.hitResult);
 
-        client.interactionManager.interactBlock(client.player, Hand.MAIN_HAND,
-                context.hitResult);
-        client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
-
-        System.out.println("InteractAction.send: Blockpos: " + context.getBlockPos() + " Side: " + context.getSide() + " HitPos: " + context.getHitPos());
-
-        //        client.interactionManager.interactBlock(client.player, Hand.MAIN_HAND,
-//                context.hitResult);
-//        client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
+        if (LitematicaMixinMod.DEBUG)
+            System.out.println("InteractAction.send: Blockpos: " + context.getBlockPos() + " Side: " + context.getSide() + " HitPos: " + context.getHitPos());
     }
 
     @Override

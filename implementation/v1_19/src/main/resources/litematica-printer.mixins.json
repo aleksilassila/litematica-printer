@@ -10,7 +10,6 @@
     "FlowerPotBlockAccessor",
     "GuiConfigsMixin",
     "InputHandlerMixin",
-    "MixinClientPlayerEntity",
     "PlayerMoveC2SPacketMixin"
   ],
   "injectors": {
