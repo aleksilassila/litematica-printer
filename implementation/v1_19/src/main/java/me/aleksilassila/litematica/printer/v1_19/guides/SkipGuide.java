@@ -16,7 +16,7 @@ public class SkipGuide extends Guide {
     }
 
     @Override
-    public boolean shouldSkip() {
+    public boolean skipOtherGuides() {
         return true;
     }
 

@@ -56,7 +56,7 @@ abstract public class PlacementGuide extends Guide {
         return Collections.singletonList(getBlockItem(state.targetState));
     }
 
-    abstract protected boolean getRequiresShift(SchematicBlockState state);
+    abstract protected boolean getUseShift(SchematicBlockState state);
 
     @Nullable
     abstract public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player);
@@ -90,7 +90,7 @@ abstract public class PlacementGuide extends Guide {
         List<AbstractAction> actions = new ArrayList<>();
         actions.add(new PrepareAction(ctx));
         actions.add(new InteractActionImpl(ctx));
-        if (getRequiresShift(state)) actions.add(new ReleaseShiftAction());
+        if (ctx.shouldSneak) actions.add(new ReleaseShiftAction());
 
         return actions;
     }

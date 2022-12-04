@@ -12,13 +12,26 @@ public class FallingBlockGuide extends GuesserGuide {
         super(state);
     }
 
-    @Override
-    public boolean shouldSkip() {
+    boolean blockPlacement() {
         if (targetState.getBlock() instanceof FallingBlock) {
             BlockState below = state.world.getBlockState(state.blockPos.offset(Direction.DOWN));
             return FallingBlock.canFallThrough(below);
         }
 
-        return super.shouldSkip();
+        return false;
+    }
+
+    @Override
+    public boolean canExecute(ClientPlayerEntity player) {
+        if (blockPlacement()) return false;
+
+        return super.canExecute(player);
+    }
+
+    @Override
+    public boolean skipOtherGuides() {
+        if (blockPlacement()) return true;
+
+        return super.skipOtherGuides();
     }
 }

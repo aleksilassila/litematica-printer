@@ -104,6 +104,13 @@ abstract public class Guide {
         return true;
     }
 
+    protected static <T extends Comparable<T>> Optional<T> getProperty(BlockState blockState, Property<T> property) {
+        if (blockState.contains(property)) {
+            return Optional.of(blockState.get(property));
+        }
+        return Optional.empty();
+    }
+
     /**
      * Returns true if
      */
@@ -111,7 +118,7 @@ abstract public class Guide {
         return statesEqualIgnoreProperties(state1, state2);
     }
 
-    public boolean shouldSkip() {
+    public boolean skipOtherGuides() {
         return false;
     }
 }

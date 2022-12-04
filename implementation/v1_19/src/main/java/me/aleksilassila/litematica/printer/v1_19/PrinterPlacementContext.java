@@ -8,9 +8,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class PrinterPlacementContext extends ItemPlacementContext {
     public final @Nullable Direction lookDirection;
-    public final boolean requiresSneaking;
+    public final boolean shouldSneak;
     public final BlockHitResult hitResult;
     public final int requiredItemSlot;
 
@@ -22,7 +24,7 @@ public class PrinterPlacementContext extends ItemPlacementContext {
         super(player, Hand.MAIN_HAND, requiredItem, hitResult);
 
         this.lookDirection = lookDirection;
-        this.requiresSneaking = requiresSneaking;
+        this.shouldSneak = requiresSneaking;
         this.hitResult = hitResult;
         this.requiredItemSlot = requiredItemSlot;
     }
@@ -50,7 +52,7 @@ public class PrinterPlacementContext extends ItemPlacementContext {
     public String toString() {
         return "PrinterPlacementContext{" +
                 "lookDirection=" + lookDirection +
-                ", requiresSneaking=" + requiresSneaking +
+                ", requiresSneaking=" + shouldSneak +
                 ", blockPos=" + hitResult.getBlockPos() +
                 ", side=" + hitResult.getSide() +
 //                ", hitVec=" + hitResult +

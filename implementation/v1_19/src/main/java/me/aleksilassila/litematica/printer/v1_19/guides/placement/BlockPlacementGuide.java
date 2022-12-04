@@ -26,8 +26,8 @@ public class BlockPlacementGuide extends PlacementGuide {
         return Arrays.asList(Direction.values());
     }
 
-    protected Direction getLookDirection() {
-        return null;
+    protected Optional<Direction> getLookDirection() {
+        return Optional.empty();
     }
 
     protected boolean getRequiresSupport() {
@@ -50,19 +50,19 @@ public class BlockPlacementGuide extends PlacementGuide {
 //        return super.getStackSlot(player);
 //    }
 
-    private @Nullable Direction getValidSide(SchematicBlockState state) {
+    private Optional<Direction> getValidSide(SchematicBlockState state) {
         boolean printInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 
         List<Direction> sides = getPossibleSides();
 
         if (sides.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
 
         List<Direction> validSides = new ArrayList<>();
         for (Direction side : sides) {
             if (printInAir && !getRequiresSupport()) {
-                return side;
+                return Optional.of(side);
             } else {
                 SchematicBlockState neighborState = state.getNeighbor(side);
 
@@ -80,43 +80,45 @@ public class BlockPlacementGuide extends PlacementGuide {
 
         for (Direction validSide : validSides) {
             if (!isInteractive(state.getNeighbor(validSide).currentState.getBlock())) {
-                return validSide;
+                return Optional.of(validSide);
             }
         }
 
-        return validSides.isEmpty() ? null : validSides.get(0);
+        return validSides.isEmpty() ? Optional.empty() : Optional.of(validSides.get(0));
     }
 
-    protected boolean getRequiresShift(SchematicBlockState state) {
+    protected boolean getUseShift(SchematicBlockState state) {
         if (getRequiresExplicitShift()) return true;
 //        if (interactionDir == null) return false;
-        Direction clickSide = getValidSide(state);
+        Direction clickSide = getValidSide(state).orElse(null);
         if (clickSide == null) return false;
         return isInteractive(state.getNeighbor(clickSide).currentState.getBlock());
     }
 
-    @Nullable
-    private Vec3d getHitVector(SchematicBlockState state, Direction validSide) {
-        Direction side = getValidSide(state);
-        if (side == null) return null;
-        return Vec3d.ofCenter(state.blockPos)
+    private Optional<Vec3d> getHitVector(SchematicBlockState state) {
+        return getValidSide(state).map(side -> Vec3d.ofCenter(state.blockPos)
                 .add(Vec3d.of(side.getVector()).multiply(0.5))
-                .add(getHitModifier(validSide));
+                .add(getHitModifier(side)));
     }
 
     @Nullable
     public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
-        Direction validSide = getValidSide(state);
-        Vec3d hitVec = getHitVector(state, validSide);
-        Optional<ItemStack> requiredItem = getRequiredItem(player);
+        try {
+            Optional<Direction> validSide = getValidSide(state);
+            Optional<Vec3d> hitVec = getHitVector(state);
+            Optional<ItemStack> requiredItem = getRequiredItem(player);
 
-        if (validSide == null || hitVec == null || requiredItem.isEmpty()) return null;
+            if (validSide.isEmpty() || hitVec.isEmpty() || requiredItem.isEmpty()) return null;
 
-        Direction lookDirection = getLookDirection();
-        boolean requiresShift = getRequiresShift(state);
+            Optional<Direction> lookDirection = getLookDirection();
+            boolean requiresShift = getUseShift(state);
 
-        BlockHitResult blockHitResult = new BlockHitResult(hitVec, validSide.getOpposite(), state.blockPos.offset(validSide), false);
+            BlockHitResult blockHitResult = new BlockHitResult(hitVec.get(), validSide.get().getOpposite(), state.blockPos.offset(validSide.get()), false);
 
-        return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), getSlotWithItem(player, requiredItem.get()), lookDirection, requiresShift);
+            return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), getSlotWithItem(player, requiredItem.get()), lookDirection.orElse(null), requiresShift);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

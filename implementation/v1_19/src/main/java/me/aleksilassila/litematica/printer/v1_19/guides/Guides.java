@@ -24,6 +24,7 @@ public class Guides {
         registerGuide(FarmlandGuide.class, FarmlandBlock.class);
         registerGuide(TillingGuide.class, FarmlandBlock.class);
         registerGuide(RailGuesserGuide.class, RailBlock.class);
+        registerGuide(ChestGuide.class, ChestBlock.class);
 
         registerGuide(PropertySpecificGuesserGuide.class,
                 RepeaterBlock.class, ComparatorBlock.class, RedstoneWireBlock.class, RedstoneTorchBlock.class,

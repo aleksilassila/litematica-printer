@@ -49,7 +49,7 @@ public class BlockReplacementGuide extends PlacementGuide {
     }
 
     @Override
-    protected boolean getRequiresShift(SchematicBlockState state) {
+    protected boolean getUseShift(SchematicBlockState state) {
         return false;
     }
 

@@ -56,7 +56,7 @@ public class GuesserGuide extends BlockPlacementGuide {
             for (Direction side : directionsToTry) {
                 BlockPos neighborPos = state.blockPos.offset(side);
                 BlockState neighborState = state.world.getBlockState(neighborPos);
-                boolean requiresShift = isInteractive(neighborState.getBlock());
+                boolean requiresShift = getRequiresExplicitShift() || isInteractive(neighborState.getBlock());
 
                 if (!canBeClicked(state.world, neighborPos) || // Handle unclickable grass for example
                         neighborState.getMaterial().isReplaceable())

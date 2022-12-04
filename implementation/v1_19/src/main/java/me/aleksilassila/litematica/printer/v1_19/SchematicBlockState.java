@@ -29,6 +29,10 @@ public class SchematicBlockState {
         return new SchematicBlockState(world, schematic, blockPos.offset(side));
     }
 
+    public SchematicBlockState offset(Direction direction) {
+        return new SchematicBlockState(world, schematic, blockPos.offset(direction));
+    }
+
     @Override
     public String toString() {
         return "SchematicBlockState{" +

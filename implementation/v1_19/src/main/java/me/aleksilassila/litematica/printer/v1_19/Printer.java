@@ -16,9 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Printer {
     @NotNull
@@ -59,14 +57,13 @@ public class Printer {
             boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
 
             for (Guide guide : guides) {
-                if (guide.shouldSkip()) continue findBlock;
                 if (guide.canExecute(player)) {
                     System.out.println("Executing " + guide + " for " + state);
-                    // interactionGuides.getInteractionGuides(state);
                     List<AbstractAction> actions = guide.execute(player);
                     packetHandler.addActions(actions.toArray(AbstractAction[]::new));
                     return true;
                 }
+                if (guide.skipOtherGuides()) continue findBlock;
             }
         }
 

@@ -5,24 +5,31 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/aleksilassila/litematica-printer/total)
 ![GitHub Repo stars](https://img.shields.io/github/stars/aleksilassila/litematica-printer)
 
-This fork adds printing functionality for [Litematica fabric](https://github.com/maruohon/litematica) 1.19, 1.18 and 1.17 versions. Printer allows players to build
+This fork adds printing functionality for [Litematica fabric](https://github.com/maruohon/litematica) 1.19, 1.18 and
+1.17 versions. Printer allows players to build
 big structures more quickly by automatically placing the correct blocks around you.
 
 ![Demo](printer_demo.gif)
 
 ## Installation
 
- 1. Download and install [Fabric](https://fabricmc.net/use/installer/) if you haven't already.
- 2. Download the latest release for your Minecraft version from the
-[releases page](https://github.com/aleksilassila/litematica-printing/releases/latest).
- 3. Download [Litematica + MaLiLib](https://www.curseforge.com/minecraft/mc-mods/litematica) and [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/).
- 4. Place the downloaded .jar files in your `mods/` folder.
+1. Download and install [Fabric](https://fabricmc.net/use/installer/) if you haven't already.
+2. Download the latest release for your Minecraft version from the
+   [releases page](https://github.com/aleksilassila/litematica-printing/releases/latest).
+3. Download [Litematica + MaLiLib](https://www.curseforge.com/minecraft/mc-mods/litematica)
+   and [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/).
+4. Place the downloaded .jar files in your `mods/` folder.
+
+[If this is the first fabric mod you are installing, here's an informative video on how to install Fabric mods.](https://www.youtube.com/watch?v=x7gmfib4gHg)
 
 ## How To Use
 
-Using the printer is straightforward: You can toggle the feature by pressing `CAPS_LOCK` by default. To configure variables such as
-printing speed and range, open Litematica's settings by pressing `M + C` and navigate to "Generic" tab. Printer's configuration can be
-found at the bottom of the page. You can also rebind the printing toggle under "Hotkeys" tab. Holding down `V` by default will also
+Using the printer is straightforward: You can toggle the feature by pressing `CAPS_LOCK` by default. To configure
+variables such as
+printing speed and range, open Litematica's settings by pressing `M + C` and navigate to "Generic" tab. Printer's
+configuration can be
+found at the bottom of the page. You can also rebind the printing toggle under "Hotkeys" tab. Holding down `V` by
+default will also
 print regardless if the printer is toggled on or off.
 
 ## Issues
@@ -34,21 +41,26 @@ or in [Discord](https://discord.gg/enypPQh6pz).
 
 Before creating an issue, make sure you are using the latest version of the mod.
 To make fixing bugs easier, include the following information in your issue:
- - Minecraft version
- - Litematica version
- - Litematica Printer version
- - Detailed description of how to reproduce the issue
- - If you can, any additional information, such as error logs, screenshots or **incorrectly printed schematics**.
+
+- Minecraft version
+- Litematica version
+- Litematica Printer version
+- Detailed description of how to reproduce the issue
+- If you can, any additional information, such as error logs, screenshots or **incorrectly printed schematics**.
 
 ### List of blacklisted blocks
-These blocks have not been implemented yet for various reasons and the printer will skip them instead of placing them wrong. If any
-other blocks are placed incorrectly, try to lower the printing speed. If certain block is still placed incorrectly, you can create
+
+These blocks have not been implemented yet for various reasons and the printer will skip them instead of placing them
+wrong. If any
+other blocks are placed incorrectly, try to lower the printing speed. If certain block is still placed incorrectly, you
+can create
 [an issue](https://github.com/aleksilassila/litematica-printer/issues).
- - Grindstones
- - Skulls placed on the ground
- - Signs
- - Glow lichen and vines
- - Entities, including item frames and armor stands
+
+- Grindstones
+- Skulls placed on the ground
+- Signs
+- Glow lichen and vines
+- Entities, including item frames and armor stands
 
 ## Building and Contributing
 
@@ -71,8 +83,8 @@ Minecraft versions that doesn't involve multiple git branches, please let me kno
 Useful gradle tasks:
 
 - `implementation:[v1_19/v1_18/v1_17]:syncImplementations`
-  - Copy over common code to other implementations
+    - Copy over common code to other implementations
 - `buildAll`
-  - Build all implementations and copy their jars to `build/` directory.
+    - Build all implementations and copy their jars to `build/` directory.
 - `implementation:[v1_19/v1_18/v1_17]:runClient`
-  - Start the target Minecraft version
+    - Start the target Minecraft version
