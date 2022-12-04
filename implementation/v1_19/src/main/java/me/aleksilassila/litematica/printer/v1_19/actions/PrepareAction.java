@@ -74,8 +74,10 @@ public class PrepareAction extends AbstractAction {
         }
 
         if (context.shouldSneak) {
+            player.input.sneaking = true;
             player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
         } else {
+            player.input.sneaking = false;
             player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
     }
