@@ -9,6 +9,7 @@ import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
 import me.aleksilassila.litematica.printer.v1_19.implementation.actions.InteractActionImpl;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Guide that clicks its neighbors to create a placement in target position.
@@ -33,6 +35,20 @@ abstract public class PlacementGuide extends Guide {
 
     protected ItemStack getBlockItem(BlockState state) {
         return state.getBlock().getPickStack(this.state.world, this.state.blockPos, state);
+    }
+
+    protected Optional<Block> getRequiredItemAsBlock(ClientPlayerEntity player) {
+        Optional<ItemStack> requiredItem = getRequiredItem(player);
+
+        if (requiredItem.isEmpty()) {
+            return Optional.empty();
+        } else {
+            ItemStack itemStack = requiredItem.get();
+
+            if (itemStack.getItem() instanceof BlockItem)
+                return Optional.of(((BlockItem) itemStack.getItem()).getBlock());
+            else return Optional.empty();
+        }
     }
 
     @Override
@@ -59,7 +75,9 @@ abstract public class PlacementGuide extends Guide {
         if (state.currentState.contains(FluidBlock.LEVEL) && state.currentState.get(FluidBlock.LEVEL) == 0)
             return false;
 
-        BlockState resultState = targetState.getBlock().getPlacementState(ctx);
+        BlockState resultState = getRequiredItemAsBlock(player)
+                .orElse(targetState.getBlock())
+                .getPlacementState(ctx);
         return resultState != null && resultState.canPlaceAt(state.world, state.blockPos);
     }
 

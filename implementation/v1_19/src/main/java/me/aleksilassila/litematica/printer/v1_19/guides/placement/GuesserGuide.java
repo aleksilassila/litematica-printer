@@ -71,7 +71,9 @@ public class GuesserGuide extends BlockPlacementGuide {
 
                     BlockHitResult hitResult = new BlockHitResult(hitVec.add(hitVecToTry.multiply(multiplier)), side.getOpposite(), neighborPos, false);
                     PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, getSlotWithItem(player, requiredItem), lookDirection, requiresShift);
-                    BlockState result = targetState.getBlock().getPlacementState(context);
+                    BlockState result = getRequiredItemAsBlock(player)
+                            .orElse(targetState.getBlock())
+                            .getPlacementState(context);
 
                     if (result != null && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
                         contextCache = context;

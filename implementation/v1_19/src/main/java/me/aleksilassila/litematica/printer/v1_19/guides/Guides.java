@@ -31,6 +31,8 @@ public class Guides {
                 HorizontalConnectingBlock.class, DoorBlock.class, TrapdoorBlock.class, FenceGateBlock.class, ChestBlock.class,
                 SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, LeverBlock.class, EndPortalFrameBlock.class,
                 CandleBlock.class, RedstoneTorchBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class);
+        registerGuide(FallingBlockGuide.class, FallingBlock.class);
+        registerGuide(BlockIndifferentGuesserGuide.class, BambooBlock.class, BigDripleafStemBlock.class, BigDripleafBlock.class);
         registerGuide(GuesserGuide.class);
 
         registerGuide(CampfireExtinguishGuide.class, CampfireBlock.class);
