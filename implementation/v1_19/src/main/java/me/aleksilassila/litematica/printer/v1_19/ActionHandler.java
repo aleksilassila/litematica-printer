@@ -9,14 +9,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class PacketHandler {
+public class ActionHandler {
     private final MinecraftClient client;
     private final ClientPlayerEntity player;
 
     private final Queue<AbstractAction> actionQueue = new LinkedList<>();
     public Direction lockedLookDirection = null;
 
-    public PacketHandler(MinecraftClient client, ClientPlayerEntity player) {
+    public ActionHandler(MinecraftClient client, ClientPlayerEntity player) {
         this.client = client;
         this.player = player;
     }
@@ -33,7 +33,7 @@ public class PacketHandler {
 
         AbstractAction nextAction = actionQueue.poll();
         if (nextAction != null) {
-            System.out.println("Sending action " + nextAction);
+            if (LitematicaMixinMod.DEBUG) System.out.println("Sending action " + nextAction);
             nextAction.send(client, player);
         } else {
             lockedLookDirection = null;

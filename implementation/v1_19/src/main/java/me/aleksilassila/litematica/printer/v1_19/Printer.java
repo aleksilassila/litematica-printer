@@ -24,55 +24,58 @@ public class Printer {
     @NotNull
     public final ClientPlayerEntity player;
 
-    public final PacketHandler packetHandler;
+    public final ActionHandler packetHandler;
 
     private final Guides interactionGuides = new Guides();
 
     public Printer(@NotNull MinecraftClient client, @NotNull ClientPlayerEntity player) {
         this.player = player;
 
-        this.packetHandler = new PacketHandler(client, player);
+        this.packetHandler = new ActionHandler(client, player);
     }
 
-    public void onGameTick() {
+    public boolean onGameTick() {
         WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-        if (worldSchematic == null) return;
+        if (!packetHandler.acceptsActions()) return false;
+
+        if (worldSchematic == null) return false;
 
         if (!LitematicaMixinMod.PRINT_MODE.getBooleanValue() && !LitematicaMixinMod.PRINT.getKeybind().isPressed())
-            return;
+            return false;
 
         PlayerAbilities abilities = player.getAbilities();
         if (!abilities.allowModifyWorld)
-            return;
+            return false;
 
-        if (packetHandler.acceptsActions()) {
-            ArrayList<BlockPos> positions = getReachablePositions();
-            findBlock:
-            for (BlockPos position : positions) {
-                SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
-                if (state.targetState.equals(state.currentState)) continue;
+        List<BlockPos> positions = getReachablePositions();
+        findBlock:
+        for (BlockPos position : positions) {
+            SchematicBlockState state = new SchematicBlockState(player.world, worldSchematic, position);
+            if (state.targetState.equals(state.currentState) || state.targetState.isAir()) continue;
 
-                Guide[] guides = interactionGuides.getInteractionGuides(state);
+            Guide[] guides = interactionGuides.getInteractionGuides(state);
 
-                boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
+            boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
 
-                for (Guide guide : guides) {
-                    if (guide.shouldSkip()) continue findBlock;
-                    if (guide.canExecute(player)) {
-                        System.out.println("Executing " + guide + " for " + state);
-                        // interactionGuides.getInteractionGuides(state);
-                        List<AbstractAction> actions = guide.execute(player);
-                        packetHandler.addActions(actions.toArray(AbstractAction[]::new));
-                        break findBlock;
-                    }
+            for (Guide guide : guides) {
+                if (guide.shouldSkip()) continue findBlock;
+                if (guide.canExecute(player)) {
+                    System.out.println("Executing " + guide + " for " + state);
+                    // interactionGuides.getInteractionGuides(state);
+                    List<AbstractAction> actions = guide.execute(player);
+                    packetHandler.addActions(actions.toArray(AbstractAction[]::new));
+                    return true;
                 }
             }
         }
+
+        return false;
     }
 
-    private ArrayList<BlockPos> getReachablePositions() {
-        int maxReach = (int) MathHelper.square(LitematicaMixinMod.PRINTING_RANGE.getDoubleValue());
+    private List<BlockPos> getReachablePositions() {
+        int maxReach = (int) Math.ceil(LitematicaMixinMod.PRINTING_RANGE.getDoubleValue());
+        int maxReachSquared = (int) MathHelper.square(LitematicaMixinMod.PRINTING_RANGE.getDoubleValue());
 
         ArrayList<BlockPos> positions = new ArrayList<>();
 
@@ -82,7 +85,7 @@ public class Printer {
                     BlockPos blockPos = player.getBlockPos().north(x).west(z).up(y);
 
                     if (!DataManager.getRenderLayerRange().isPositionWithinRange(blockPos)) continue;
-                    if (this.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(blockPos)) > maxReach) {
+                    if (this.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(blockPos)) > maxReachSquared) {
                         continue;
                     }
 
@@ -91,31 +94,15 @@ public class Printer {
             }
         }
 
-        Map<Integer, ArrayList<BlockPos>> printingLayers = new HashMap<>();
-
-        positions.forEach(blockPos -> {
-            int layer = blockPos.getY();
-
-            if (!printingLayers.containsKey(layer)) {
-                printingLayers.put(layer, new ArrayList<>());
-            }
-
-            printingLayers.get(layer).add(blockPos);
-        });
-
-        printingLayers.values().forEach(list -> list.sort((a, b) -> {
-            double aDistance = this.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(a));
-            double bDistance = this.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(b));
-
-            return Double.compare(aDistance, bDistance);
-        }));
-
-        ArrayList<BlockPos> output = new ArrayList<>();
-
-        for (int layer : printingLayers.keySet()) {
-            output.addAll(printingLayers.get(layer));
-        }
-
-        return output;
+        return positions.stream()
+                .filter(p -> {
+                    Vec3d vec = Vec3d.ofCenter(p);
+                    return this.player.getPos().squaredDistanceTo(vec) > 1 && this.player.getEyePos().squaredDistanceTo(vec) > 1;
+                })
+                .sorted((a, b) -> {
+                    double aDistance = this.player.getPos().squaredDistanceTo(Vec3d.ofCenter(a));
+                    double bDistance = this.player.getPos().squaredDistanceTo(Vec3d.ofCenter(b));
+                    return Double.compare(aDistance, bDistance);
+                }).toList();
     }
 }

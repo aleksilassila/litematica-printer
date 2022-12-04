@@ -114,7 +114,7 @@ abstract public class PlacementGuide extends Guide {
     }
 
     public static Class<?>[] interactiveBlocks = new Class[]{
-            ChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
+            AbstractChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
             AbstractButtonBlock.class, LeverBlock.class, DoorBlock.class, TrapdoorBlock.class,
             BedBlock.class, RedstoneWireBlock.class, ScaffoldingBlock.class, HopperBlock.class,
             EnchantingTableBlock.class, NoteBlock.class, JukeboxBlock.class, CakeBlock.class,

@@ -42,15 +42,14 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             LitematicaMixinMod.printer = new Printer(client, clientPlayer);
         }
 
-        LitematicaMixinMod.printer.onGameTick();
-        LitematicaMixinMod.printer.packetHandler.onGameTick();
-//
-//        if (Printer.getPrinter() == null) {
-//            Printer.init(client);
-//            return;
-//        }
-
-//        Printer.getPrinter().tick();
+        // Dirty optimization
+        boolean didFindPlacement = true;
+        for (int i = 0; i < 10; i++) {
+            if (didFindPlacement) {
+                didFindPlacement = LitematicaMixinMod.printer.onGameTick();
+            }
+            LitematicaMixinMod.printer.packetHandler.onGameTick();
+        }
     }
 
     public void checkForUpdates() {
