@@ -17,7 +17,7 @@ public class Guides {
     }
 
     static {
-        registerGuide(SkipGuide.class, AbstractSignBlock.class, SkullBlock.class);
+        registerGuide(SkipGuide.class, AbstractSignBlock.class, SkullBlock.class, BannerBlock.class);
 
         registerGuide(SlabGuide.class, SlabBlock.class);
         registerGuide(WallTorchGuide.class, WallTorchBlock.class, WallRedstoneTorchBlock.class);
@@ -30,9 +30,11 @@ public class Guides {
                 BambooBlock.class, CactusBlock.class, SaplingBlock.class, ScaffoldingBlock.class, PointedDripstoneBlock.class,
                 HorizontalConnectingBlock.class, DoorBlock.class, TrapdoorBlock.class, FenceGateBlock.class, ChestBlock.class,
                 SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, LeverBlock.class, EndPortalFrameBlock.class,
-                CandleBlock.class, RedstoneTorchBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class);
+                CandleBlock.class, RedstoneTorchBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class,
+                TripwireHookBlock.class);
         registerGuide(FallingBlockGuide.class, FallingBlock.class);
-        registerGuide(BlockIndifferentGuesserGuide.class, BambooBlock.class, BigDripleafStemBlock.class, BigDripleafBlock.class);
+        registerGuide(BlockIndifferentGuesserGuide.class, BambooBlock.class, BigDripleafStemBlock.class, BigDripleafBlock.class,
+                TwistingVinesPlantBlock.class, TripwireBlock.class);
         registerGuide(GuesserGuide.class);
 
         registerGuide(CampfireExtinguishGuide.class, CampfireBlock.class);
