@@ -1,5 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
+import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
@@ -73,14 +74,13 @@ abstract public class PlacementGuide extends Guide {
         ItemPlacementContext ctx = getPlacementContext(player);
         if (ctx == null || !ctx.canPlace()) return false;
 //        if (!state.currentState.getMaterial().isReplaceable()) return false;
-        if (state.currentState.contains(FluidBlock.LEVEL) && state.currentState.get(FluidBlock.LEVEL) == 0)
+        if (!LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue()
+                && getProperty(state.currentState, FluidBlock.LEVEL).orElse(1) == 0)
             return false;
 
         BlockState resultState = getRequiredItemAsBlock(player)
                 .orElse(targetState.getBlock())
                 .getPlacementState(ctx);
-
-//        if (resultState != null && !canPlaceInWater(resultState)) return false;
 
         if (resultState != null) {
             if (!resultState.canPlaceAt(state.world, state.blockPos)) return false;

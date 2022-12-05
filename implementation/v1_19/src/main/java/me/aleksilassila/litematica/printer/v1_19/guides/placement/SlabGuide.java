@@ -17,11 +17,6 @@ public class SlabGuide extends BlockPlacementGuide {
     }
 
     @Override
-    public boolean skipOtherGuides() {
-        return false;
-    }
-
-    @Override
     protected List<Direction> getPossibleSides() {
         return Arrays.stream(Direction.values())
                 .filter(d -> d != (getRequiredHalf(state).getOpposite()) &&

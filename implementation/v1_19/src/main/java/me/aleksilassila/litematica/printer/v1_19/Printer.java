@@ -72,7 +72,7 @@ public class Printer {
 
     private List<BlockPos> getReachablePositions() {
         int maxReach = (int) Math.ceil(LitematicaMixinMod.PRINTING_RANGE.getDoubleValue());
-        int maxReachSquared = (int) MathHelper.square(LitematicaMixinMod.PRINTING_RANGE.getDoubleValue());
+        double maxReachSquared = MathHelper.square(LitematicaMixinMod.PRINTING_RANGE.getDoubleValue());
 
         ArrayList<BlockPos> positions = new ArrayList<>();
 
