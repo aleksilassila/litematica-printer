@@ -6,8 +6,6 @@ import net.minecraft.block.*;
 public class BlockIndifferentGuesserGuide extends GuesserGuide {
     public BlockIndifferentGuesserGuide(SchematicBlockState state) {
         super(state);
-
-
     }
 
     @Override

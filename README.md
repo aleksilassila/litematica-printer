@@ -56,11 +56,9 @@ other blocks are placed incorrectly, try to lower the printing speed. If certain
 can create
 [an issue](https://github.com/aleksilassila/litematica-printer/issues).
 
-- Grindstones
-- Skulls placed on the ground
-- Signs
-- Glow lichen and vines
+- Rotating blocks such as skulls, banners and signs
 - Entities, including item frames and armor stands
+- Waterlogged blocks and liquids
 
 ## Building and Contributing
 

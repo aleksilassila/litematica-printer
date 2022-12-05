@@ -7,7 +7,6 @@
   ],
   "client": [
     "ConfigsMixin",
-    "FlowerPotBlockAccessor",
     "GuiConfigsMixin",
     "InputHandlerMixin",
     "PlayerMoveC2SPacketMixin"
