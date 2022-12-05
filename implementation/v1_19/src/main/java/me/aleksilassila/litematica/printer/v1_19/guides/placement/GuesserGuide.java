@@ -5,6 +5,7 @@ import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -87,8 +88,10 @@ public class GuesserGuide extends BlockPlacementGuide {
     }
 
     @Override
-    protected boolean statesEqual(BlockState resultState, BlockState targetState) {
-        return super.statesEqual(resultState, targetState);
+    public boolean canExecute(ClientPlayerEntity player) {
+        if (targetState.getBlock() instanceof SlabBlock) return false; // Slabs are a special case
+
+        return super.canExecute(player);
     }
 
     private boolean correctChestPlacement(BlockState targetState, BlockState result) {

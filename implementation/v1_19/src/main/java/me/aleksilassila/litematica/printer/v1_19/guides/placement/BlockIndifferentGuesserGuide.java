@@ -2,6 +2,7 @@ package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.SlabType;
 
 public class BlockIndifferentGuesserGuide extends GuesserGuide {
     public BlockIndifferentGuesserGuide(SchematicBlockState state) {
@@ -36,6 +37,10 @@ public class BlockIndifferentGuesserGuide extends GuesserGuide {
                     TripwireBlock.ATTACHED, TripwireBlock.DISARMED, TripwireBlock.POWERED, TripwireBlock.NORTH,
                     TripwireBlock.EAST, TripwireBlock.SOUTH, TripwireBlock.WEST);
         }
+
+//        if (getProperty(targetState, SlabBlock.TYPE).orElse(null) == SlabType.DOUBLE && resultBlock instanceof SlabBlock) {
+//            return statesEqualIgnoreProperties(resultState, targetState, SlabBlock.TYPE);
+//        }
 
         return super.statesEqual(resultState, targetState);
     }

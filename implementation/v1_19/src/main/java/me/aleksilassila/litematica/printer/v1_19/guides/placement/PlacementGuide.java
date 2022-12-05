@@ -13,6 +13,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -78,7 +79,15 @@ abstract public class PlacementGuide extends Guide {
         BlockState resultState = getRequiredItemAsBlock(player)
                 .orElse(targetState.getBlock())
                 .getPlacementState(ctx);
-        return resultState != null && resultState.canPlaceAt(state.world, state.blockPos);
+
+//        if (resultState != null && !canPlaceInWater(resultState)) return false;
+
+        if (resultState != null) {
+            if (!resultState.canPlaceAt(state.world, state.blockPos)) return false;
+            return !(currentState.getBlock() instanceof FluidBlock) || canPlaceInWater(resultState);
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -111,6 +120,22 @@ abstract public class PlacementGuide extends Guide {
         }
 
         return false;
+    }
+
+    private boolean canPlaceInWater(BlockState blockState) {
+        Block block = blockState.getBlock();
+        if (block instanceof FluidFillable) {
+            return true;
+        } else if (!(block instanceof DoorBlock) && !blockState.isIn(BlockTags.SIGNS) && !blockState.isOf(Blocks.LADDER) && !blockState.isOf(Blocks.SUGAR_CANE) && !blockState.isOf(Blocks.BUBBLE_COLUMN)) {
+            Material material = blockState.getMaterial();
+            if (material != Material.PORTAL && material != Material.STRUCTURE_VOID && material != Material.UNDERWATER_PLANT && material != Material.REPLACEABLE_UNDERWATER_PLANT) {
+                return material.blocksMovement();
+            } else {
+                return true;
+            }
+        }
+
+        return true;
     }
 
     public static Class<?>[] interactiveBlocks = new Class[]{

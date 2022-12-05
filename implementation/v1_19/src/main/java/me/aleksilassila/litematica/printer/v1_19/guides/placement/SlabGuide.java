@@ -4,6 +4,7 @@ import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -16,8 +17,16 @@ public class SlabGuide extends BlockPlacementGuide {
     }
 
     @Override
+    public boolean skipOtherGuides() {
+        return false;
+    }
+
+    @Override
     protected List<Direction> getPossibleSides() {
-        return Arrays.stream(Direction.values()).filter(d -> d != (getRequiredHalf(state).getOpposite())).toList();
+        return Arrays.stream(Direction.values())
+                .filter(d -> d != (getRequiredHalf(state).getOpposite()) &&
+                        getProperty(state.offset(d).currentState, SlabBlock.TYPE).orElse(SlabType.DOUBLE) == SlabType.DOUBLE)
+                .toList();
     }
 
     @Override

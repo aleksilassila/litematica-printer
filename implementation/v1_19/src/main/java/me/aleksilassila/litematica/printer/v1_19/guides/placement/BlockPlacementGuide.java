@@ -64,13 +64,21 @@ public class BlockPlacementGuide extends PlacementGuide {
             if (printInAir && !getRequiresSupport()) {
                 return Optional.of(side);
             } else {
-                SchematicBlockState neighborState = state.getNeighbor(side);
+                SchematicBlockState neighborState = state.offset(side);
 
-                // If neighbor is half slab
-                if (neighborState.currentState.contains(SlabBlock.TYPE)
-                        && neighborState.currentState.get(SlabBlock.TYPE) != SlabType.DOUBLE) {
+                if (getProperty(neighborState.currentState, SlabBlock.TYPE).orElse(null) == SlabType.DOUBLE) {
+                    validSides.add(side);
                     continue;
                 }
+
+//                if (getProperty(neighborState.currentState, SlabBlock.TYPE).orElse(SlabType.DOUBLE) != SlabType.DOUBLE)
+//                    continue;
+//
+//                // If neighbor is half slab
+//                if (!(state.targetState.getBlock() instanceof SlabBlock)
+//                        && getProperty(neighborState.currentState, SlabBlock.TYPE).orElse(SlabType.DOUBLE) != SlabType.DOUBLE) {
+//                    continue;
+//                }
 
                 if (canBeClicked(neighborState.world, neighborState.blockPos) && // Handle unclickable grass for example
                         !neighborState.currentState.getMaterial().isReplaceable())
@@ -79,7 +87,7 @@ public class BlockPlacementGuide extends PlacementGuide {
         }
 
         for (Direction validSide : validSides) {
-            if (!isInteractive(state.getNeighbor(validSide).currentState.getBlock())) {
+            if (!isInteractive(state.offset(validSide).currentState.getBlock())) {
                 return Optional.of(validSide);
             }
         }
@@ -92,7 +100,7 @@ public class BlockPlacementGuide extends PlacementGuide {
 //        if (interactionDir == null) return false;
         Direction clickSide = getValidSide(state).orElse(null);
         if (clickSide == null) return false;
-        return isInteractive(state.getNeighbor(clickSide).currentState.getBlock());
+        return isInteractive(state.offset(clickSide).currentState.getBlock());
     }
 
     private Optional<Vec3d> getHitVector(SchematicBlockState state) {

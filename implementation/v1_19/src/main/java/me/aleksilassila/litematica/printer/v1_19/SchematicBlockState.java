@@ -25,10 +25,6 @@ public class SchematicBlockState {
         this.currentState = world.getBlockState(blockPos);
     }
 
-    public SchematicBlockState getNeighbor(Direction side) {
-        return new SchematicBlockState(world, schematic, blockPos.offset(side));
-    }
-
     public SchematicBlockState offset(Direction direction) {
         return new SchematicBlockState(world, schematic, blockPos.offset(direction));
     }

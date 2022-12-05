@@ -3,10 +3,12 @@ package me.aleksilassila.litematica.printer.v1_19.guides;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.CoralBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,7 +60,7 @@ abstract public class Guide {
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
 
-        return !targetState.equals(currentState);
+        return !statesEqual(targetState, currentState);
     }
 
     abstract public List<AbstractAction> execute(ClientPlayerEntity player);
@@ -88,6 +90,8 @@ abstract public class Guide {
 
         loop:
         for (Property<?> property : state1.getProperties()) {
+            if (property == Properties.WATERLOGGED && !(state1.getBlock() instanceof CoralBlock)) continue;
+
             for (Property<?> ignoredProperty : propertiesToIgnore) {
                 if (property == ignoredProperty) continue loop;
             }

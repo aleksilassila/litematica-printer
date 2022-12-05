@@ -4,7 +4,9 @@ import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.CandleBlock;
 import net.minecraft.block.SeaPickleBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.SnowBlock;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -64,6 +66,10 @@ public class BlockReplacementGuide extends PlacementGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
+        if (getProperty(targetState, SlabBlock.TYPE).orElse(null) == SlabType.DOUBLE && getProperty(currentState, SlabBlock.TYPE).orElse(SlabType.DOUBLE) != SlabType.DOUBLE) {
+            return super.canExecute(player);
+        }
+
         if (currentLevel == null || targetLevel == null || increasingProperty == null) return false;
         if (!statesEqualIgnoreProperties(currentState, targetState, increasingProperty)) return false;
         if (currentLevel >= targetLevel) return false;
