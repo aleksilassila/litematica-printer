@@ -18,9 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Guide that clicks the current block to change its state.
+ * A guide that clicks the current block to change its state.
  */
-
 public abstract class InteractionGuide extends Guide {
     public InteractionGuide(SchematicBlockState state) {
         super(state);

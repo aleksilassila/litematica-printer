@@ -1,6 +1,5 @@
 package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.SlabBlock;
@@ -17,8 +16,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class BlockPlacementGuide extends PlacementGuide {
-    public BlockPlacementGuide(SchematicBlockState state) {
+/**
+ * An old school guide where there are defined specific conditions
+ * for player state depending on the block being placed.
+ */
+public class GeneralPlacementGuide extends PlacementGuide {
+    public GeneralPlacementGuide(SchematicBlockState state) {
         super(state);
     }
 
@@ -42,16 +45,8 @@ public class BlockPlacementGuide extends PlacementGuide {
         return new Vec3d(0, 0, 0);
     }
 
-//    @Override
-//    protected int getStackSlot(ClientPlayerEntity player) {
-//        List<ItemStack> requiredItems = getRequiredItems();
-//        if (requiredItems.isEmpty() || requiredItems.get(0) == ItemStack.EMPTY) return -1;
-//
-//        return super.getStackSlot(player);
-//    }
-
     private Optional<Direction> getValidSide(SchematicBlockState state) {
-        boolean printInAir = LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
+        boolean printInAir = false; // LitematicaMixinMod.PRINT_IN_AIR.getBooleanValue();
 
         List<Direction> sides = getPossibleSides();
 
@@ -71,15 +66,6 @@ public class BlockPlacementGuide extends PlacementGuide {
                     continue;
                 }
 
-//                if (getProperty(neighborState.currentState, SlabBlock.TYPE).orElse(SlabType.DOUBLE) != SlabType.DOUBLE)
-//                    continue;
-//
-//                // If neighbor is half slab
-//                if (!(state.targetState.getBlock() instanceof SlabBlock)
-//                        && getProperty(neighborState.currentState, SlabBlock.TYPE).orElse(SlabType.DOUBLE) != SlabType.DOUBLE) {
-//                    continue;
-//                }
-
                 if (canBeClicked(neighborState.world, neighborState.blockPos) && // Handle unclickable grass for example
                         !neighborState.currentState.getMaterial().isReplaceable())
                     validSides.add(side);
@@ -97,7 +83,7 @@ public class BlockPlacementGuide extends PlacementGuide {
 
     protected boolean getUseShift(SchematicBlockState state) {
         if (getRequiresExplicitShift()) return true;
-//        if (interactionDir == null) return false;
+
         Direction clickSide = getValidSide(state).orElse(null);
         if (clickSide == null) return false;
         return isInteractive(state.offset(clickSide).currentState.getBlock());

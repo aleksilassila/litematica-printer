@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
  * It will try to predict the correct player state for producing the right blockState
  * by brute forcing the correct hit vector and look direction.
  */
-public class GuesserGuide extends BlockPlacementGuide {
+public class GuesserGuide extends GeneralPlacementGuide {
     private PrinterPlacementContext contextCache = null;
 
     protected static Direction[] directionsToTry = new Direction[]{

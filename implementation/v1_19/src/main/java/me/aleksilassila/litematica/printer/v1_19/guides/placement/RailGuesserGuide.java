@@ -1,15 +1,15 @@
 package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import net.minecraft.block.AbstractRailBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.RailShape;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class RailGuesserGuide extends GuesserGuide {
     static final RailShape[] STRAIGHT_RAIL_SHAPES = new RailShape[]{
@@ -30,6 +30,13 @@ public class RailGuesserGuide extends GuesserGuide {
     protected boolean statesEqual(BlockState resultState, BlockState targetState) {
         if (!wouldConnectCorrectly()) return false;
 //        if (wouldBlockAnotherConnection()) return false;
+        /*TODO: Fully working rail guesser
+        * If has a neighbor that:
+        *   - Has not been placed yet
+        *       - OR Has been placed but can change shape
+        *   - AND this placement should connect to only one rail, that is not the neighbor
+        * Then return false
+        * */
 
         if (getRailShape(resultState).isPresent()) {
             if (Arrays.stream(STRAIGHT_RAIL_SHAPES).anyMatch(shape -> shape == getRailShape(resultState).orElse(null))) {

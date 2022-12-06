@@ -4,14 +4,13 @@ import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class SlabGuide extends BlockPlacementGuide {
+public class SlabGuide extends GeneralPlacementGuide {
     public SlabGuide(SchematicBlockState state) {
         super(state);
     }

@@ -8,8 +8,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public class PrinterPlacementContext extends ItemPlacementContext {
     public final @Nullable Direction lookDirection;
     public final boolean shouldSneak;

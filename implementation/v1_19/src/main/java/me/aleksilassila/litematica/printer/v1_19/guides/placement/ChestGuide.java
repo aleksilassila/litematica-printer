@@ -16,7 +16,7 @@ import java.util.Optional;
  * Also that reversing chest connection logic is an enormous pain in the ass. I spent way too long on this.
  * Thanks for coming to my ted talk
  */
-public class ChestGuide extends BlockPlacementGuide {
+public class ChestGuide extends GeneralPlacementGuide {
     public ChestGuide(SchematicBlockState state) {
         super(state);
     }

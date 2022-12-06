@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
-public class FarmlandGuide extends BlockPlacementGuide {
+public class FarmlandGuide extends GeneralPlacementGuide {
     public static final Block[] TILLABLE_BLOCKS = new Block[]{
             Blocks.DIRT,
             Blocks.GRASS_BLOCK,

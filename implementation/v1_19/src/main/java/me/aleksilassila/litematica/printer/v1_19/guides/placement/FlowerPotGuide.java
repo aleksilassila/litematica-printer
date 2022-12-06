@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-public class FlowerPotGuide extends BlockPlacementGuide {
+public class FlowerPotGuide extends GeneralPlacementGuide {
     public FlowerPotGuide(SchematicBlockState state) {
         super(state);
     }

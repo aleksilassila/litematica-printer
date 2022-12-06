@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class LogGuide extends BlockPlacementGuide {
+public class LogGuide extends GeneralPlacementGuide {
     public LogGuide(SchematicBlockState state) {
         super(state);
     }

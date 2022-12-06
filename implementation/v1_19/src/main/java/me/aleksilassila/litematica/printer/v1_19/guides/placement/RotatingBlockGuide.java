@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class RotatingBlockGuide extends BlockPlacementGuide {
+public class RotatingBlockGuide extends GeneralPlacementGuide {
     public RotatingBlockGuide(SchematicBlockState state) {
         super(state);
     }

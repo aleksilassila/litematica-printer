@@ -2,10 +2,8 @@ package me.aleksilassila.litematica.printer.v1_19.mixin;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.Printer;
-import me.aleksilassila.litematica.printer.v1_19.actions.Action;
 import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;

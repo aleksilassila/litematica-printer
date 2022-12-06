@@ -2,7 +2,6 @@ package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ComparatorBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
