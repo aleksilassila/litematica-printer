@@ -105,7 +105,7 @@ abstract public class PlacementGuide extends Guide {
     }
 
     protected static boolean canBeClicked(World world, BlockPos pos) {
-        return getOutlineShape(world, pos) != VoxelShapes.empty();
+        return getOutlineShape(world, pos) != VoxelShapes.empty() && !(world.getBlockState(pos).getBlock() instanceof AbstractSignBlock); // FIXME signs
     }
 
     private static VoxelShape getOutlineShape(World world, BlockPos pos) {
@@ -148,6 +148,6 @@ abstract public class PlacementGuide extends Guide {
             DropperBlock.class, DispenserBlock.class, ShulkerBoxBlock.class, LecternBlock.class,
             FlowerPotBlock.class, BarrelBlock.class, BellBlock.class, SmithingTableBlock.class,
             LoomBlock.class, CartographyTableBlock.class, GrindstoneBlock.class,
-            StonecutterBlock.class
+            StonecutterBlock.class, AbstractSignBlock.class,
     };
 }

@@ -21,10 +21,10 @@ public class Guides {
 
         registerGuide(RotatingBlockGuide.class, AbstractSkullBlock.class, AbstractSignBlock.class, AbstractBannerBlock.class);
         registerGuide(SlabGuide.class, SlabBlock.class);
-        registerGuide(WallTorchGuide.class, WallTorchBlock.class, WallRedstoneTorchBlock.class);
+        registerGuide(TorchGuide.class, TorchBlock.class);
         registerGuide(FarmlandGuide.class, FarmlandBlock.class);
         registerGuide(TillingGuide.class, FarmlandBlock.class);
-        registerGuide(RailGuesserGuide.class, RailBlock.class);
+        registerGuide(RailGuesserGuide.class, AbstractRailBlock.class);
         registerGuide(ChestGuide.class, ChestBlock.class);
         registerGuide(FlowerPotGuide.class, FlowerPotBlock.class);
         registerGuide(FlowerPotFillGuide.class, FlowerPotBlock.class);
