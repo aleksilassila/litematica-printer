@@ -2,7 +2,7 @@ package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
+import me.aleksilassila.litematica.printer.v1_19.actions.Action;
 import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_19.actions.ReleaseShiftAction;
 import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
@@ -27,12 +27,12 @@ public abstract class InteractionGuide extends Guide {
     }
 
     @Override
-    public List<AbstractAction> execute(ClientPlayerEntity player) {
+    public List<Action> execute(ClientPlayerEntity player) {
         BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
         ItemStack itemStack = getRequiredItem(player).orElse(ItemStack.EMPTY);
         PrinterPlacementContext ctx = new PrinterPlacementContext(player, hitResult, itemStack, getSlotWithItem(player, itemStack));
 
-        List<AbstractAction> actions = new ArrayList<>();
+        List<Action> actions = new ArrayList<>();
         actions.add(new ReleaseShiftAction());
         actions.add(new PrepareAction(ctx));
         actions.add(new InteractActionImpl(ctx));

@@ -17,7 +17,7 @@ import java.util.List;
 public class LitematicaMixinMod implements ModInitializer {
 
     public static Printer printer;
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
     // Config settings
     public static final ConfigInteger PRINT_INTERVAL = new ConfigInteger("printInterval", 12, 1, 40, "Printing interval. Lower values mean faster printing speed.\nIf the printer creates \"ghost blocks\" or blocks are facing the wrong way, raise this value.");
     public static final ConfigDouble PRINTING_RANGE = new ConfigDouble("printingRange", 2, 1, 5, "Printing block place range\nLower values are recommended for servers.");

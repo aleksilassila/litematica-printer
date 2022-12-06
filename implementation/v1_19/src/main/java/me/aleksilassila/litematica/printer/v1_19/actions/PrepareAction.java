@@ -10,7 +10,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
 
-public class PrepareAction extends AbstractAction {
+public class PrepareAction extends Action {
 //    public final Direction lookDirection;
 //    public final boolean requireSneaking;
 //    public final Item item;
@@ -27,13 +27,38 @@ public class PrepareAction extends AbstractAction {
 
     public final PrinterPlacementContext context;
 
+    public boolean modifyYaw = true;
+    public boolean modifyPitch = true;
+    public float yaw = 0;
+    public float pitch = 0;
+
     public PrepareAction(PrinterPlacementContext context) {
         this.context = context;
+
+        Direction lookDirection = context.lookDirection;
+
+        if (lookDirection != null && lookDirection.getAxis().isHorizontal()) {
+            this.yaw = lookDirection.asRotation();
+        } else {
+            this.modifyYaw = false;
+        }
+
+        if (lookDirection == Direction.UP) {
+            this.pitch = -90;
+        } else if (lookDirection == Direction.DOWN) {
+            this.pitch = 90;
+        } else if (lookDirection != null) {
+            this.pitch = 0;
+        } else {
+            this.modifyPitch = false;
+        }
     }
 
-    @Override
-    public Direction lockedLookDirection() {
-        return context.lookDirection;
+    public PrepareAction(PrinterPlacementContext context, float yaw, float pitch) {
+        this.context = context;
+
+        this.yaw = yaw;
+        this.pitch = pitch;
     }
 
     @Override
@@ -57,16 +82,9 @@ public class PrepareAction extends AbstractAction {
             }
         }
 
-        if (context.lookDirection != null) {
-//            Implementation.sendLookPacket(player, context.lookDirection);
-            float yaw = player.getYaw();
-            float pitch = player.getPitch();
-
-            if (context.lookDirection.getAxis().isHorizontal()) {
-                yaw = context.lookDirection.asRotation();
-            } else {
-                pitch = context.lookDirection == Direction.UP ? -90 : 90;
-            }
+        if (modifyPitch || modifyYaw) {
+            float yaw = modifyYaw ? this.yaw : player.getYaw();
+            float pitch = modifyPitch ? this.pitch : player.getPitch();
 
             PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw, pitch, player.isOnGround());
 

@@ -2,6 +2,8 @@ package me.aleksilassila.litematica.printer.v1_19.mixin;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.Printer;
+import me.aleksilassila.litematica.printer.v1_19.actions.Action;
+import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,30 +16,23 @@ public class PlayerMoveC2SPacketMixin {
     private static float modifyLookYaw(float yaw) {
         Printer printer = LitematicaMixinMod.printer;
         if (printer == null) return yaw;
-        Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
 
-        if (lockedLookDirection != null && lockedLookDirection.getAxis().isHorizontal()) {
-//            System.out.println("RETURNING " + lockedLookDirection);
-            return lockedLookDirection.asRotation();
-        }
-
-        return yaw;
+        PrepareAction action = printer.actionHandler.lookAction;
+        if (action != null && action.modifyYaw) {
+            if (LitematicaMixinMod.DEBUG) System.out.println("YAW: " + action.yaw);
+            return action.yaw;
+        } else return yaw;
     }
 
     @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 1)
     private static float modifyLookPitch(float pitch) {
         Printer printer = LitematicaMixinMod.printer;
         if (printer == null) return pitch;
-        Direction lockedLookDirection = printer.packetHandler.lockedLookDirection;
 
-        if (lockedLookDirection == Direction.UP) {
-            return -90;
-        } else if (lockedLookDirection == Direction.DOWN) {
-            return 90;
-        } else if (lockedLookDirection != null) {
-            return 0;
-        }
-
-        return pitch;
+        PrepareAction action = printer.actionHandler.lookAction;
+        if (action != null && action.modifyPitch) {
+            if (LitematicaMixinMod.DEBUG) System.out.println("PITCH: " + action.pitch);
+            return action.pitch;
+        } else return pitch;
     }
 }

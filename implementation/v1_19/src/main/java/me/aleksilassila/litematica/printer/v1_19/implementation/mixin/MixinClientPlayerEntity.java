@@ -59,7 +59,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             if (didFindPlacement) {
                 didFindPlacement = LitematicaMixinMod.printer.onGameTick();
             }
-            LitematicaMixinMod.printer.packetHandler.onGameTick();
+            LitematicaMixinMod.printer.actionHandler.onGameTick();
         }
     }
 

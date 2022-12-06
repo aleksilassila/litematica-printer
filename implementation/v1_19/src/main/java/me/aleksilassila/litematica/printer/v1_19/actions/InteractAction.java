@@ -7,7 +7,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 
-abstract public class InteractAction extends AbstractAction {
+abstract public class InteractAction extends Action {
     public final PrinterPlacementContext context;
 
     public InteractAction(PrinterPlacementContext context) {

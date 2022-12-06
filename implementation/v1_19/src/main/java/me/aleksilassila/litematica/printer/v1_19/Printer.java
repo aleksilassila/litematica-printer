@@ -3,7 +3,7 @@ package me.aleksilassila.litematica.printer.v1_19;
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
-import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
+import me.aleksilassila.litematica.printer.v1_19.actions.Action;
 import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
 import me.aleksilassila.litematica.printer.v1_19.guides.Guides;
 import net.minecraft.client.MinecraftClient;
@@ -22,20 +22,20 @@ public class Printer {
     @NotNull
     public final ClientPlayerEntity player;
 
-    public final ActionHandler packetHandler;
+    public final ActionHandler actionHandler;
 
     private final Guides interactionGuides = new Guides();
 
     public Printer(@NotNull MinecraftClient client, @NotNull ClientPlayerEntity player) {
         this.player = player;
 
-        this.packetHandler = new ActionHandler(client, player);
+        this.actionHandler = new ActionHandler(client, player);
     }
 
     public boolean onGameTick() {
         WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
 
-        if (!packetHandler.acceptsActions()) return false;
+        if (!actionHandler.acceptsActions()) return false;
 
         if (worldSchematic == null) return false;
 
@@ -59,8 +59,8 @@ public class Printer {
             for (Guide guide : guides) {
                 if (guide.canExecute(player)) {
                     System.out.println("Executing " + guide + " for " + state);
-                    List<AbstractAction> actions = guide.execute(player);
-                    packetHandler.addActions(actions.toArray(AbstractAction[]::new));
+                    List<Action> actions = guide.execute(player);
+                    actionHandler.addActions(actions.toArray(Action[]::new));
                     return true;
                 }
                 if (guide.skipOtherGuides()) continue findBlock;

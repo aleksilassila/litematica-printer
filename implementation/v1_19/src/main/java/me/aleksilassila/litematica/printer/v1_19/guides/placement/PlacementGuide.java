@@ -3,7 +3,7 @@ package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
+import me.aleksilassila.litematica.printer.v1_19.actions.Action;
 import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_19.actions.ReleaseShiftAction;
 import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
@@ -91,12 +91,12 @@ abstract public class PlacementGuide extends Guide {
     }
 
     @Override
-    public List<AbstractAction> execute(ClientPlayerEntity player) {
+    public List<Action> execute(ClientPlayerEntity player) {
         PrinterPlacementContext ctx = getPlacementContext(player);
 
         if (ctx == null) return null;
 
-        List<AbstractAction> actions = new ArrayList<>();
+        List<Action> actions = new ArrayList<>();
         actions.add(new PrepareAction(ctx));
         actions.add(new InteractActionImpl(ctx));
         if (ctx.shouldSneak) actions.add(new ReleaseShiftAction());

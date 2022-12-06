@@ -1,7 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_19.guides;
 
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
+import me.aleksilassila.litematica.printer.v1_19.actions.Action;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +26,7 @@ public class SkipGuide extends Guide {
     }
 
     @Override
-    public List<AbstractAction> execute(ClientPlayerEntity player) {
+    public List<Action> execute(ClientPlayerEntity player) {
         return new ArrayList<>();
     }
 

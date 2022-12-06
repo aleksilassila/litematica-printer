@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_19;
 
-import me.aleksilassila.litematica.printer.v1_19.actions.AbstractAction;
+import me.aleksilassila.litematica.printer.v1_19.actions.Action;
+import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Direction;
@@ -13,8 +14,8 @@ public class ActionHandler {
     private final MinecraftClient client;
     private final ClientPlayerEntity player;
 
-    private final Queue<AbstractAction> actionQueue = new LinkedList<>();
-    public Direction lockedLookDirection = null;
+    private final Queue<Action> actionQueue = new LinkedList<>();
+    public PrepareAction lookAction = null;
 
     public ActionHandler(MinecraftClient client, ClientPlayerEntity player) {
         this.client = client;
@@ -31,12 +32,12 @@ public class ActionHandler {
             return;
         }
 
-        AbstractAction nextAction = actionQueue.poll();
+        Action nextAction = actionQueue.poll();
         if (nextAction != null) {
             if (LitematicaMixinMod.DEBUG) System.out.println("Sending action " + nextAction);
             nextAction.send(client, player);
         } else {
-            lockedLookDirection = null;
+            lookAction = null;
         }
     }
 
@@ -44,13 +45,14 @@ public class ActionHandler {
         return actionQueue.isEmpty();
     }
 
-    public void addActions(AbstractAction... actions) {
+    public void addActions(Action... actions) {
         if (!acceptsActions()) return;
 
-        for (AbstractAction action : actions) {
-            if (action.lockedLookDirection() != null)
-                lockedLookDirection = action.lockedLookDirection();
+        for (Action action : actions) {
+            if (action instanceof PrepareAction)
+                lookAction = (PrepareAction) action;
         }
+
         actionQueue.addAll(List.of(actions));
     }
 }
