@@ -9,7 +9,8 @@
     "ConfigsMixin",
     "GuiConfigsMixin",
     "InputHandlerMixin",
-    "PlayerMoveC2SPacketMixin"
+    "PlayerMoveC2SPacketMixin",
+    "AxeItemAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
