@@ -2,7 +2,7 @@ package me.aleksilassila.litematica.printer.v1_19.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
+import me.aleksilassila.litematica.printer.v1_19.mixin.AxeItemAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
