@@ -3,8 +3,8 @@ plugins {
     id("maven-publish")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_16
+java.targetCompatibility = JavaVersion.VERSION_16
 
 val archives_base_name: String by project
 val minecraft_version: String by project
