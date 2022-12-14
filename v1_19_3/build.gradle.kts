@@ -3,8 +3,8 @@ plugins {
     id("maven-publish")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_16
-java.targetCompatibility = JavaVersion.VERSION_16
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
 
 val archives_base_name: String by project
 val minecraft_version: String by project
@@ -22,7 +22,7 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:${loader_version}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-    modImplementation("fi.dy.masa.malilib:malilib-fabric-${minecraft_version}:${malilib_version}")
+    modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
     modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
 }
 
@@ -31,8 +31,8 @@ repositories {
     maven("https://www.cursemaven.com")
 }
 
-val sourceModule = "v1_17"
-val targetModules = arrayOf("v1_19", "v1_18", "v1_19_3")
+val sourceModule = "v1_19_3"
+val targetModules = arrayOf("v1_19", "v1_18", "v1_17")
 
 fun copyFile(source: File) {
     for (targetModule in targetModules) {

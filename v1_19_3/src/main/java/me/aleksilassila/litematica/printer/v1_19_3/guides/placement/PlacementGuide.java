@@ -1,13 +1,13 @@
-package me.aleksilassila.litematica.printer.v1_19.guides.placement;
+package me.aleksilassila.litematica.printer.v1_19_3.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
-import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.actions.Action;
-import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;
-import me.aleksilassila.litematica.printer.v1_19.actions.ReleaseShiftAction;
-import me.aleksilassila.litematica.printer.v1_19.guides.Guide;
-import me.aleksilassila.litematica.printer.v1_19.implementation.actions.InteractActionImpl;
+import me.aleksilassila.litematica.printer.v1_19_3.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_19_3.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_19_3.SchematicBlockState;
+import me.aleksilassila.litematica.printer.v1_19_3.actions.Action;
+import me.aleksilassila.litematica.printer.v1_19_3.actions.PrepareAction;
+import me.aleksilassila.litematica.printer.v1_19_3.actions.ReleaseShiftAction;
+import me.aleksilassila.litematica.printer.v1_19_3.guides.Guide;
+import me.aleksilassila.litematica.printer.v1_19_3.implementation.actions.InteractActionImpl;
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -112,7 +112,7 @@ abstract public class PlacementGuide extends Guide {
     }
 
     public boolean isInteractive(Block block) {
-        for (Class<?> clazz : getInteractiveBlocks()) {
+        for (Class<?> clazz : interactiveBlocks) {
             if (clazz.isInstance(block)) {
                 return true;
             }

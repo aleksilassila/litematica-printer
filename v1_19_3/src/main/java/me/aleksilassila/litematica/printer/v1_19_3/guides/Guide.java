@@ -1,8 +1,8 @@
-package me.aleksilassila.litematica.printer.v1_19.guides;
+package me.aleksilassila.litematica.printer.v1_19_3.guides;
 
-import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
-import me.aleksilassila.litematica.printer.v1_19.actions.Action;
-import me.aleksilassila.litematica.printer.v1_19.implementation.BlockHelperImpl;
+import me.aleksilassila.litematica.printer.v1_19_3.SchematicBlockState;
+import me.aleksilassila.litematica.printer.v1_19_3.actions.Action;
+import me.aleksilassila.litematica.printer.v1_19_3.implementation.BlockHelperImpl;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CoralBlock;
 import net.minecraft.client.network.ClientPlayerEntity;

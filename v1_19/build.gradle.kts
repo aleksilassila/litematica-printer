@@ -31,32 +31,38 @@ repositories {
     maven("https://www.cursemaven.com")
 }
 
-fun copyFile(source: File, sourceVersion: String, targetVersion: String) {
-    val destination = file(source.absolutePath.replace(sourceVersion, targetVersion))
-    println("Copying ${source.absolutePath} to ${destination.absolutePath}")
-    destination.parentFile.mkdirs()
-    source.copyTo(destination, true)
-    destination.writeText(destination.readText().replace(sourceVersion, targetVersion))
+val sourceModule = "v1_19"
+val targetModules = arrayOf("v1_19_3", "v1_18", "v1_17")
+
+fun copyFile(source: File) {
+    for (targetModule in targetModules) {
+        val destination = file(source.absolutePath.replace(sourceModule, targetModule))
+        println("Copying ${source.absolutePath} to ${destination.absolutePath}")
+        destination.parentFile.mkdirs()
+        source.copyTo(destination, true)
+        destination.writeText(destination.readText().replace(sourceModule, targetModule))
+    }
 }
 
-fun deleteOldFiles(sourceBase: File, sourceVersion: String, targetVersion: String) {
-    val targetBase = file(sourceBase.absolutePath.replace(sourceVersion, targetVersion))
+fun deleteOldFiles(sourceBase: File) {
+    for (targetModule in targetModules) {
+        val targetBase = file(sourceBase.absolutePath.replace(sourceModule, targetModule))
 
-    for (file in targetBase.listFiles()) {
-        if (file.name.equals("implementation")) continue
-        println("Deleting recursively ${file.absolutePath}")
-        file.deleteRecursively()
+        for (file in targetBase.listFiles()) {
+            if (file.name.equals("implementation")) continue
+            println("Deleting recursively ${file.absolutePath}")
+            file.deleteRecursively()
+        }
     }
 }
 
 val syncImplementations = tasks.create("syncImplementations") {
     doFirst {
         val sourceStart =
-            this.project.projectDir.absolutePath + "/src/main/java/me/aleksilassila/litematica/printer/v1_19"
+            this.project.projectDir.absolutePath + "/src/main/java/me/aleksilassila/litematica/printer/" + sourceModule
         val sourceDir = file(sourceStart)
 
-        deleteOldFiles(sourceDir, "v1_19", "v1_18")
-        deleteOldFiles(sourceDir, "v1_19", "v1_17")
+        deleteOldFiles(sourceDir)
 
         for (sourceFile in sourceDir.listFiles()) {
             if (sourceFile.name.equals("implementation")) continue
@@ -64,8 +70,7 @@ val syncImplementations = tasks.create("syncImplementations") {
             sourceFile.walk()
                 .filter { it.isFile }
                 .forEach {
-                    copyFile(it, "v1_19", "v1_18")
-                    copyFile(it, "v1_19", "v1_17")
+                    copyFile(it)
                 }
         }
     }
