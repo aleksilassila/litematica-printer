@@ -27,6 +27,7 @@ public class FlowerPotFillGuide extends InteractionGuide {
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
         if (content == null) return false;
+        if (!(currentState.getBlock() instanceof FlowerPotBlock)) return false;
 
         return super.canExecute(player);
     }

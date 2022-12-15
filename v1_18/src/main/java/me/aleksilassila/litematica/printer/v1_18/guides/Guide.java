@@ -2,6 +2,7 @@ package me.aleksilassila.litematica.printer.v1_18.guides;
 
 import me.aleksilassila.litematica.printer.v1_18.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_18.actions.Action;
+import me.aleksilassila.litematica.printer.v1_18.implementation.BlockHelperImpl;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CoralBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-abstract public class Guide {
+abstract public class Guide extends BlockHelperImpl {
     protected final SchematicBlockState state;
     protected final BlockState currentState;
     protected final BlockState targetState;

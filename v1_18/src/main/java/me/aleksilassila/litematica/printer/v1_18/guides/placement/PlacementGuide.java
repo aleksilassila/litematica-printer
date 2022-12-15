@@ -14,7 +14,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -112,7 +111,7 @@ abstract public class PlacementGuide extends Guide {
         return world.getBlockState(pos).getOutlineShape(world, pos);
     }
 
-    public static boolean isInteractive(Block block) {
+    public boolean isInteractive(Block block) {
         for (Class<?> clazz : interactiveBlocks) {
             if (clazz.isInstance(block)) {
                 return true;
@@ -126,7 +125,7 @@ abstract public class PlacementGuide extends Guide {
         Block block = blockState.getBlock();
         if (block instanceof FluidFillable) {
             return true;
-        } else if (!(block instanceof DoorBlock) && !blockState.isIn(BlockTags.SIGNS) && !blockState.isOf(Blocks.LADDER) && !blockState.isOf(Blocks.SUGAR_CANE) && !blockState.isOf(Blocks.BUBBLE_COLUMN)) {
+        } else if (!(block instanceof DoorBlock) && !(blockState.getBlock() instanceof AbstractSignBlock) && !blockState.isOf(Blocks.LADDER) && !blockState.isOf(Blocks.SUGAR_CANE) && !blockState.isOf(Blocks.BUBBLE_COLUMN)) {
             Material material = blockState.getMaterial();
             if (material != Material.PORTAL && material != Material.STRUCTURE_VOID && material != Material.UNDERWATER_PLANT && material != Material.REPLACEABLE_UNDERWATER_PLANT) {
                 return material.blocksMovement();
@@ -137,17 +136,4 @@ abstract public class PlacementGuide extends Guide {
 
         return true;
     }
-
-    public static Class<?>[] interactiveBlocks = new Class[]{
-            AbstractChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
-            AbstractButtonBlock.class, LeverBlock.class, DoorBlock.class, TrapdoorBlock.class,
-            BedBlock.class, RedstoneWireBlock.class, ScaffoldingBlock.class, HopperBlock.class,
-            EnchantingTableBlock.class, NoteBlock.class, JukeboxBlock.class, CakeBlock.class,
-            FenceGateBlock.class, BrewingStandBlock.class, DragonEggBlock.class, CommandBlock.class,
-            BeaconBlock.class, AnvilBlock.class, ComparatorBlock.class, RepeaterBlock.class,
-            DropperBlock.class, DispenserBlock.class, ShulkerBoxBlock.class, LecternBlock.class,
-            FlowerPotBlock.class, BarrelBlock.class, BellBlock.class, SmithingTableBlock.class,
-            LoomBlock.class, CartographyTableBlock.class, GrindstoneBlock.class,
-            StonecutterBlock.class, AbstractSignBlock.class,
-    };
 }

@@ -1,6 +1,6 @@
-package me.aleksilassila.litematica.printer.v1_19.implementation;
+package me.aleksilassila.litematica.printer.v1_18.implementation;
 
-import me.aleksilassila.litematica.printer.v1_19.BlockHelper;
+import me.aleksilassila.litematica.printer.v1_18.BlockHelper;
 import net.minecraft.block.AbstractButtonBlock;
 
 import java.util.Arrays;

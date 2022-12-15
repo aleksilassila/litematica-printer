@@ -112,7 +112,7 @@ abstract public class PlacementGuide extends Guide {
     }
 
     public boolean isInteractive(Block block) {
-        for (Class<?> clazz : getInteractiveBlocks()) {
+        for (Class<?> clazz : interactiveBlocks) {
             if (clazz.isInstance(block)) {
                 return true;
             }
