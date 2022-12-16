@@ -12,28 +12,21 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CampfireExtinguishGuide extends InteractionGuide {
-    static final Item[] SHOVEL_ITEMS = new Item[]{
-            Items.NETHERITE_SHOVEL,
-            Items.DIAMOND_SHOVEL,
-            Items.GOLDEN_SHOVEL,
-            Items.IRON_SHOVEL,
-            Items.STONE_SHOVEL,
-            Items.WOODEN_SHOVEL
-    };
+    boolean shouldBeLit;
+    boolean isLit;
 
     public CampfireExtinguishGuide(SchematicBlockState state) {
         super(state);
+
+        shouldBeLit = getProperty(targetState, CampfireBlock.LIT).orElse(false);
+        isLit = getProperty(currentState, CampfireBlock.LIT).orElse(false);
     }
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
         if (!super.canExecute(player)) return false;
 
-        if (currentState.getBlock() instanceof CampfireBlock && targetState.getBlock() instanceof CampfireBlock) {
-            return currentState.get(CampfireBlock.LIT) && !targetState.get(CampfireBlock.LIT);
-        }
-
-        return false;
+        return (currentState.getBlock() instanceof CampfireBlock) && !shouldBeLit && isLit;
     }
 
     @Override

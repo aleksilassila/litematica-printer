@@ -29,13 +29,14 @@ abstract public class Guide extends BlockHelperImpl {
     }
 
     protected boolean playerHasRightItem(ClientPlayerEntity player) {
-        return getStackSlot(player) != -1;
+        return getRequiredItemStackSlot(player) != -1;
     }
 
     protected int getSlotWithItem(ClientPlayerEntity player, ItemStack itemStack) {
         PlayerInventory inventory = player.getInventory();
 
         for (int i = 0; i < inventory.main.size(); ++i) {
+            if (itemStack.isEmpty() && inventory.main.get(i).isOf(itemStack.getItem())) return i;
             if (!inventory.main.get(i).isEmpty() && inventory.main.get(i).isItemEqual(itemStack)) {
                 return i;
             }
@@ -44,7 +45,7 @@ abstract public class Guide extends BlockHelperImpl {
         return -1;
     }
 
-    protected int getStackSlot(ClientPlayerEntity player) {
+    protected int getRequiredItemStackSlot(ClientPlayerEntity player) {
         if (player.getAbilities().creativeMode) {
             return player.getInventory().selectedSlot;
         }
@@ -64,7 +65,7 @@ abstract public class Guide extends BlockHelperImpl {
         return !statesEqual(targetState, currentState);
     }
 
-    abstract public List<Action> execute(ClientPlayerEntity player);
+    abstract public @NotNull List<Action> execute(ClientPlayerEntity player);
 
     abstract protected @NotNull List<ItemStack> getRequiredItems();
 
@@ -79,7 +80,7 @@ abstract public class Guide extends BlockHelperImpl {
             if (player.getAbilities().creativeMode) return Optional.of(requiredItem);
 
             int slot = getSlotWithItem(player, requiredItem);
-            if (slot > -1 && !requiredItem.isOf(Items.AIR))
+            if (slot > -1)
                 return Optional.of(requiredItem);
         }
 

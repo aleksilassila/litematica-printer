@@ -60,6 +60,9 @@ Currently, the following features are still broken or missing:
   sometimes it can't place all the rails (to avoid placing anything incorrectly).
 - Legit mode? (for anticheats)
 
+Also, I have decided that features that fix existing builds,
+such as automatic excavation or correcting incorrectly placed blocks are out of the scope of this mod.
+
 ## Building and Contributing
 
 Each Minecraft version has its own submodule, that has the default fabric mod development tasks
