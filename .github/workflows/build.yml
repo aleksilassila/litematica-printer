@@ -4,7 +4,7 @@
 # against bad commits.
 
 name: build
-on: [pull_request, push, workflow_dispatch]
+on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
   build:
@@ -20,11 +20,18 @@ jobs:
           java-version: 17
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: build
-        run: ./gradlew build
+
+      - name: build 1.17
+        run: ./gradlew :v1_17:build
+      - name: build 1.18
+        run: ./gradlew :v1_18:build
+      - name: build 1.19
+        run: ./gradlew :v1_19:build
+      - name: build 1.19.3
+        run: ./gradlew :v1_19_3:build
+
       - name: capture build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Artifacts
-          path: build/libs/
-
+          path: /**/build/*.jar
