@@ -15,6 +15,8 @@ val malilib_version: String by project
 val litematica_projectid: String by project
 val litematica_fileid: String by project
 
+val mod_version: String by project
+
 dependencies {
 //    implementation(project(":common"))
     minecraft("com.mojang:minecraft:${minecraft_version}")
@@ -29,6 +31,15 @@ dependencies {
 repositories {
     maven("https://masa.dy.fi/maven")
     maven("https://www.cursemaven.com")
+}
+
+// Process resources
+tasks.withType<ProcessResources> {
+    inputs.property("version", mod_version)
+
+    filesMatching("fabric.mod.json") {
+        expand(mapOf("version" to mod_version))
+    }
 }
 
 val sourceModule = "v1_19_3"
