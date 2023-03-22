@@ -57,7 +57,7 @@ public class Printer {
             boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
 
             for (Guide guide : guides) {
-                if (guide.canExecute(player)) {
+                if (guide.canExecute(player) && LitematicaMixinMod.INTERACT_BLOCKS.getBooleanValue()) {
                     System.out.println("Executing " + guide + " for " + state);
                     List<Action> actions = guide.execute(player);
                     actionHandler.addActions(actions.toArray(Action[]::new));
