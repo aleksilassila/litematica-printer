@@ -43,7 +43,7 @@ tasks.withType<ProcessResources> {
 }
 
 val sourceModule = "v1_18"
-val targetModules = arrayOf("v1_19", "v1_19_3", "v1_17")
+val targetModules = arrayOf("v1_17", "v1_19", "v1_19_3", "v1_19_4")
 
 fun copyFile(source: File) {
     for (targetModule in targetModules) {

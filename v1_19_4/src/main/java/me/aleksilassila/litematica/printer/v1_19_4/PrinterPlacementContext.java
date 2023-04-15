@@ -40,8 +40,8 @@ public class PrinterPlacementContext extends ItemPlacementContext {
     }
 
     @Override
-    public Direction getPlayerFacing() {
-        if (lookDirection == null || !lookDirection.getAxis().isHorizontal()) return super.getPlayerFacing();
+    public Direction getHorizontalPlayerFacing() {
+        if (lookDirection == null || !lookDirection.getAxis().isHorizontal()) return super.getHorizontalPlayerFacing();
 
         return lookDirection;
     }
