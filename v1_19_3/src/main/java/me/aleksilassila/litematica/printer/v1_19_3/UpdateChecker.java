@@ -33,10 +33,11 @@ public class UpdateChecker {
 //        }
 //    }
 
+    @SuppressWarnings("deprecation")
     public static String getPrinterVersion() {
         try (InputStream inputStream = new URL("https://api.github.com/repos/aleksilassila/litematica-printer/tags").openStream(); Scanner scanner = new Scanner(inputStream)) {
             if (scanner.hasNext()) {
-                JsonArray tags = JsonParser.parseString(scanner.next()).getAsJsonArray();
+                JsonArray tags = new JsonParser().parse(scanner.next()).getAsJsonArray();
                 return ((JsonObject) tags.get(0)).get("name").getAsString();
             }
         } catch (Exception exception) {

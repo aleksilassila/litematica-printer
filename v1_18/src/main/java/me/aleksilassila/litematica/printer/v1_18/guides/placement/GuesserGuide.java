@@ -52,6 +52,9 @@ public class GuesserGuide extends GeneralPlacementGuide {
         if (contextCache != null && !LitematicaMixinMod.DEBUG) return contextCache;
 
         ItemStack requiredItem = getRequiredItem(player).orElse(ItemStack.EMPTY);
+        int slot = getRequiredItemStackSlot(player);
+
+        if (slot == -1) return null;
 
         for (Direction lookDirection : directionsToTry) {
             for (Direction side : directionsToTry) {
@@ -71,10 +74,10 @@ public class GuesserGuide extends GeneralPlacementGuide {
                     multiplier = new Vec3d(multiplier.x == 0 ? 1 : 0, multiplier.y == 0 ? 1 : 0, multiplier.z == 0 ? 1 : 0);
 
                     BlockHitResult hitResult = new BlockHitResult(hitVec.add(hitVecToTry.multiply(multiplier)), side.getOpposite(), neighborPos, false);
-                    PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, getSlotWithItem(player, requiredItem), lookDirection, requiresShift);
+                    PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, lookDirection, requiresShift);
                     BlockState result = getRequiredItemAsBlock(player)
                             .orElse(targetState.getBlock())
-                            .getPlacementState(context);
+                            .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
 
                     if (result != null && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
                         contextCache = context;

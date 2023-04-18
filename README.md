@@ -15,10 +15,11 @@ big structures more quickly by automatically placing the correct blocks around y
 ## Installation
 
 1. Download and install [Fabric](https://fabricmc.net/use/installer/) if you haven't already.
-2. Download the latest release for your Minecraft version from the
-   [releases page](https://github.com/aleksilassila/litematica-printing/releases/latest).
+2. Download the latest Litematica Printer release for your Minecraft version from the
+   [releases page](https://github.com/aleksilassila/litematica-printing/releases/latest) (The files can be found under
+   "assets").
 3. Download [Litematica + MaLiLib](https://www.curseforge.com/minecraft/mc-mods/litematica)
-   and [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/).
+   and [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/) (≠ Fabric).
 4. Place the downloaded .jar files in your `mods/` folder.
 
 [If this is the first fabric mod you are installing, here's an informative video on how to install Fabric mods.](https://www.youtube.com/watch?v=x7gmfib4gHg)

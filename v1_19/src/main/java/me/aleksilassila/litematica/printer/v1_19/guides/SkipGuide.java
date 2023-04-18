@@ -26,7 +26,7 @@ public class SkipGuide extends Guide {
     }
 
     @Override
-    public List<Action> execute(ClientPlayerEntity player) {
+    public @NotNull List<Action> execute(ClientPlayerEntity player) {
         return new ArrayList<>();
     }
 

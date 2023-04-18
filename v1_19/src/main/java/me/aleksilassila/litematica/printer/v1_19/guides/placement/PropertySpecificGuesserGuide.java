@@ -36,6 +36,9 @@ public class PropertySpecificGuesserGuide extends GuesserGuide {
             LeavesBlock.DISTANCE,
             LeavesBlock.PERSISTENT,
             Properties.ATTACHED,
+            Properties.NOTE,
+            Properties.INSTRUMENT,
+
     };
 
     public PropertySpecificGuesserGuide(SchematicBlockState state) {

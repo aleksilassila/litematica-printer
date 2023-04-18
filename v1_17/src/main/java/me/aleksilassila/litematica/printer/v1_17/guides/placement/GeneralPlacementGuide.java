@@ -101,15 +101,16 @@ public class GeneralPlacementGuide extends PlacementGuide {
             Optional<Direction> validSide = getValidSide(state);
             Optional<Vec3d> hitVec = getHitVector(state);
             Optional<ItemStack> requiredItem = getRequiredItem(player);
+            int requiredSlot = getRequiredItemStackSlot(player);
 
-            if (validSide.isEmpty() || hitVec.isEmpty() || requiredItem.isEmpty()) return null;
+            if (validSide.isEmpty() || hitVec.isEmpty() || requiredItem.isEmpty() || requiredSlot == -1) return null;
 
             Optional<Direction> lookDirection = getLookDirection();
             boolean requiresShift = getUseShift(state);
 
             BlockHitResult blockHitResult = new BlockHitResult(hitVec.get(), validSide.get().getOpposite(), state.blockPos.offset(validSide.get()), false);
 
-            return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), getSlotWithItem(player, requiredItem.get()), lookDirection.orElse(null), requiresShift);
+            return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), requiredSlot, lookDirection.orElse(null), requiresShift);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
