@@ -1,6 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_17.implementation.actions;
 
-import me.aleksilassila.litematica.printer.v1_17.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_17.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_17.actions.InteractAction;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;

@@ -1,6 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_17.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_17.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_17.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_17.SchematicBlockState;
 import net.minecraft.block.CandleBlock;
 import net.minecraft.block.SeaPickleBlock;

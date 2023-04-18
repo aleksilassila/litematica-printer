@@ -1,6 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_19_3.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_19_3.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_19_3.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19_3.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_19_3.actions.Action;
 import me.aleksilassila.litematica.printer.v1_19_3.actions.PrepareAction;

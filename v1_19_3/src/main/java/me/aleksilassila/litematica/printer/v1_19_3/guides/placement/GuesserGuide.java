@@ -1,7 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_19_3.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19_3.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19_3.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_19_3.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19_3.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;

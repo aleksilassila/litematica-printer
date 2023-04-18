@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19_3;
+package me.aleksilassila.litematica.printer.v1_19_3.implementation;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;

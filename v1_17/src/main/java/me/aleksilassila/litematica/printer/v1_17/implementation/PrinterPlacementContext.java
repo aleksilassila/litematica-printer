@@ -1,4 +1,4 @@
-package me.aleksilassila.litematica.printer.v1_19_4;
+package me.aleksilassila.litematica.printer.v1_17.implementation;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
@@ -40,8 +40,8 @@ public class PrinterPlacementContext extends ItemPlacementContext {
     }
 
     @Override
-    public Direction getHorizontalPlayerFacing() {
-        if (lookDirection == null || !lookDirection.getAxis().isHorizontal()) return super.getHorizontalPlayerFacing();
+    public Direction getPlayerFacing() {
+        if (lookDirection == null || !lookDirection.getAxis().isHorizontal()) return super.getPlayerFacing();
 
         return lookDirection;
     }

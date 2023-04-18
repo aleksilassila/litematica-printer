@@ -1,6 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_19_4.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_19_4.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_19_4.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19_4.SchematicBlockState;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;

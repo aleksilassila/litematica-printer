@@ -1,7 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_19.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_19.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_19.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_19.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_19.actions.Action;
 import me.aleksilassila.litematica.printer.v1_19.actions.PrepareAction;

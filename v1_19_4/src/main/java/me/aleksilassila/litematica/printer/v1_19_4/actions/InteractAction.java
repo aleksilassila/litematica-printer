@@ -1,7 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_19_4.actions;
 
 import me.aleksilassila.litematica.printer.v1_19_4.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19_4.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_19_4.implementation.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Hand;
