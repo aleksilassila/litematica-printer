@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_18;
 
 import fi.dy.masa.litematica.data.DataManager;
+import fi.dy.masa.litematica.util.RayTraceUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_18.actions.Action;
@@ -13,8 +14,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +58,8 @@ public class Printer {
 
             Guide[] guides = interactionGuides.getInteractionGuides(state);
 
-            boolean isCurrentlyLooking = ((BlockHitResult) player.raycast(20, 1, false)).getBlockPos().equals(position);
+            BlockHitResult result = RayTraceUtils.traceToSchematicWorld(player, 10, true, true);
+            boolean isCurrentlyLookingSchematic = result != null && result.getBlockPos().equals(position);
 
             for (Guide guide : guides) {
                 if (guide.canExecute(player)) {

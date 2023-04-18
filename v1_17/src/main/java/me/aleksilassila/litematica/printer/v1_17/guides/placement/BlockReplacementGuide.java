@@ -23,19 +23,14 @@ public class BlockReplacementGuide extends PlacementGuide {
     private static final HashMap<IntProperty, Item> increasingProperties = new HashMap<>();
 
     static {
-        addProperties();
+        increasingProperties.put(SnowBlock.LAYERS, null);
+        increasingProperties.put(SeaPickleBlock.PICKLES, null);
+        increasingProperties.put(CandleBlock.CANDLES, null);
     }
 
     private Integer currentLevel = null;
     private Integer targetLevel = null;
     private IntProperty increasingProperty = null;
-
-    protected static void addProperties() {
-        increasingProperties.put(SnowBlock.LAYERS, null);
-        increasingProperties.put(SeaPickleBlock.PICKLES, null);
-        increasingProperties.put(CandleBlock.CANDLES, null);
-//            increasingProperties.put(LeveledCauldronBlock.LEVEL, Items.GLASS_BOTTLE);
-    }
 
     public BlockReplacementGuide(SchematicBlockState state) {
         super(state);
@@ -58,10 +53,11 @@ public class BlockReplacementGuide extends PlacementGuide {
     @Override
     public @Nullable PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
         Optional<ItemStack> requiredItem = getRequiredItem(player);
-        if (requiredItem.isEmpty()) return null;
+        int slot = getRequiredItemStackSlot(player);
+        if (requiredItem.isEmpty() || slot == -1) return null;
 
         BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
-        return new PrinterPlacementContext(player, hitResult, requiredItem.get(), getSlotWithItem(player, requiredItem.get()));
+        return new PrinterPlacementContext(player, hitResult, requiredItem.get(), slot);
     }
 
     @Override
@@ -71,7 +67,7 @@ public class BlockReplacementGuide extends PlacementGuide {
         }
 
         if (currentLevel == null || targetLevel == null || increasingProperty == null) return false;
-        if (!statesEqualIgnoreProperties(currentState, targetState, increasingProperty)) return false;
+        if (!statesEqualIgnoreProperties(currentState, targetState, CandleBlock.LIT, increasingProperty)) return false;
         if (currentLevel >= targetLevel) return false;
 
         return super.canExecute(player);

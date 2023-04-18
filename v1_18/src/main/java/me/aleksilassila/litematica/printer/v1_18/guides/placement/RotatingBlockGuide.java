@@ -8,7 +8,9 @@ import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +37,10 @@ public class RotatingBlockGuide extends GeneralPlacementGuide {
     }
 
     @Override
-    public List<Action> execute(ClientPlayerEntity player) {
+    public @NotNull List<Action> execute(ClientPlayerEntity player) {
         PrinterPlacementContext ctx = getPlacementContext(player);
 
-        if (ctx == null) return null;
+        if (ctx == null) return new ArrayList<>();
 
         int rotation = getProperty(state.targetState, Properties.ROTATION).orElse(0);
         if (targetState.getBlock() instanceof BannerBlock || targetState.getBlock() instanceof SignBlock) {

@@ -90,12 +90,11 @@ abstract public class PlacementGuide extends Guide {
     }
 
     @Override
-    public List<Action> execute(ClientPlayerEntity player) {
+    public @NotNull List<Action> execute(ClientPlayerEntity player) {
+        List<Action> actions = new ArrayList<>();
         PrinterPlacementContext ctx = getPlacementContext(player);
 
-        if (ctx == null) return null;
-
-        List<Action> actions = new ArrayList<>();
+        if (ctx == null) return actions;
         actions.add(new PrepareAction(ctx));
         actions.add(new InteractActionImpl(ctx));
         if (ctx.shouldSneak) actions.add(new ReleaseShiftAction());

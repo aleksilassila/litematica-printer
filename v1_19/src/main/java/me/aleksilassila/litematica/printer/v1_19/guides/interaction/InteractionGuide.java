@@ -26,12 +26,17 @@ public abstract class InteractionGuide extends Guide {
     }
 
     @Override
-    public List<Action> execute(ClientPlayerEntity player) {
-        BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
-        ItemStack itemStack = getRequiredItem(player).orElse(ItemStack.EMPTY);
-        PrinterPlacementContext ctx = new PrinterPlacementContext(player, hitResult, itemStack, getSlotWithItem(player, itemStack));
-
+    public @NotNull List<Action> execute(ClientPlayerEntity player) {
         List<Action> actions = new ArrayList<>();
+
+        BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, false);
+        ItemStack requiredItem = getRequiredItem(player).orElse(ItemStack.EMPTY);
+        int requiredSlot = getRequiredItemStackSlot(player);
+
+        if (requiredSlot == -1) return actions;
+
+        PrinterPlacementContext ctx = new PrinterPlacementContext(player, hitResult, requiredItem, requiredSlot);
+
         actions.add(new ReleaseShiftAction());
         actions.add(new PrepareAction(ctx));
         actions.add(new InteractActionImpl(ctx));
