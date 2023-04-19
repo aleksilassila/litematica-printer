@@ -62,7 +62,7 @@ public class Printer {
             boolean isCurrentlyLookingSchematic = result != null && result.getBlockPos().equals(position);
 
             for (Guide guide : guides) {
-                if (guide.canExecute(player)) {
+                if (guide.canExecute(player) && LitematicaMixinMod.INTERACT_BLOCKS.getBooleanValue()) {
                     System.out.println("Executing " + guide + " for " + state);
                     List<Action> actions = guide.execute(player);
                     actionHandler.addActions(actions.toArray(Action[]::new));
