@@ -16,7 +16,7 @@ big structures more quickly by automatically placing the correct blocks around y
 
 1. Download and install [Fabric](https://fabricmc.net/use/installer/) if you haven't already.
 2. Download the latest Litematica Printer release for your Minecraft version from the
-   [releases page](https://github.com/aleksilassila/litematica-printing/releases/latest) (The files can be found under
+   [releases page](https://github.com/aleksilassila/litematica-printer/releases) (The files can be found under
    "assets").
 3. Download [Litematica + MaLiLib](https://www.curseforge.com/minecraft/mc-mods/litematica)
    and [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/) (≠ Fabric).
