@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.aleksilassila.litematica.printer.v1_17.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+  ],
+  "client": [
+    "BlockHelperMixin",
+    "InteractActionMixin",
+    "MixinClientPlayerEntity",
+    "PrinterPlacementContextMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
