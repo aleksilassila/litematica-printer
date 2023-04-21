@@ -18,7 +18,8 @@ val litematica_fileid: String by project
 val mod_version: String by project
 
 dependencies {
-//    implementation(project(":common"))
+    implementation(project(path = ":common", configuration = "namedElements"))
+    //    implementation(project(":common"))
     minecraft("com.mojang:minecraft:${minecraft_version}")
     mappings("net.fabricmc:yarn:${yarn_mappings}:v2")
 
@@ -70,7 +71,7 @@ fun deleteOldFiles(sourceBase: File) {
 val syncImplementations = tasks.create("syncImplementations") {
     doFirst {
         val sourceStart =
-            this.project.projectDir.absolutePath + "/src/main/java/me/aleksilassila/litematica/printer/" + sourceModule
+                this.project.projectDir.absolutePath + "/src/main/java/me/aleksilassila/litematica/printer/" + sourceModule
         val sourceDir = file(sourceStart)
 
         deleteOldFiles(sourceDir)
@@ -79,10 +80,10 @@ val syncImplementations = tasks.create("syncImplementations") {
             if (sourceFile.name.equals("implementation")) continue
 
             sourceFile.walk()
-                .filter { it.isFile }
-                .forEach {
-                    copyFile(it)
-                }
+                    .filter { it.isFile }
+                    .forEach {
+                        copyFile(it)
+                    }
         }
     }
 }

@@ -1,12 +1,12 @@
-package me.aleksilassila.litematica.printer.v1_19_3.implementation.mixin;
+package me.aleksilassila.litematica.printer.v1_19_4.mixin;
 
 import com.mojang.authlib.GameProfile;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
+import me.aleksilassila.litematica.printer.common.LitematicaMod;
+import me.aleksilassila.litematica.printer.common.Printer;
+import me.aleksilassila.litematica.printer.common.SchematicBlockState;
 import me.aleksilassila.litematica.printer.common.UpdateChecker;
-import me.aleksilassila.litematica.printer.v1_19_3.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_19_3.Printer;
-import me.aleksilassila.litematica.printer.v1_19_3.SchematicBlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -47,18 +47,18 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             checkForUpdates();
         }
 
-        if (LitematicaMixinMod.printer == null || LitematicaMixinMod.printer.player != clientPlayer) {
+        if (LitematicaMod.printer == null || LitematicaMod.printer.player != clientPlayer) {
             System.out.println("Initializing printer, player: " + clientPlayer + ", client: " + client);
-            LitematicaMixinMod.printer = new Printer(client, clientPlayer);
+            LitematicaMod.printer = new Printer(client, clientPlayer);
         }
 
         // Dirty optimization
         boolean didFindPlacement = true;
         for (int i = 0; i < 10; i++) {
             if (didFindPlacement) {
-                didFindPlacement = LitematicaMixinMod.printer.onGameTick();
+                didFindPlacement = LitematicaMod.printer.onGameTick();
             }
-            LitematicaMixinMod.printer.actionHandler.onGameTick();
+            LitematicaMod.printer.actionHandler.onGameTick();
         }
     }
 

@@ -16,12 +16,12 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.aleksilassila.litematica.printer.v1_19_4.LitematicaMixinMod"
+      "me.aleksilassila.litematica.printer.common.LitematicaMod"
     ]
   },
   "mixins": [
-    "litematica-printer.mixins.json",
-    "litematica-printer-implementation.mixins.json"
+    "common.mixins.json",
+    "implementation.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.7",
