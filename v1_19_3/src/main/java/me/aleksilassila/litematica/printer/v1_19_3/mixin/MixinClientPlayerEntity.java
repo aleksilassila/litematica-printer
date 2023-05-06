@@ -40,6 +40,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
     @Inject(at = @At("TAIL"), method = "tick")
     public void tick(CallbackInfo ci) {
+        System.out.println("Tick DID INJECT");
         ClientPlayerEntity clientPlayer = (ClientPlayerEntity) (Object) this;
         if (!didCheckForUpdates) {
             didCheckForUpdates = true;

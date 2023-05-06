@@ -24,14 +24,17 @@
     "implementation.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.7",
-    "fabric": "*",
-    "minecraft": "1.19.x",
+    "minecraft": ">=1.19.3",
     "java": ">=17"
   },
   "custom": {
     "modmenu": {
-      "parent": "carpet"
+      "modmenu": {
+        "parent": "litematica_library",
+        "badges": [
+          "library"
+        ]
+      }
     }
   }
 }

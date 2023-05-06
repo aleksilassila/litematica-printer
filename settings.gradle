@@ -8,9 +8,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-include 'common'
 include 'v1_19_4'
 include 'v1_19_3'
-include 'v1_19'
-include 'v1_18'
-include 'v1_17'
+include 'common'
+//include 'v1_19'
+//include 'v1_18'
+//include 'v1_17'
