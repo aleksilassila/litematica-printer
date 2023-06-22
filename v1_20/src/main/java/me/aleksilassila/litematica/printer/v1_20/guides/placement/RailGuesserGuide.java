@@ -1,6 +1,6 @@
-package me.aleksilassila.litematica.printer.v1_19_4.guides.placement;
+package me.aleksilassila.litematica.printer.v1_20.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_19_4.SchematicBlockState;
+import me.aleksilassila.litematica.printer.v1_20.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.RailShape;
 import net.minecraft.state.property.Properties;
