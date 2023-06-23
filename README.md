@@ -14,6 +14,9 @@ big structures more quickly by automatically placing the correct blocks around y
 
 ## Installation
 
+[![Modrinth](https://img.shields.io/badge/Modrinth-00af5c?logo=modrinth&logoColor=%23000000)](https://modrinth.com/mod/litematica-printer)
+[![GitHub](https://img.shields.io/badge/GitHub-8f00f7?logo=github&logoColor=%23000000)](https://github.com/aleksilassila/litematica-printer/releases)
+
 1. Download and install [Fabric](https://fabricmc.net/use/installer/) if you haven't already.
 2. Download the latest Litematica Printer release for your Minecraft version from the
    [releases page](https://github.com/aleksilassila/litematica-printer/releases) (The files can be found under
