@@ -1,12 +1,26 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
 import me.aleksilassila.litematica.printer.SchematicBlockState;
-import net.minecraft.block.*;
+import net.minecraft.block.BambooBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CactusBlock;
+import net.minecraft.block.CandleBlock;
+import net.minecraft.block.ComparatorBlock;
+import net.minecraft.block.EndPortalFrameBlock;
+import net.minecraft.block.HorizontalConnectingBlock;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.PointedDripstoneBlock;
+import net.minecraft.block.RedstoneWireBlock;
+import net.minecraft.block.RepeaterBlock;
+import net.minecraft.block.SaplingBlock;
+import net.minecraft.block.ScaffoldingBlock;
+import net.minecraft.block.SeaPickleBlock;
+import net.minecraft.block.SnowBlock;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 
 public class PropertySpecificGuesserGuide extends GuesserGuide {
-    protected static Property<?>[] ignoredProperties = new Property[]{
+    protected static Property<?>[] ignoredProperties = new Property[] {
             RepeaterBlock.DELAY,
             ComparatorBlock.MODE,
             RedstoneWireBlock.POWER,

@@ -4,34 +4,37 @@
 # against bad commits.
 
 name: build
-on: [ pull_request, push, workflow_dispatch ]
+on: [ pull_request, push ]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        # Use these Java versions
+        java: [
+          21,    # Current Java LTS & minimum supported by Minecraft
+        ]
+        # and run on both Linux and Windows
+        os: [ ubuntu-20.04, windows-2022 ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: validate gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
-      - name: setup jdk 17
-        uses: actions/setup-java@v1
+        uses: gradle/actions/wrapper-validation@v3
+      - name: setup jdk ${{ matrix.java }}
+        uses: actions/setup-java@v4
         with:
-          java-version: 17
+          distribution: temurin
+          java-version: ${{ matrix.java }}
       - name: make gradle wrapper executable
+        if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
-
-      - name: build 1.17
-        run: ./gradlew :v1_17:build
-      - name: build 1.18
-        run: ./gradlew :v1_18:build
-      - name: build 1.19
-        run: ./gradlew :v1_19:build
-      - name: build 1.19.3
-        run: ./gradlew :v1_19_3:build
-
+      - name: build
+        run: ./gradlew build
       - name: capture build artifacts
-        uses: actions/upload-artifact@v2
+        if: ${{ runner.os == 'Linux' }}
+        uses: actions/upload-artifact@v4
         with:
           name: Artifacts
-          path: ./**/build/libs/*.jar
+          path: build/libs/

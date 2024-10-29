@@ -1,19 +1,21 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.Direction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Whilst making this guide, I learned that chests are much like humans.
- * Some prefer to stay single, and some want to connect with another of its kind.
- * Also that reversing chest connection logic is an enormous pain in the ass. I spent way too long on this.
+ * Some prefer to stay single, and some want to connect with another of its
+ * kind.
+ * Also, that reversing chest connection logic is an enormous pain in the ass. I
+ * spent way too long on this.
  * Thanks for coming to my ted talk
  */
 public class ChestGuide extends GeneralPlacementGuide {
@@ -44,7 +46,8 @@ public class ChestGuide extends GeneralPlacementGuide {
 
         List<Direction> sides = new ArrayList<>();
 
-        if (targetFacing == null || targetType == null) return sides;
+        if (targetFacing == null || targetType == null)
+            return sides;
 
         for (Direction direction : Direction.values()) {
             if (targetType == ChestType.SINGLE && !willConnectToSide(state, direction)) {
@@ -54,7 +57,7 @@ public class ChestGuide extends GeneralPlacementGuide {
             }
         }
 
-        // Place single chests if cannot connect any existing chests
+        // Place single chests if you cannot connect any existing chests
         if (sides.isEmpty()) {
             for (Direction direction : Direction.values()) {
                 if (!wantsToConnectToSide(state, direction) && !willConnectToSide(state, direction)) {
@@ -77,7 +80,8 @@ public class ChestGuide extends GeneralPlacementGuide {
         if (facing.getAxis() == neighborDirection.getAxis() || neighborDirection.getAxis() == Direction.Axis.Y)
             return false;
 
-        return neighborType == ChestType.SINGLE && neighborFacing == facing && state.targetState.getBlock() == neighbor.getBlock();
+        return neighborType == ChestType.SINGLE && neighborFacing == facing
+                && state.targetState.getBlock() == neighbor.getBlock();
     }
 
     private boolean wantsToConnectToSide(SchematicBlockState state, Direction direction) {

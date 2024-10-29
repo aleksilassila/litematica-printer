@@ -3,34 +3,54 @@ package me.aleksilassila.litematica.printer.mixin;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.Printer;
 import me.aleksilassila.litematica.printer.actions.PrepareAction;
+
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(PlayerMoveC2SPacket.class)
-public class PlayerMoveC2SPacketMixin {
-    @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 0)
-    private static float modifyLookYaw(float yaw) {
+public class PlayerMoveC2SPacketMixin
+{
+    @ModifyVariable(method = "<init>(DDDFFZZZZ)V", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private static float modifyLookYaw(float yaw)
+    {
         Printer printer = LitematicaMixinMod.printer;
-        if (printer == null) return yaw;
+        if (printer == null)
+        {
+            return yaw;
+        }
 
         PrepareAction action = printer.actionHandler.lookAction;
-        if (action != null && action.modifyYaw) {
-            if (LitematicaMixinMod.DEBUG) System.out.println("YAW: " + action.yaw);
+        if (action != null && action.modifyYaw)
+        {
+            Printer.printDebug("YAW: {}", action.yaw);
             return action.yaw;
-        } else return yaw;
+        }
+        else
+        {
+            return yaw;
+        }
     }
 
-    @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 1)
-    private static float modifyLookPitch(float pitch) {
+    @ModifyVariable(method = "<init>(DDDFFZZZZ)V", at = @At("HEAD"), ordinal = 1, argsOnly = true)
+    private static float modifyLookPitch(float pitch)
+    {
         Printer printer = LitematicaMixinMod.printer;
-        if (printer == null) return pitch;
+        if (printer == null)
+        {
+            return pitch;
+        }
 
         PrepareAction action = printer.actionHandler.lookAction;
-        if (action != null && action.modifyPitch) {
-            if (LitematicaMixinMod.DEBUG) System.out.println("PITCH: " + action.pitch);
+        if (action != null && action.modifyPitch)
+        {
+            Printer.printDebug("PITCH: {}", action.pitch);
             return action.pitch;
-        } else return pitch;
+        }
+        else
+        {
+            return pitch;
+        }
     }
 }

@@ -1,14 +1,15 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.state.property.Properties;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Collections;
-import java.util.List;
 
 public class EnderEyeGuide extends InteractionGuide {
     public EnderEyeGuide(SchematicBlockState state) {
@@ -17,7 +18,8 @@ public class EnderEyeGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         if (currentState.contains(Properties.EYE) && targetState.contains(Properties.EYE)) {
             return !currentState.get(Properties.EYE) && targetState.get(Properties.EYE);

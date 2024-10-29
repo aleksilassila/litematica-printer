@@ -1,5 +1,10 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeverBlock;
@@ -7,13 +12,9 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Collections;
-import java.util.List;
 
 public class CycleStateGuide extends InteractionGuide {
-    private static final Property<?>[] propertiesToIgnore = new Property[]{
+    private static final Property<?>[] propertiesToIgnore = new Property[] {
             Properties.POWERED,
             Properties.LIT
     };
@@ -24,7 +25,8 @@ public class CycleStateGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         return targetState.getBlock() == currentState.getBlock();
     }

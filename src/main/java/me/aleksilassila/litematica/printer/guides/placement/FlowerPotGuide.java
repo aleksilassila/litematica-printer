@@ -1,12 +1,13 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Collections;
-import java.util.List;
 
 public class FlowerPotGuide extends GeneralPlacementGuide {
     public FlowerPotGuide(SchematicBlockState state) {

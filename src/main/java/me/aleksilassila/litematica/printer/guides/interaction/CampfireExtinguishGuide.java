@@ -1,13 +1,14 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class CampfireExtinguishGuide extends InteractionGuide {
     boolean shouldBeLit;
@@ -22,7 +23,8 @@ public class CampfireExtinguishGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         return (currentState.getBlock() instanceof CampfireBlock) && !shouldBeLit && isLit;
     }

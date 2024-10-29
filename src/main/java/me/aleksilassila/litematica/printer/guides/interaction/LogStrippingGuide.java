@@ -1,21 +1,20 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
-import me.aleksilassila.litematica.printer.LitematicaMixinMod;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.mixin.AxeItemAccessor;
+import org.jetbrains.annotations.NotNull;
 import net.minecraft.block.Block;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 public class LogStrippingGuide extends InteractionGuide {
-    static final Item[] AXE_ITEMS = new Item[]{
+    static final Item[] AXE_ITEMS = new Item[] {
             Items.NETHERITE_AXE,
             Items.DIAMOND_AXE,
             Items.GOLDEN_AXE,
@@ -32,9 +31,11 @@ public class LogStrippingGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!LitematicaMixinMod.STRIP_LOGS.getBooleanValue()) return false;
+        if (!Configs.STRIP_LOGS.getBooleanValue())
+            return false;
 
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         Block strippingResult = STRIPPED_BLOCKS.get(currentState.getBlock());
         return strippingResult == targetState.getBlock();

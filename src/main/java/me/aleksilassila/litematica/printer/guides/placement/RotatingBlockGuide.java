@@ -1,19 +1,25 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
-import me.aleksilassila.litematica.printer.SchematicBlockState;
-import me.aleksilassila.litematica.printer.actions.Action;
-import me.aleksilassila.litematica.printer.actions.PrepareAction;
-import net.minecraft.block.*;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.Direction;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
+
+import me.aleksilassila.litematica.printer.SchematicBlockState;
+import me.aleksilassila.litematica.printer.actions.Action;
+import me.aleksilassila.litematica.printer.actions.PrepareAction;
+import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
+import net.minecraft.block.BannerBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.SignBlock;
+import net.minecraft.block.WallBannerBlock;
+import net.minecraft.block.WallSignBlock;
+import net.minecraft.block.WallSkullBlock;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.math.Direction;
 
 public class RotatingBlockGuide extends GeneralPlacementGuide {
     public RotatingBlockGuide(SchematicBlockState state) {
@@ -24,7 +30,8 @@ public class RotatingBlockGuide extends GeneralPlacementGuide {
     protected List<Direction> getPossibleSides() {
         Block block = state.targetState.getBlock();
         if (block instanceof WallSkullBlock || block instanceof WallSignBlock || block instanceof WallBannerBlock) {
-            Optional<Direction> side = getProperty(state.targetState, Properties.HORIZONTAL_FACING).map(Direction::getOpposite);
+            Optional<Direction> side = getProperty(state.targetState, Properties.HORIZONTAL_FACING)
+                    .map(Direction::getOpposite);
             return side.map(Collections::singletonList).orElseGet(Collections::emptyList);
         }
 
@@ -40,7 +47,8 @@ public class RotatingBlockGuide extends GeneralPlacementGuide {
     public @NotNull List<Action> execute(ClientPlayerEntity player) {
         PrinterPlacementContext ctx = getPlacementContext(player);
 
-        if (ctx == null) return new ArrayList<>();
+        if (ctx == null)
+            return new ArrayList<>();
 
         int rotation = getProperty(state.targetState, Properties.ROTATION).orElse(0);
         if (targetState.getBlock() instanceof BannerBlock || targetState.getBlock() instanceof SignBlock) {

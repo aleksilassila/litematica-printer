@@ -1,18 +1,19 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.guides.placement.FarmlandGuide;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class TillingGuide extends InteractionGuide {
-    public static final Item[] HOE_ITEMS = new Item[]{
+    public static final Item[] HOE_ITEMS = new Item[] {
             Items.NETHERITE_HOE,
             Items.DIAMOND_HOE,
             Items.GOLDEN_HOE,
@@ -27,7 +28,8 @@ public class TillingGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         return Arrays.stream(FarmlandGuide.TILLABLE_BLOCKS).anyMatch(b -> b == currentState.getBlock());
     }

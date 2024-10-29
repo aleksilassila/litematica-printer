@@ -23,14 +23,16 @@ public class FallingBlockGuide extends GuesserGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (blockPlacement()) return false;
+        if (blockPlacement())
+            return false;
 
         return super.canExecute(player);
     }
 
     @Override
     public boolean skipOtherGuides() {
-        if (blockPlacement()) return true;
+        if (blockPlacement())
+            return true;
 
         return super.skipOtherGuides();
     }
