@@ -1,8 +1,5 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;

@@ -75,6 +75,8 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             String version = UpdateChecker.version;
             String newVersion = UpdateChecker.getPrinterVersion();
 
+            Printer.printDebug("Current version: [{}], detected version [{}]", version, newVersion);
+
             if (!version.equals(newVersion)) {
                 client.inGameHud.getChatHud().addMessage(Text.literal("New version of Litematica Printer available in https://github.com/aleksilassila/litematica-printer/releases"));
             }

@@ -109,6 +109,8 @@ public class RailGuesserGuide extends GuesserGuide {
 
     private List<Direction> getRailDirections(SchematicBlockState state) {
         RailShape shape = getRailShape(state.currentState).orElse(null);
+        if (shape == null)
+            return new ArrayList<>();
 
         return getRailDirections(shape);
     }
