@@ -20,7 +20,6 @@ public class Configs
     public static final ConfigBoolean PRINT_DEBUG                   = new ConfigBoolean("printingDebug",    false).apply(GENERIC_KEY);
     public static final ConfigBoolean REPLACE_FLUIDS_SOURCE_BLOCKS  = new ConfigBoolean("replaceFluidSourceBlocks",true).apply(GENERIC_KEY);
     public static final ConfigBoolean STRIP_LOGS                    = new ConfigBoolean("stripLogs",        true).apply(GENERIC_KEY);
-    // Add INTERACT_BLOCKS pull by DarkReaper231
     public static final ConfigBoolean INTERACT_BLOCKS               = new ConfigBoolean("interactBlocks",   true).apply(GENERIC_KEY);
 
     public static ImmutableList<IConfigBase> getConfigList()
