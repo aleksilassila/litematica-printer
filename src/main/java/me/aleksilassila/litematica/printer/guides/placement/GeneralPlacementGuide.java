@@ -5,8 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
-
+import javax.annotation.Nullable;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
 import net.minecraft.block.SlabBlock;

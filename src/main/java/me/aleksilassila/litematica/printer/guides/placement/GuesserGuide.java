@@ -1,9 +1,10 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
+import javax.annotation.Nullable;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
-import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.SlabBlock;

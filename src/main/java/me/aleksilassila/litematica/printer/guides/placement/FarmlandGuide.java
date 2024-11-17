@@ -2,10 +2,9 @@ package me.aleksilassila.litematica.printer.guides.placement;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
@@ -24,7 +23,7 @@ public class FarmlandGuide extends GeneralPlacementGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Arrays.stream(TILLABLE_BLOCKS).map(b -> getBlockItem(b.getDefaultState())).toList();
     }
 }

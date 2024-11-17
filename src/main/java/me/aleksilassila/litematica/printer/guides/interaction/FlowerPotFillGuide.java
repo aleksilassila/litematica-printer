@@ -2,10 +2,9 @@ package me.aleksilassila.litematica.printer.guides.interaction;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.FlowerPotBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -36,7 +35,7 @@ public class FlowerPotFillGuide extends InteractionGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         if (content == null)
             return Collections.emptyList();
         else

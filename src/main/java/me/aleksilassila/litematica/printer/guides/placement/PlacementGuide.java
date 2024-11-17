@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.actions.Action;
 import me.aleksilassila.litematica.printer.actions.PrepareAction;
@@ -12,8 +14,7 @@ import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.guides.Guide;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.implementation.actions.InteractActionImpl;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -53,7 +54,7 @@ abstract public class PlacementGuide extends Guide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(getBlockItem(state.targetState));
     }
 
@@ -92,7 +93,7 @@ abstract public class PlacementGuide extends Guide {
     }
 
     @Override
-    public @NotNull List<Action> execute(ClientPlayerEntity player) {
+    public @Nonnull List<Action> execute(ClientPlayerEntity player) {
         List<Action> actions = new ArrayList<>();
         PrinterPlacementContext ctx = getPlacementContext(player);
 

@@ -2,6 +2,7 @@ package me.aleksilassila.litematica.printer;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.actions.Action;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.config.Hotkeys;
@@ -9,7 +10,6 @@ import me.aleksilassila.litematica.printer.guides.Guide;
 import me.aleksilassila.litematica.printer.guides.Guides;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -27,12 +27,12 @@ import fi.dy.masa.litematica.world.WorldSchematic;
 public class Printer
 {
     public static final Logger logger = LogManager.getLogger(PrinterReference.MOD_ID);
-    @NotNull
+    @Nonnull
     public final ClientPlayerEntity player;
     public final ActionHandler actionHandler;
     private final Guides interactionGuides = new Guides();
 
-    public Printer(@NotNull MinecraftClient client, @NotNull ClientPlayerEntity player)
+    public Printer(@Nonnull MinecraftClient client, @Nonnull ClientPlayerEntity player)
     {
         this.player = player;
         this.actionHandler = new ActionHandler(client, player);

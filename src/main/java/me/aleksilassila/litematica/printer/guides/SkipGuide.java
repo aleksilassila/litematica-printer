@@ -3,11 +3,10 @@ package me.aleksilassila.litematica.printer.guides;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.actions.Action;
+
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 
@@ -27,12 +26,12 @@ public class SkipGuide extends Guide {
     }
 
     @Override
-    public @NotNull List<Action> execute(ClientPlayerEntity player) {
+    public @Nonnull List<Action> execute(ClientPlayerEntity player) {
         return new ArrayList<>();
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(ItemStack.EMPTY);
     }
 }

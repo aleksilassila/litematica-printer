@@ -2,10 +2,9 @@ package me.aleksilassila.litematica.printer.guides.interaction;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -30,7 +29,7 @@ public class CampfireExtinguishGuide extends InteractionGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Arrays.stream(SHOVEL_ITEMS).map(ItemStack::new).toList();
     }
 }

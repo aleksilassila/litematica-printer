@@ -2,10 +2,9 @@ package me.aleksilassila.litematica.printer.guides.interaction;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+
 import net.minecraft.block.AbstractCandleBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -24,7 +23,7 @@ public class LightCandleGuide extends InteractionGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(new ItemStack(Items.FLINT_AND_STEEL));
     }
 

@@ -2,10 +2,9 @@ package me.aleksilassila.litematica.printer.guides.interaction;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeverBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -32,7 +31,7 @@ public class CycleStateGuide extends InteractionGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(ItemStack.EMPTY);
     }
 

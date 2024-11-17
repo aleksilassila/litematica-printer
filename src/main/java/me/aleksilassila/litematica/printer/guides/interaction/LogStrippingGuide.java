@@ -3,10 +3,11 @@ package me.aleksilassila.litematica.printer.guides.interaction;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.mixin.AxeItemAccessor;
-import org.jetbrains.annotations.NotNull;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
@@ -42,7 +43,7 @@ public class LogStrippingGuide extends InteractionGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Arrays.stream(AXE_ITEMS).map(ItemStack::new).toList();
     }
 }

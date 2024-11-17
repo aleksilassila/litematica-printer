@@ -2,10 +2,10 @@ package me.aleksilassila.litematica.printer.guides;
 
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.actions.Action;
 import me.aleksilassila.litematica.printer.implementation.BlockHelperImpl;
-import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CoralBlock;
@@ -76,9 +76,9 @@ abstract public class Guide extends BlockHelperImpl
         return !statesEqual(targetState, currentState);
     }
 
-    abstract public @NotNull List<Action> execute(ClientPlayerEntity player);
+    abstract public @Nonnull List<Action> execute(ClientPlayerEntity player);
 
-    abstract protected @NotNull List<ItemStack> getRequiredItems();
+    abstract protected @Nonnull List<ItemStack> getRequiredItems();
 
     /**
      * Returns the first required item that the player has access to,

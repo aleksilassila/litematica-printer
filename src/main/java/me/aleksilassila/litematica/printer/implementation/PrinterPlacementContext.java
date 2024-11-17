@@ -1,6 +1,6 @@
 package me.aleksilassila.litematica.printer.implementation;
 
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;

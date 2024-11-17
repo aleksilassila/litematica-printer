@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.guides.interaction.LogStrippingGuide;
-import org.jetbrains.annotations.NotNull;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -30,7 +31,7 @@ public class LogGuide extends GeneralPlacementGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         for (Block log : LogStrippingGuide.STRIPPED_BLOCKS.keySet()) {
             if (targetState.getBlock() == LogStrippingGuide.STRIPPED_BLOCKS.get(log)) {
                 return Collections.singletonList(new ItemStack(log));

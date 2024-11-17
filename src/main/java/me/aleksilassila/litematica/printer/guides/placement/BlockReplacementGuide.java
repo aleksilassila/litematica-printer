@@ -3,8 +3,7 @@ package me.aleksilassila.litematica.printer.guides.placement;
 import java.util.HashMap;
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
-
+import javax.annotation.Nullable;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.guides.Guide;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
