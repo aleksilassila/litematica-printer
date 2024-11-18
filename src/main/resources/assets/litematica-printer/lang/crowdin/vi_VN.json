@@ -18,7 +18,7 @@
     "litematica-printer.config.generic.comment.printingMode": "Tự động xây dựng / in lựa chọn đã tải.\nLưu ý rằng một số máy chủ và plugin chống gian lận không cho phép in.",
     "litematica-printer.config.generic.comment.printingDebug": "Cho phép ghi nhật ký gỡ lỗi để in.",
     "litematica-printer.config.generic.comment.replaceFluidSourceBlocks": "Máy in có cần thay thế khối nguồn chất lỏng hay không.",
-    "litematica-printer.config.generic.comment.stripLogs": "Máy in có nên sử dụng nhật ký bình thường hay không nếu không có phiên bản\nđã bị xóa và sau đó xóa chúng bằng rìu.",
+    "litematica-printer.config.generic.comment.stripLogs": "Máy in có nên sử dụng các bản ghi bình thường hay không nếu không có phiên bản\nđã bị xóa và sau đó xóa chúng bằng rìu.",
     "litematica-printer.config.generic.comment.interactBlocks": "Máy in có nên thiết lập trạng thái khối hay không.",
     "litematica-printer.config.hotkeys.name.print": "in",
     "litematica-printer.config.hotkeys.name.togglePrintingMode": "togglePrintingMode",

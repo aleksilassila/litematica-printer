@@ -18,7 +18,7 @@
     "litematica-printer.config.generic.comment.printingMode": "Automatikus építés / nyomtatás betöltött kijelölés.\nNe feledje, hogy egyes szerverek és csalásgátló beépülő modulok nem teszik lehetővé a nyomtatást.",
     "litematica-printer.config.generic.comment.printingDebug": "Lehetővé teszi a hibakeresési naplózást a nyomtatáshoz.",
     "litematica-printer.config.generic.comment.replaceFluidSourceBlocks": "A folyadékforrás blokkjait ki kell-e cserélnie a nyomtatónak.",
-    "litematica-printer.config.generic.comment.stripLogs": "Függetlenül attól, hogy a nyomtatónak normál naplókat kell-e használnia, ha nem állnak rendelkezésre lecsupaszított\nverziók, majd fejszével távolítsa el őket.",
+    "litematica-printer.config.generic.comment.stripLogs": "Függetlenül attól, hogy a nyomtató használjon-e normál naplókat, ha nem állnak rendelkezésre lecsupaszított\nverziók, majd fejszével távolítsa el őket.",
     "litematica-printer.config.generic.comment.interactBlocks": "A nyomtatónak be kell-e állítania a blokkállapotokat.",
     "litematica-printer.config.hotkeys.name.print": "nyomtatás",
     "litematica-printer.config.hotkeys.name.togglePrintingMode": "váltson Nyomtatási módot",

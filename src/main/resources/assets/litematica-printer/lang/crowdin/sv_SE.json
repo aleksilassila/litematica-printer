@@ -13,7 +13,7 @@
     "litematica-printer.config.generic.prettyName.replaceFluidSourceBlocks": "Byt ut vätskekällblock",
     "litematica-printer.config.generic.prettyName.stripLogs": "Strip loggar",
     "litematica-printer.config.generic.prettyName.interactBlocks": "Interagera block",
-    "litematica-printer.config.generic.comment.printingInterval": "Utskriftsintervall. Lägre värden betyder snabbare utskriftshastighet.\nOm skrivaren skapar \"spökblock\" eller block är vända åt fel håll, höj detta värde.",
+    "litematica-printer.config.generic.comment.printingInterval": "Utskriftsintervall. Lägre värden betyder snabbare utskriftshastighet.\nOm skrivaren skapar \"spökblock\" eller om blocken är vända åt fel håll, höj detta värde.",
     "litematica-printer.config.generic.comment.printingRange": "Platsintervall för utskriftsblock\nLägre värden rekommenderas för servrar.",
     "litematica-printer.config.generic.comment.printingMode": "Autobygga / skriva ut laddat urval.\nVar medveten om att vissa servrar och anticheat-plugins inte tillåter utskrift.",
     "litematica-printer.config.generic.comment.printingDebug": "Aktiverar felsökningsloggning för utskrift.",

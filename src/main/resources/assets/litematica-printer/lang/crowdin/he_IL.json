@@ -18,7 +18,7 @@
     "litematica-printer.config.generic.comment.printingMode": "בנייה אוטומטית / הדפסה נטענת בחירה.\nשים לב ששרתים מסוימים ותוספי גניבה לא מאפשרים הדפסה.",
     "litematica-printer.config.generic.comment.printingDebug": "מאפשר רישום באגים להדפסה.",
     "litematica-printer.config.generic.comment.replaceFluidSourceBlocks": "האם יש להחליף או לא בלוקים של מקור נוזלים על ידי המדפסת.",
-    "litematica-printer.config.generic.comment.stripLogs": "האם המדפסת צריכה להשתמש ביומנים רגילים אם גרסאות\nמופשטות אינן זמינות ולאחר מכן הסר אותן עם גרזן.",
+    "litematica-printer.config.generic.comment.stripLogs": "האם המדפסת צריכה להשתמש ביומנים רגילים אם גרסאות\nמופשטות אינן זמינות ולאחר מכן פשט אותן עם גרזן.",
     "litematica-printer.config.generic.comment.interactBlocks": "האם המדפסת צריכה להגדיר מצבי חסימה או לא.",
     "litematica-printer.config.hotkeys.name.print": "הֶדפֵּס",
     "litematica-printer.config.hotkeys.name.togglePrintingMode": "החלפת מצב הדפסה",
