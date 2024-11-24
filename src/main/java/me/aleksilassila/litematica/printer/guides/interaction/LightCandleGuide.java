@@ -6,8 +6,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.state.property.Properties;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,13 +23,14 @@ public class LightCandleGuide extends InteractionGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(new ItemStack(Items.FLINT_AND_STEEL));
     }
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         return (currentState.getBlock() instanceof AbstractCandleBlock) && shouldBeLit && !isLit;
     }

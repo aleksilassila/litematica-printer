@@ -6,10 +6,7 @@ import net.minecraft.block.enums.RailShape;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class RailGuesserGuide extends GuesserGuide {
     static final RailShape[] STRAIGHT_RAIL_SHAPES = new RailShape[]{
@@ -28,19 +25,24 @@ public class RailGuesserGuide extends GuesserGuide {
 
     @Override
     protected boolean statesEqual(BlockState resultState, BlockState targetState) {
-        if (!wouldConnectCorrectly()) return false;
-//        if (wouldBlockAnotherConnection()) return false;
-        /*TODO: Fully working rail guesser
+        if (!wouldConnectCorrectly())
+            return false;
+        // if (wouldBlockAnotherConnection()) return false;
+        /*
+         * TODO: Fully working rail guesser
          * If has a neighbor that:
-         *   - Has not been placed yet
-         *       - OR Has been placed but can change shape
-         *   - AND this placement should connect to only one rail, that is not the neighbor
+         * - Has not been placed yet
+         * - OR Has been placed but can change shape
+         * - AND this placement should connect to only one rail, that is not the
+         * neighbor
          * Then return false
-         * */
+         */
 
         if (getRailShape(resultState).isPresent()) {
-            if (Arrays.stream(STRAIGHT_RAIL_SHAPES).anyMatch(shape -> shape == getRailShape(resultState).orElse(null))) {
-                return super.statesEqualIgnoreProperties(resultState, targetState, Properties.RAIL_SHAPE, Properties.STRAIGHT_RAIL_SHAPE, Properties.POWERED);
+            if (Arrays.stream(STRAIGHT_RAIL_SHAPES)
+                    .anyMatch(shape -> shape == getRailShape(resultState).orElse(null))) {
+                return super.statesEqualIgnoreProperties(resultState, targetState, Properties.RAIL_SHAPE,
+                        Properties.STRAIGHT_RAIL_SHAPE, Properties.POWERED);
             }
         }
 
@@ -49,13 +51,15 @@ public class RailGuesserGuide extends GuesserGuide {
 
     private boolean wouldConnectCorrectly() {
         RailShape targetShape = getRailShape(state.targetState).orElse(null);
-        if (targetShape == null) return false;
+        if (targetShape == null)
+            return false;
 
         List<Direction> allowedConnections = getRailDirections(targetShape);
 
         List<Direction> possibleConnections = new ArrayList<>();
         for (Direction d : Direction.values()) {
-            if (d.getAxis().isVertical()) continue;
+            if (d.getAxis().isVertical())
+                continue;
             SchematicBlockState neighbor = state.offset(d);
 
             if (hasFreeConnections(neighbor)) {
@@ -63,9 +67,10 @@ public class RailGuesserGuide extends GuesserGuide {
             }
         }
 
-        if (possibleConnections.size() > 2) return false;
+        if (possibleConnections.size() > 2)
+            return false;
 
-        return allowedConnections.containsAll(possibleConnections);
+        return new HashSet<>(allowedConnections).containsAll(possibleConnections);
     }
 
 //    private boolean wouldBlockAnotherConnection() {
@@ -85,10 +90,12 @@ public class RailGuesserGuide extends GuesserGuide {
 
     private boolean hasFreeConnections(SchematicBlockState state) {
         List<Direction> possibleConnections = getRailDirections(state);
-        if (possibleConnections.isEmpty()) return false;
+        if (possibleConnections.isEmpty())
+            return false;
 
         for (Direction d : possibleConnections) {
             SchematicBlockState neighbor = state.offset(d);
+            // FIXME -->  when will this ever not be equal? <.<
             if (neighbor.currentState.getBlock() != neighbor.currentState.getBlock()) {
                 return false;
             }
@@ -102,7 +109,8 @@ public class RailGuesserGuide extends GuesserGuide {
 
     private List<Direction> getRailDirections(SchematicBlockState state) {
         RailShape shape = getRailShape(state.currentState).orElse(null);
-        if (shape == null) return new ArrayList<>();
+        if (shape == null)
+            return new ArrayList<>();
 
         return getRailDirections(shape);
     }
@@ -122,7 +130,8 @@ public class RailGuesserGuide extends GuesserGuide {
 
     Optional<RailShape> getRailShape(BlockState state) {
         Optional<RailShape> shape = getProperty(state, Properties.RAIL_SHAPE);
-        if (shape.isEmpty()) return getProperty(state, Properties.STRAIGHT_RAIL_SHAPE);
+        if (shape.isEmpty())
+            return getProperty(state, Properties.STRAIGHT_RAIL_SHAPE);
         return shape;
     }
 }

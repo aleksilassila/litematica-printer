@@ -1,18 +1,17 @@
 plugins {
-    id("fabric-loom").version("1.6-SNAPSHOT")
+    id("fabric-loom").version("1.8-SNAPSHOT")
     id("maven-publish")
 }
 
-//subprojects {
-//apply<JavaPlugin>()
-
 val minecraft_version: String by project
-val yarn_mappings: String by project
-val loader_version: String by project
-val fabric_version: String by project
+val mappings_version: String by project
+val fabric_loader_version: String by project
+val fabric_api_version: String by project
 val malilib_version: String by project
-val litematica_projectid: String by project
-val litematica_fileid: String by project
+//val litematica_projectid: String by project
+//val litematica_fileid: String by project
+val litematica_version: String by project
+val mod_menu_version: String by project
 
 val archives_base_name: String by project
 val mod_version: String by project
@@ -23,24 +22,32 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
-//}
 
 repositories {
     mavenLocal()
     mavenCentral()
     maven("https://masa.dy.fi/maven")
-    maven("https://www.cursemaven.com")
+    //maven("https://www.cursemaven.com")
+    maven("https://maven.terraformersmc.com/releases/")
+    maven("https://jitpack.io")
 }
 
 dependencies {
-//    implementation(project(":common"))
     minecraft("com.mojang:minecraft:${minecraft_version}")
-    mappings("net.fabricmc:yarn:${yarn_mappings}:v2")
+    mappings("net.fabricmc:yarn:${mappings_version}:v2")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
 
-    modImplementation("net.fabricmc:fabric-loader:${loader_version}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-    modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
-    modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
+    modImplementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
+    //modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
+    //modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
+
+    // Sakura's Jitpack
+    modImplementation("com.github.sakura-ryoko:malilib:${malilib_version}")
+    modImplementation("com.github.sakura-ryoko:litematica:${litematica_version}")
+
+    // For Mod Menu display
+    modCompileOnly("com.terraformersmc:modmenu:${mod_menu_version}")
 }
 
 tasks.withType<ProcessResources> {

@@ -8,25 +8,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Direction;
 
 public class PrepareAction extends Action {
-//    public final Direction lookDirection;
-//    public final boolean requireSneaking;
-//    public final Item item;
-
-//    public PrepareAction(Direction lookDirection, boolean requireSneaking, Item item) {
-//        this.lookDirection = lookDirection;
-//        this.requireSneaking = requireSneaking;
-//        this.item = item;
-//    }
-//
-//    public PrepareAction(Direction lookDirection, boolean requireSneaking, BlockState requiredState) {
-//        this(lookDirection, requireSneaking, requiredState.getBlock().asItem());
-//    }
-
     public final PrinterPlacementContext context;
-
     public boolean modifyYaw = true;
     public boolean modifyPitch = true;
     public float yaw = 0;
@@ -34,7 +20,6 @@ public class PrepareAction extends Action {
 
     public PrepareAction(PrinterPlacementContext context) {
         this.context = context;
-
         Direction lookDirection = context.lookDirection;
 
         if (lookDirection != null && lookDirection.getAxis().isHorizontal()) {
@@ -66,13 +51,14 @@ public class PrepareAction extends Action {
         ItemStack itemStack = context.getStack();
         int slot = context.requiredItemSlot;
 
-        if (itemStack != null) {
+        if (itemStack != null && client.interactionManager != null) {
             PlayerInventory inventory = player.getInventory();
 
             // This thing is straight from MinecraftClient#doItemPick()
             if (player.getAbilities().creativeMode) {
                 inventory.addPickBlock(itemStack);
-                client.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND), 36 + inventory.selectedSlot);
+                client.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND),
+                        36 + inventory.selectedSlot);
             } else if (slot != -1) {
                 if (PlayerInventory.isValidHotbarIndex(slot)) {
                     inventory.selectedSlot = slot;
@@ -86,16 +72,17 @@ public class PrepareAction extends Action {
             float yaw = modifyYaw ? this.yaw : player.getYaw();
             float pitch = modifyPitch ? this.pitch : player.getPitch();
 
-            PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw, pitch, player.isOnGround());
+            PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw,
+                    pitch, player.isOnGround(), player.horizontalCollision);
 
             player.networkHandler.sendPacket(packet);
         }
 
         if (context.shouldSneak) {
-            player.input.sneaking = true;
+            player.input.playerInput = new PlayerInput(player.input.playerInput.forward(), player.input.playerInput.backward(), player.input.playerInput.left(), player.input.playerInput.right(), player.input.playerInput.jump(), true, player.input.playerInput.sprint());
             player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
         } else {
-            player.input.sneaking = false;
+            player.input.playerInput = new PlayerInput(player.input.playerInput.forward(), player.input.playerInput.backward(), player.input.playerInput.left(), player.input.playerInput.right(), player.input.playerInput.jump(), false, player.input.playerInput.sprint());
             player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
     }

@@ -9,18 +9,14 @@ import net.minecraft.world.World;
 public class SchematicBlockState {
     public final World world;
     public final WorldSchematic schematic;
-
     public final BlockPos blockPos;
-
     public final BlockState targetState;
     public final BlockState currentState;
 
     public SchematicBlockState(World world, WorldSchematic schematic, BlockPos blockPos) {
         this.world = world;
         this.schematic = schematic;
-
         this.blockPos = blockPos;
-
         this.targetState = schematic.getBlockState(blockPos);
         this.currentState = world.getBlockState(blockPos);
     }

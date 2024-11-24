@@ -1,8 +1,8 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.guides.Guide;
+import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
 import net.minecraft.block.CandleBlock;
 import net.minecraft.block.SeaPickleBlock;
 import net.minecraft.block.SlabBlock;
@@ -15,8 +15,8 @@ import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Optional;
 

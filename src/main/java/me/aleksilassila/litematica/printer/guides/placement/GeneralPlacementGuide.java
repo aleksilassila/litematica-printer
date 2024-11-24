@@ -1,7 +1,8 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.Printer;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -9,8 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,14 +79,16 @@ public class GeneralPlacementGuide extends PlacementGuide {
             }
         }
 
-        return validSides.isEmpty() ? Optional.empty() : Optional.of(validSides.get(0));
+        return validSides.isEmpty() ? Optional.empty() : Optional.of(validSides.getFirst());
     }
 
     protected boolean getUseShift(SchematicBlockState state) {
-        if (getRequiresExplicitShift()) return true;
+        if (getRequiresExplicitShift())
+            return true;
 
         Direction clickSide = getValidSide(state).orElse(null);
-        if (clickSide == null) return false;
+        if (clickSide == null)
+            return false;
         return isInteractive(state.offset(clickSide).currentState.getBlock());
     }
 
@@ -103,16 +106,20 @@ public class GeneralPlacementGuide extends PlacementGuide {
             Optional<ItemStack> requiredItem = getRequiredItem(player);
             int requiredSlot = getRequiredItemStackSlot(player);
 
-            if (validSide.isEmpty() || hitVec.isEmpty() || requiredItem.isEmpty() || requiredSlot == -1) return null;
+            if (validSide.isEmpty() || hitVec.isEmpty() || requiredItem.isEmpty() || requiredSlot == -1)
+                return null;
 
             Optional<Direction> lookDirection = getLookDirection();
             boolean requiresShift = getUseShift(state);
 
-            BlockHitResult blockHitResult = new BlockHitResult(hitVec.get(), validSide.get().getOpposite(), state.blockPos.offset(validSide.get()), false);
+            BlockHitResult blockHitResult = new BlockHitResult(hitVec.get(), validSide.get().getOpposite(),
+                    state.blockPos.offset(validSide.get()), false);
 
-            return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), requiredSlot, lookDirection.orElse(null), requiresShift);
+            return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), requiredSlot,
+                    lookDirection.orElse(null), requiresShift);
         } catch (Exception e) {
-            e.printStackTrace();
+            Printer.logger.error("getPlacementContext(): Exception caught: {}", e.getMessage());
+            //e.printStackTrace();
             return null;
         }
     }

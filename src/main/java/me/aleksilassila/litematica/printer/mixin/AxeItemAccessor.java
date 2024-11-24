@@ -16,5 +16,4 @@ public interface AxeItemAccessor {
     static Map<Block, Block> getStrippedBlocks() {
         throw new AssertionError("Untransformed @Accessor");
     }
-
 }

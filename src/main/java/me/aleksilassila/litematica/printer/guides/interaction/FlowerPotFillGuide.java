@@ -5,8 +5,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.FlowerPotBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,15 +26,19 @@ public class FlowerPotFillGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (content == null) return false;
-        if (!(currentState.getBlock() instanceof FlowerPotBlock)) return false;
+        if (content == null)
+            return false;
+        if (!(currentState.getBlock() instanceof FlowerPotBlock))
+            return false;
 
         return super.canExecute(player);
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
-        if (content == null) return Collections.emptyList();
-        else return Collections.singletonList(new ItemStack(content));
+    protected @Nonnull List<ItemStack> getRequiredItems() {
+        if (content == null)
+            return Collections.emptyList();
+        else
+            return Collections.singletonList(new ItemStack(content));
     }
 }

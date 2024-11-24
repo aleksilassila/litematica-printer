@@ -12,7 +12,7 @@
     "sources": "https://github.com/aleksilassila/litematica-printer"
   },
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/litematica-printer/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -24,15 +24,16 @@
     "litematica-printer-implementation.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.7",
+    "fabricloader": ">=0.16.7",
     "fabric": "*",
-    "minecraft": ">=1.20.1",
-    "java": ">=17"
+    "java": ">=21",
+    "minecraft": ">=1.21.2 <=1.21.3",
+    "malilib": ">=0.22.0",
+    "litematica": ">=0.20.0"
   },
   "custom": {
     "modmenu": {
-      "parent": "carpet"
+      "parent": "litematica"
     }
   }
 }
-

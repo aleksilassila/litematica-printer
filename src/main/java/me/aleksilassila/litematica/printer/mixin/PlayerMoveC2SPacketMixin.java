@@ -10,27 +10,35 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(PlayerMoveC2SPacket.class)
 public class PlayerMoveC2SPacketMixin {
-    @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 0)
+    @ModifyVariable(method = "<init>(DDDFFZZZZ)V", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private static float modifyLookYaw(float yaw) {
         Printer printer = LitematicaMixinMod.printer;
-        if (printer == null) return yaw;
+        if (printer == null) {
+            return yaw;
+        }
 
         PrepareAction action = printer.actionHandler.lookAction;
         if (action != null && action.modifyYaw) {
-            if (LitematicaMixinMod.DEBUG) System.out.println("YAW: " + action.yaw);
+            Printer.printDebug("YAW: {}", action.yaw);
             return action.yaw;
-        } else return yaw;
+        } else {
+            return yaw;
+        }
     }
 
-    @ModifyVariable(method = "<init>(DDDFFZZZ)V", at = @At("HEAD"), ordinal = 1)
+    @ModifyVariable(method = "<init>(DDDFFZZZZ)V", at = @At("HEAD"), ordinal = 1, argsOnly = true)
     private static float modifyLookPitch(float pitch) {
         Printer printer = LitematicaMixinMod.printer;
-        if (printer == null) return pitch;
+        if (printer == null) {
+            return pitch;
+        }
 
         PrepareAction action = printer.actionHandler.lookAction;
         if (action != null && action.modifyPitch) {
-            if (LitematicaMixinMod.DEBUG) System.out.println("PITCH: " + action.pitch);
+            Printer.printDebug("PITCH: {}", action.pitch);
             return action.pitch;
-        } else return pitch;
+        } else {
+            return pitch;
+        }
     }
 }

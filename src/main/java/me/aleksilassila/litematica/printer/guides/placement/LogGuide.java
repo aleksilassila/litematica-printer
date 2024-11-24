@@ -1,15 +1,15 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
+import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.guides.interaction.LogStrippingGuide;
 import net.minecraft.block.Block;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +31,7 @@ public class LogGuide extends GeneralPlacementGuide {
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         for (Block log : LogStrippingGuide.STRIPPED_BLOCKS.keySet()) {
             if (targetState.getBlock() == LogStrippingGuide.STRIPPED_BLOCKS.get(log)) {
                 return Collections.singletonList(new ItemStack(log));
@@ -43,7 +43,8 @@ public class LogGuide extends GeneralPlacementGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!LitematicaMixinMod.STRIP_LOGS.getBooleanValue()) return false;
+        if (!Configs.STRIP_LOGS.getBooleanValue())
+            return false;
 
         if (LogStrippingGuide.STRIPPED_BLOCKS.containsValue(targetState.getBlock())) {
             return super.canExecute(player);

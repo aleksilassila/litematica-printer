@@ -9,7 +9,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class UpdateChecker {
-    public static final String version = "v3.2.1";
+    public static final String version = "v" + PrinterReference.MOD_VERSION;
 
     // Try to get this to work at some point
 //    static {

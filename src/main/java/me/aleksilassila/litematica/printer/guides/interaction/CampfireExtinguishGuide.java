@@ -4,8 +4,8 @@ import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,13 +22,14 @@ public class CampfireExtinguishGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!super.canExecute(player))
+            return false;
 
         return (currentState.getBlock() instanceof CampfireBlock) && !shouldBeLit && isLit;
     }
 
     @Override
-    protected @NotNull List<ItemStack> getRequiredItems() {
+    protected @Nonnull List<ItemStack> getRequiredItems() {
         return Arrays.stream(SHOVEL_ITEMS).map(ItemStack::new).toList();
     }
 }
