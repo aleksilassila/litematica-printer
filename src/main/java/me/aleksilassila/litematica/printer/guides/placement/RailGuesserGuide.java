@@ -1,15 +1,15 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import java.util.*;
-
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.RailShape;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 
+import java.util.*;
+
 public class RailGuesserGuide extends GuesserGuide {
-    static final RailShape[] STRAIGHT_RAIL_SHAPES = new RailShape[] {
+    static final RailShape[] STRAIGHT_RAIL_SHAPES = new RailShape[]{
             RailShape.NORTH_SOUTH,
             RailShape.EAST_WEST
     };
@@ -88,7 +88,7 @@ public class RailGuesserGuide extends GuesserGuide {
 //        return possibleConnections.size() > 1;
 //    }
 
-     private boolean hasFreeConnections(SchematicBlockState state) {
+    private boolean hasFreeConnections(SchematicBlockState state) {
         List<Direction> possibleConnections = getRailDirections(state);
         if (possibleConnections.isEmpty())
             return false;

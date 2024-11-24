@@ -1,15 +1,14 @@
 package me.aleksilassila.litematica.printer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import net.minecraft.block.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
-abstract public class BlockHelper
-{
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+abstract public class BlockHelper {
     public static List<Class<?>> interactiveBlocks = new ArrayList<>(Arrays.asList(
             AbstractChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
             LeverBlock.class,

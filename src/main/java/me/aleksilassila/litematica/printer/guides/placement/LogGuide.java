@@ -1,19 +1,19 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.guides.interaction.LogStrippingGuide;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class LogGuide extends GeneralPlacementGuide {
     public LogGuide(SchematicBlockState state) {

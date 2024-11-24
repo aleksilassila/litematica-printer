@@ -1,10 +1,8 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import javax.annotation.Nullable;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.SlabBlock;
@@ -16,6 +14,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
+
 /**
  * This is the placement guide that most blocks will use.
  * It will try to predict the correct player state for producing the right
@@ -25,7 +25,7 @@ import net.minecraft.util.math.Vec3d;
 public class GuesserGuide extends GeneralPlacementGuide {
     private PrinterPlacementContext contextCache = null;
 
-    protected static Direction[] directionsToTry = new Direction[] {
+    protected static Direction[] directionsToTry = new Direction[]{
             Direction.NORTH,
             Direction.SOUTH,
             Direction.EAST,
@@ -33,7 +33,7 @@ public class GuesserGuide extends GeneralPlacementGuide {
             Direction.UP,
             Direction.DOWN
     };
-    protected static Vec3d[] hitVecsToTry = new Vec3d[] {
+    protected static Vec3d[] hitVecsToTry = new Vec3d[]{
             new Vec3d(-0.25, -0.25, -0.25),
             new Vec3d(+0.25, -0.25, -0.25),
             new Vec3d(-0.25, +0.25, -0.25),
@@ -85,7 +85,7 @@ public class GuesserGuide extends GeneralPlacementGuide {
                     BlockState result = getRequiredItemAsBlock(player)
                             .orElse(targetState.getBlock())
                             .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState
-                                                         // is the clicked block, which is true
+                    // is the clicked block, which is true
 
                     if (result != null
                             && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {

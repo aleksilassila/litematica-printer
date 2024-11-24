@@ -1,14 +1,14 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
-import java.util.Collections;
-import java.util.List;
-import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.FlowerPotBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
 
 public class FlowerPotFillGuide extends InteractionGuide {
     private final Block content;

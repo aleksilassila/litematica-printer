@@ -1,14 +1,14 @@
 package me.aleksilassila.litematica.printer.guides;
 
+import me.aleksilassila.litematica.printer.SchematicBlockState;
+import me.aleksilassila.litematica.printer.actions.Action;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.item.ItemStack;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
-import me.aleksilassila.litematica.printer.SchematicBlockState;
-import me.aleksilassila.litematica.printer.actions.Action;
-
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
 
 public class SkipGuide extends Guide {
     public SkipGuide(SchematicBlockState state) {

@@ -1,9 +1,5 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import java.util.HashMap;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.guides.Guide;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
@@ -19,6 +15,10 @@ import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Optional;
 
 public class BlockReplacementGuide extends PlacementGuide {
     private static final HashMap<IntProperty, Item> increasingProperties = new HashMap<>();

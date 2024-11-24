@@ -1,18 +1,18 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.guides.placement.FarmlandGuide;
-
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
+
 public class TillingGuide extends InteractionGuide {
-    public static final Item[] HOE_ITEMS = new Item[] {
+    public static final Item[] HOE_ITEMS = new Item[]{
             Items.NETHERITE_HOE,
             Items.DIAMOND_HOE,
             Items.GOLDEN_HOE,

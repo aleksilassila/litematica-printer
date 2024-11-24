@@ -1,16 +1,7 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
 import me.aleksilassila.litematica.printer.SchematicBlockState;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BambooShootBlock;
-import net.minecraft.block.BigDripleafBlock;
-import net.minecraft.block.BigDripleafStemBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.TripwireBlock;
-import net.minecraft.block.TwistingVinesBlock;
-import net.minecraft.block.TwistingVinesPlantBlock;
+import net.minecraft.block.*;
 
 public class BlockIndifferentGuesserGuide extends GuesserGuide {
     public BlockIndifferentGuesserGuide(SchematicBlockState state) {

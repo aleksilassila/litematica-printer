@@ -1,13 +1,13 @@
 package me.aleksilassila.litematica.printer.implementation;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
+
+import javax.annotation.Nullable;
 
 public class PrinterPlacementContext extends ItemPlacementContext
 {

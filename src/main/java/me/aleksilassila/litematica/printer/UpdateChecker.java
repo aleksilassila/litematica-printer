@@ -1,15 +1,15 @@
 package me.aleksilassila.litematica.printer;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Scanner;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class UpdateChecker
-{
-    public static final String version = "v"+ PrinterReference.MOD_VERSION;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Scanner;
+
+public class UpdateChecker {
+    public static final String version = "v" + PrinterReference.MOD_VERSION;
 
     // Try to get this to work at some point
 //    static {
@@ -28,18 +28,13 @@ public class UpdateChecker
 //    }
 
     @SuppressWarnings("deprecation")
-    public static String getPrinterVersion()
-    {
-        try (InputStream inputStream = new URL("https://api.github.com/repos/aleksilassila/litematica-printer/tags").openStream(); Scanner scanner = new Scanner(inputStream))
-        {
-            if (scanner.hasNext())
-            {
+    public static String getPrinterVersion() {
+        try (InputStream inputStream = new URL("https://api.github.com/repos/aleksilassila/litematica-printer/tags").openStream(); Scanner scanner = new Scanner(inputStream)) {
+            if (scanner.hasNext()) {
                 JsonArray tags = new JsonParser().parse(scanner.next()).getAsJsonArray();
                 return ((JsonObject) tags.get(0)).get("name").getAsString();
             }
-        }
-        catch (Exception exception)
-        {
+        } catch (Exception exception) {
             System.out.println("Cannot look for updates: " + exception.getMessage());
         }
 

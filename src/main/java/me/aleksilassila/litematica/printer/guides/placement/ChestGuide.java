@@ -1,14 +1,14 @@
 package me.aleksilassila.litematica.printer.guides.placement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.Direction;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Whilst making this guide, I learned that chests are much like humans.

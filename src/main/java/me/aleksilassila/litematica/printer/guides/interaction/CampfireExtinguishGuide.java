@@ -1,13 +1,13 @@
 package me.aleksilassila.litematica.printer.guides.interaction;
 
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.Nonnull;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
-
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
+
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
 
 public class CampfireExtinguishGuide extends InteractionGuide {
     boolean shouldBeLit;

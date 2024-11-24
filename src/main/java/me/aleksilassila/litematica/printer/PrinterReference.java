@@ -1,10 +1,9 @@
 package me.aleksilassila.litematica.printer;
 
-import net.minecraft.MinecraftVersion;
 import fi.dy.masa.malilib.util.StringUtils;
+import net.minecraft.MinecraftVersion;
 
-public class PrinterReference
-{
+public class PrinterReference {
     public static final String MOD_ID = "litematica_printer";
     public static final String MOD_KEY = "litematica-printer"; // For lang files since they shouldn't use a '_'
     public static final String MOD_NAME = "Litematica Printer";
